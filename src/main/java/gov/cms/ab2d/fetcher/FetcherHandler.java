@@ -20,8 +20,7 @@ import java.io.IOException;
 public class FetcherHandler implements RequestHandler<KinesisEvent, String> {
     ObjectMapper objectMapper = new ObjectMapper();
 
-    static AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(
-            FetcherHandler.class.getPackage().getName());
+    static AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext("gov.cms.ab2d");
 
     @Autowired
     EOBFetcher eobFetcher;
