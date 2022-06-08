@@ -8,6 +8,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import com.amazonaws.services.lambda.runtime.events.KinesisEvent;
 import com.amazonaws.services.lambda.runtime.events.KinesisEvent.KinesisEventRecord;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 import java.io.IOException;
 
@@ -17,6 +19,15 @@ import java.io.IOException;
 @SuppressWarnings("unused")
 public class FetcherHandler implements RequestHandler<KinesisEvent, String> {
     ObjectMapper objectMapper = new ObjectMapper();
+
+    static AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext("gov.cms.ab2d");
+
+    @Autowired
+    EOBFetcher eobFetcher;
+
+    public FetcherHandler() {
+        ctx.getAutowireCapableBeanFactory().autowireBean(this);
+    }
 
     @Override
     public String handleRequest(KinesisEvent event, Context context) {
@@ -40,8 +51,7 @@ public class FetcherHandler implements RequestHandler<KinesisEvent, String> {
         String correlationId = node.get("collation_id").asText();
         long beneId = node.get("beneficiary_id").asLong();
         String sinceDateStr = node.get("since").asText();
-        logger.log("Received fetch EOB message - corrId:" + correlationId +
-                " beneId: "  + beneId + " since datestr: " + sinceDateStr + "\n");
+        eobFetcher.fetchMe(logger, correlationId, beneId, sinceDateStr);
     }
 }
 
