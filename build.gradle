@@ -8,14 +8,18 @@ repositories {
 }
 
 dependencies {
+    compileOnly    'org.projectlombok:lombok:1.18.24'
     implementation 'com.amazonaws:aws-lambda-java-core:1.2.1'
     implementation 'com.amazonaws:aws-lambda-java-events:3.11.0'
     implementation 'org.springframework:spring-context:5.3.20'
     implementation 'com.newrelic.agent.java:newrelic-api:7.6.0'
-    implementation 'gov.cms.ab2d:ab2d-fhir:1.0'
     implementation 'ca.uhn.hapi.fhir:hapi-fhir-structures-dstu3:5.7.2'
     implementation 'ca.uhn.hapi.fhir:hapi-fhir-structures-r4:5.7.2'
+    implementation 'gov.cms.ab2d:ab2d-aggregator:1.1'
     implementation 'gov.cms.ab2d:ab2d-bfd:1.2'
+    implementation 'gov.cms.ab2d:ab2d-events-client:1.0'
+    implementation 'gov.cms.ab2d:ab2d-fhir:1.0'
+    implementation 'gov.cms.ab2d:ab2d-filters:1.5'
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.13.3'
 }
 
