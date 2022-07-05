@@ -41,6 +41,12 @@ public class PatientClaimsProcessorImpl {
     @Value("${efs.mount}")
     private final String efsMount;
 
+    @Value("${aggregator.directory.streaming:streaming}")
+    private final String streamingDir;
+
+    @Value("${aggregator.directory.finished:finished}")
+    private final String finishedDir;
+
     public void writeOutData(JobFetchPayload jobFetchPayload, ProgressTrackerUpdate update) throws IOException {
         File file = null;
         try (ClaimsStream stream = buildClaimStream(jobFetchPayload.getJobId(), DATA)) {
@@ -75,7 +81,7 @@ public class PatientClaimsProcessorImpl {
 
     private ClaimsStream buildClaimStream(String jobId, FileOutputType outputType) throws IOException {
         return new ClaimsStream(jobId, efsMount, outputType,
-                "streaming", "finished", (int) FileUtils.ONE_MB);
+                streamingDir, finishedDir, (int) FileUtils.ONE_MB);
     }
 
     @Trace(metricName = "EOBWriteToFile", dispatcher = true)
