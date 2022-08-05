@@ -36,16 +36,16 @@ public class PatientClaimsProcessorImpl {
 
     private final BFDClient bfdClient;
     
-    private final EventClient eventClient;
+    private final EventClient eventClient = new MockEventClient();
 
-    @Value("${efs.mount}")
-    private final String efsMount;
+//    @Value("${efs.mount}")
+    private final String efsMount = "tmpEfs";
 
-    @Value("${aggregator.directory.streaming:streaming}")
-    private final String streamingDir;
+//    @Value("${aggregator.directory.streaming:streaming}")
+    private final String streamingDir = "streaming";
 
-    @Value("${aggregator.directory.finished:finished}")
-    private final String finishedDir;
+//    @Value("${aggregator.directory.finished:finished}")
+    private final String finishedDir = "finished";
 
     public void writeOutData(JobFetchPayload jobFetchPayload, ProgressTrackerUpdate update) throws IOException {
         File file = null;
