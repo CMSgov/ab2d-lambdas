@@ -3,11 +3,13 @@ package gov.cms.ab2d.fetcher;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import com.amazonaws.services.lambda.runtime.events.KinesisEvent;
 import com.amazonaws.services.lambda.runtime.events.KinesisEvent.KinesisEventRecord;
+import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import gov.cms.ab2d.fetcher.model.JobFetchPayload;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
@@ -18,9 +20,11 @@ import java.io.IOException;
  */
 @SuppressWarnings("unused")
 public class FetcherHandler implements RequestHandler<KinesisEvent, String> {
-    ObjectMapper objectMapper = new ObjectMapper();
+    ObjectMapper objectMapper = JsonMapper.builder().addModule(new JavaTimeModule()).build();
 
-    static AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext("gov.cms.ab2d");
+
+    static AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(
+            "gov.cms.ab2d.fetcher", "gov.cms.ab2d.worker", "gov.cms.ab2d.bfd");
 
     @Autowired
     EOBFetcher eobFetcher;
@@ -37,8 +41,9 @@ public class FetcherHandler implements RequestHandler<KinesisEvent, String> {
         String response = "200 OK";
         for (KinesisEventRecord eventRecord : event.getRecords()) {
             try {
-                JsonNode node = objectMapper.readTree(eventRecord.getKinesis().getData().array());
-                process(logger, node);
+                JobFetchPayload jobFetchPayload =
+                        objectMapper.readValue(eventRecord.getKinesis().getData().array(), JobFetchPayload.class);
+                process(logger, jobFetchPayload);
             } catch (IOException ioe) {
                 throw new RuntimeException(ioe);
             }
@@ -47,11 +52,11 @@ public class FetcherHandler implements RequestHandler<KinesisEvent, String> {
         return response;
     }
 
-    private void process(LambdaLogger logger, JsonNode node) {
-        String correlationId = node.get("collation_id").asText();
-        long beneId = node.get("beneficiary_id").asLong();
-        String sinceDateStr = node.get("since").asText();
-        eobFetcher.fetchMe(logger, correlationId, beneId, sinceDateStr);
+    private void process(LambdaLogger logger, JobFetchPayload jobFetchPayload) {
+                logger.log("In Process\n");
+        logger.log(jobFetchPayload.toString());
+        logger.log("\nDone with process.\n");
+//        eobFetcher.fetchMe(logger, correlationId, beneId, sinceDateStr);
     }
 }
 
