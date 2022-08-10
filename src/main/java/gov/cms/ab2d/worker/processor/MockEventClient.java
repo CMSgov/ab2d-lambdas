@@ -6,6 +6,6 @@ import gov.cms.ab2d.eventclient.events.LoggableEvent;
 public class MockEventClient implements EventClient {
     @Override
     public void send(LoggableEvent loggableEvent) {
-        throw new UnsupportedOperationException();
+        // TDDO - get fancier with mocking at a later point.
     }
 }
