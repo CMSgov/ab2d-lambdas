@@ -3,13 +3,14 @@ package gov.cms.ab2d.fetcher;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import com.amazonaws.services.lambda.runtime.events.KinesisEvent;
 import com.amazonaws.services.lambda.runtime.events.KinesisEvent.KinesisEventRecord;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import gov.cms.ab2d.fetcher.model.JobFetchPayload;
+import gov.cms.ab2d.worker.processor.PatientClaimsProcessorImpl;
+import gov.cms.ab2d.worker.processor.ProgressTrackerUpdate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
@@ -27,7 +28,7 @@ public class FetcherHandler implements RequestHandler<KinesisEvent, String> {
             "gov.cms.ab2d.fetcher", "gov.cms.ab2d.worker", "gov.cms.ab2d.bfd");
 
     @Autowired
-    EOBFetcher eobFetcher;
+    PatientClaimsProcessorImpl patientClaimsProcessor;
 
     public FetcherHandler() {
         ctx.getAutowireCapableBeanFactory().autowireBean(this);
@@ -39,24 +40,20 @@ public class FetcherHandler implements RequestHandler<KinesisEvent, String> {
 
         logger.log("Kinesis event version.");
         String response = "200 OK";
+
+        ProgressTrackerUpdate update = new ProgressTrackerUpdate();
         for (KinesisEventRecord eventRecord : event.getRecords()) {
             try {
                 JobFetchPayload jobFetchPayload =
                         objectMapper.readValue(eventRecord.getKinesis().getData().array(), JobFetchPayload.class);
-                process(logger, jobFetchPayload);
+                patientClaimsProcessor.writeOutData(jobFetchPayload, update);
             } catch (IOException ioe) {
                 throw new RuntimeException(ioe);
             }
         }
+        // TODO - push JobFetchPayload updates
 
         return response;
-    }
-
-    private void process(LambdaLogger logger, JobFetchPayload jobFetchPayload) {
-                logger.log("In Process\n");
-        logger.log(jobFetchPayload.toString());
-        logger.log("\nDone with process.\n");
-//        eobFetcher.fetchMe(logger, correlationId, beneId, sinceDateStr);
     }
 }
 
