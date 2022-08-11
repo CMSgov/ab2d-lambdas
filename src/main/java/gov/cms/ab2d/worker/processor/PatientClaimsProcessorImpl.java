@@ -12,12 +12,12 @@ import gov.cms.ab2d.fetcher.model.EOBFetchParams;
 import gov.cms.ab2d.fetcher.model.JobFetchPayload;
 import gov.cms.ab2d.fhir.BundleUtils;
 import gov.cms.ab2d.fhir.FhirVersion;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -31,21 +31,27 @@ import static gov.cms.ab2d.aggregator.FileOutputType.ERROR;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class PatientClaimsProcessorImpl {
 
     private final BFDClient bfdClient;
     
-    private final EventClient eventClient;
-
-    @Value("${efs.mount}")
+    private final EventClient eventClient = new MockEventClient();
     private final String efsMount;
 
-    @Value("${aggregator.directory.streaming:streaming}")
     private final String streamingDir;
 
-    @Value("${aggregator.directory.finished:finished}")
     private final String finishedDir;
+
+    @Autowired
+    public PatientClaimsProcessorImpl(BFDClient bfdClient,
+                                      @Value("${efs.mount}") String efsMount,
+                                      @Value("${aggregator.directory.streaming:streaming}") String streamingDir,
+                                      @Value("${aggregator.directory.finished:finished}") String finishedDir) {
+        this.bfdClient = bfdClient;
+        this.efsMount = efsMount;
+        this.streamingDir = streamingDir;
+        this.finishedDir = finishedDir;
+    }
 
     public void writeOutData(JobFetchPayload jobFetchPayload, ProgressTrackerUpdate update) throws IOException {
         File file = null;
