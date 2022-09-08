@@ -1,9 +1,10 @@
 package gov.cms.ab2d.worker.processor;
 
-import gov.cms.ab2d.fetcher.model.EOBFetchParams;
+import gov.cms.ab2d.fetcher.model.PatientCoverage;
 import gov.cms.ab2d.fhir.BundleUtils;
 import gov.cms.ab2d.fhir.EobUtils;
 import gov.cms.ab2d.fhir.ExtensionUtils;
+import gov.cms.ab2d.fhir.FhirVersion;
 import gov.cms.ab2d.filter.ExplanationOfBenefitTrimmer;
 import gov.cms.ab2d.filter.FilterEob;
 import lombok.extern.slf4j.Slf4j;
@@ -12,10 +13,13 @@ import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Collect and filter claims based on AB2D business requirements and allow documenting the results of all actions.
@@ -25,17 +29,7 @@ import java.util.List;
  *      - {@link EobUtils#isPartD} remove claims that are PartD
  */
 @Slf4j
-public class PatientClaimsCollector {
-
-    private final List<IBaseResource> eobs;
-
-    public PatientClaimsCollector() {
-        this.eobs = new ArrayList<>();
-    }
-
-    public List<IBaseResource> getEobs() {
-        return eobs;
-    }
+public class PatientClaimsFilter {
 
     /**
      * Filter out EOBs not meeting requirements and add on MBIs to remaining claims
@@ -51,43 +45,53 @@ public class PatientClaimsCollector {
      *
      * Billable period filters are applied to all contract types except for
      *
-     * @param bundle response from BFD containing a list of claims for a specific requested patient
+     * @param bundle - response from BFD containing a list of claims for a specific requested patient
+     * @param patient - the patient identifier information
+     * @param attestationDate - the date the contract was attested
+     * @param isSkipBillablePeriodCheck - for test data, do we need to skip any date filtering
+     * @param since - The _since date specified in the api job creation request
+     * @param version - the FHIR version to help with parsing the data
      */
-    public void filterAndAddEntries(IBaseBundle bundle, EOBFetchParams patient) {
+    public static List<IBaseResource> filterEntries(IBaseBundle bundle, PatientCoverage patient, Date attestationDate,
+                                                    boolean isSkipBillablePeriodCheck, OffsetDateTime since,
+                                                    FhirVersion version) {
 
         // Skip if bundle is missing for some reason
         if (bundle == null) {
-            return;
+            return new ArrayList<>();
         }
 
-
-        // Returns null if bundle is null
+        // Returns if bundle entries is null
         List<IBaseBackboneElement> bundleEntries = BundleUtils.getEntries(bundle);
         if (bundleEntries == null) {
             log.error("bundle entries not found for bundle");
-            return;
+            return new ArrayList<>();
         }
 
-        Date earliest = new Date(patient.getSince().toEpochSecond() * 1000);
-
         // Perform filtering actions
-        BundleUtils.getEobResources(bundleEntries).stream()
+        return BundleUtils.getEobResources(bundleEntries).stream()
                 // Filter by date unless contract is an old synthetic data contract, part D or attestation time is null
                 // Filter out data
-                .filter(resource -> FilterEob.filter(resource, patient.getDateRanges(), earliest, earliest,
-                        patient.isSkipBillablePeriodCheck()).isPresent())
+                .filter(resource -> FilterEob.filter(resource, patient.getDateRanges(), getEarliest(),
+                        attestationDate, isSkipBillablePeriodCheck).isPresent())
                 // Filter out unnecessary fields
                 .map(ExplanationOfBenefitTrimmer::getBenefit)
                 // Make sure patients are the same
                 .filter(resource -> matchingPatient(resource, patient.getBeneId()))
                 // Make sure update date is after since date
-                .filter(eob -> afterSinceDate(eob, patient))
-                .forEach(eob -> addEobsToList(eobs, eob, patient));
+                .filter(eob -> afterSinceDate(eob, since))
+                .peek(eob -> addMbiIdsToEobs(eob, patient.getCurrentMBI(), patient.getHistoricMBIs(), version))
+                .collect(Collectors.toList());
     }
 
-    private void addEobsToList(List<IBaseResource> eobs, IBaseResource eob, EOBFetchParams patient) {
-        addMbiIdsToEobs(eob, patient);
-        eobs.add(eob);
+    /**
+     * The earliest date we are able to return data for is 1/1/2020
+     *
+     * @return that date
+     */
+    static Date getEarliest() {
+        LocalDateTime d = LocalDateTime.of(2020, 1, 1, 0, 0, 0, 0);
+        return new Date(d.toInstant(ZoneOffset.UTC).toEpochMilli());
     }
 
     /**
@@ -97,10 +101,10 @@ public class PatientClaimsCollector {
      * the _since date
      *
      * @param resource - the EOB
-     * @return true if the lastUpdated date is after the since date
+     * @param sinceTime - the time the user specified as the _since date
+     * @return true if the lastUpdated date is after the _since date
      */
-    boolean afterSinceDate(IBaseResource resource, EOBFetchParams eobFetchParams) {
-        OffsetDateTime sinceTime = eobFetchParams.getSince();
+    static boolean afterSinceDate(IBaseResource resource, OffsetDateTime sinceTime) {
         if (sinceTime == null) {
             return true;
         }
@@ -118,7 +122,7 @@ public class PatientClaimsCollector {
      * @param benefit  - The benefit to check
      * @return true if this patient is a member of the correct contract
      */
-    private boolean matchingPatient(IBaseResource benefit, long requestedPatientId) {
+    static boolean matchingPatient(IBaseResource benefit, long requestedPatientId) {
 
         Long patientId = EobUtils.getPatientId(benefit);
         if (patientId == null || requestedPatientId != patientId) {
@@ -128,24 +132,35 @@ public class PatientClaimsCollector {
         return true;
     }
 
-    private void addMbiIdsToEobs(IBaseResource eob, EOBFetchParams patient) {
+    /**
+     * Add the patient MBIs as an extension to the ExplanationOfBenefit (since this is the only way the PDP
+     * can do the mapping between their patients and ours)
+     *
+     * @param eob - the EOB
+     * @param mbi - the current MBI
+     * @param historicMbis - any historic MBI
+     * @param version - the FHIR version
+     */
+    static void addMbiIdsToEobs(IBaseResource eob, String mbi, String[] historicMbis, FhirVersion version) {
         if (eob == null) {
             return;
         }
 
-        // Add extesions only if beneficiary id is present and known to memberships
+        // Add extensions only if beneficiary id is present and known to memberships
         Long benId = EobUtils.getPatientId(eob);
-        if (benId != null && patient != null) {
+        if (benId != null) {
 
             // Add each mbi to each eob
-            if (patient.getMBI() != null) {
-                IBase currentMbiExtension = ExtensionUtils.createMbiExtension(patient.getMBI(), true, patient.getVersion());
-                ExtensionUtils.addExtension(eob, currentMbiExtension, patient.getVersion());
+            if (mbi != null) {
+                IBase currentMbiExtension = ExtensionUtils.createMbiExtension(mbi, true, version);
+                ExtensionUtils.addExtension(eob, currentMbiExtension, version);
             }
 
-            for (String mbi : patient.getHistoricMBIs()) {
-                IBase mbiExtension = ExtensionUtils.createMbiExtension(mbi, false, patient.getVersion());
-                ExtensionUtils.addExtension(eob, mbiExtension, patient.getVersion());
+            if (historicMbis != null && historicMbis.length > 0) {
+                for (String historicMbi : historicMbis) {
+                    IBase mbiExtension = ExtensionUtils.createMbiExtension(historicMbi, false, version);
+                    ExtensionUtils.addExtension(eob, mbiExtension, version);
+                }
             }
         }
     }

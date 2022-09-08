@@ -10,11 +10,9 @@ public class ProgressTrackerUpdate {
     private int eobsFetchedCount;
     private int eobsProcessedCount;
 
-
     public void incPatientProcessCount() {
         patientRequestProcessedCount++;
     }
-
 
     public void incPatientsWithEobsCount() {
         patientWithEobCount++;

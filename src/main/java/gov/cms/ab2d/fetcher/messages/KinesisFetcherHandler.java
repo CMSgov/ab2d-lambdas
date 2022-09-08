@@ -1,4 +1,4 @@
-package gov.cms.ab2d.fetcher;
+package gov.cms.ab2d.fetcher.messages;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
@@ -11,7 +11,6 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import gov.cms.ab2d.fetcher.model.JobFetchPayload;
 import gov.cms.ab2d.worker.processor.PatientClaimsProcessorImpl;
 import gov.cms.ab2d.worker.processor.ProgressTrackerUpdate;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 import java.io.IOException;
@@ -20,17 +19,16 @@ import java.io.IOException;
  * The entry point invoked by AWS
  */
 @SuppressWarnings("unused")
-public class FetcherHandler implements RequestHandler<KinesisEvent, String> {
-    ObjectMapper objectMapper = JsonMapper.builder().addModule(new JavaTimeModule()).build();
+public class KinesisFetcherHandler implements RequestHandler<KinesisEvent, String> {
+    private final ObjectMapper objectMapper = JsonMapper.builder().addModule(new JavaTimeModule()).build();
 
-
-    static AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(
+    private static final AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(
             "gov.cms.ab2d.fetcher", "gov.cms.ab2d.worker", "gov.cms.ab2d.bfd");
 
-    @Autowired
-    PatientClaimsProcessorImpl patientClaimsProcessor;
+    private final PatientClaimsProcessorImpl patientClaimsProcessor;
 
-    public FetcherHandler() {
+    public KinesisFetcherHandler(PatientClaimsProcessorImpl patientClaimsProcessor) {
+        this.patientClaimsProcessor = patientClaimsProcessor;
         ctx.getAutowireCapableBeanFactory().autowireBean(this);
     }
 
@@ -46,12 +44,13 @@ public class FetcherHandler implements RequestHandler<KinesisEvent, String> {
             try {
                 JobFetchPayload jobFetchPayload =
                         objectMapper.readValue(eventRecord.getKinesis().getData().array(), JobFetchPayload.class);
-                patientClaimsProcessor.writeOutData(jobFetchPayload, update);
+                patientClaimsProcessor.processBeneficiaries(jobFetchPayload, update);
             } catch (IOException ioe) {
                 throw new RuntimeException(ioe);
             }
         }
-        // TODO - push JobFetchPayload updates
+
+        // TODO - push ProgressTrackerUpdate updates
 
         return response;
     }

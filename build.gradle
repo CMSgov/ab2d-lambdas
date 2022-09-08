@@ -1,10 +1,30 @@
 plugins {
     id 'java'
+    id 'com.jfrog.artifactory' version '4.29.0' apply false
+    id "org.sonarqube" version "3.4.0.2513"
+}
+
+ext {
+    sourcesRepo = 'ab2d-main'
+    artifactoryLoc = project.hasProperty('artifactory_contextUrl') ? project.artifactory_contextUrl
+            : System.getenv()['ARTIFACTORY_URL']
+
+    // Override user and password
+    artifactory_user = project.hasProperty('artifactory_user') ? project.artifactory_user
+            : System.getenv()['ARTIFACTORY_USER']
+    artifactory_password = project.hasProperty('artifactory_password') ? project.artifactory_password
+            : System.getenv()['ARTIFACTORY_PASSWORD']
 }
 
 repositories {
     mavenCentral()
-    mavenLocal()
+    maven {
+        url = "${artifactoryLoc}/${sourcesRepo}"
+        credentials {
+            username = project.artifactory_user
+            password = project.artifactory_password
+        }
+    }
 }
 
 dependencies {
@@ -15,12 +35,13 @@ dependencies {
     implementation 'com.newrelic.agent.java:newrelic-api:7.6.0'
     implementation 'ca.uhn.hapi.fhir:hapi-fhir-structures-dstu3:5.7.2'
     implementation 'ca.uhn.hapi.fhir:hapi-fhir-structures-r4:5.7.2'
-    implementation 'gov.cms.ab2d:ab2d-aggregator:1.1'
-    implementation 'gov.cms.ab2d:ab2d-bfd:1.2'
-    implementation 'gov.cms.ab2d:ab2d-events-client:1.0'
-    implementation 'gov.cms.ab2d:ab2d-fhir:1.0'
-    implementation 'gov.cms.ab2d:ab2d-filters:1.5'
+    implementation 'gov.cms.ab2d:ab2d-aggregator:1.2.1'
+    implementation 'gov.cms.ab2d:ab2d-bfd:1.3.1'
+    implementation 'gov.cms.ab2d:ab2d-events-client:1.3.1'
+    implementation 'gov.cms.ab2d:ab2d-fhir:1.1.1'
+    implementation 'gov.cms.ab2d:ab2d-filters:1.6.1'
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.13.3'
+    annotationProcessor  "org.projectlombok:lombok:1.18.24"
 }
 
 test {
