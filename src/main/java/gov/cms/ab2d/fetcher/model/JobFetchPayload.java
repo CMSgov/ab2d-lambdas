@@ -6,34 +6,19 @@ import lombok.Getter;
 import lombok.ToString;
 
 import java.time.OffsetDateTime;
-import java.util.Arrays;
-import java.util.Iterator;
+import java.util.Date;
 
 @Getter
 @ToString
 public class JobFetchPayload {
-
-    String jobId;  // collation_id in the request
-    String organization;
-    boolean skipBillablePeriodCheck;
-    FhirVersion version;
+    private String jobId;
+    private String contract;
+    private String organization;
+    private boolean skipBillablePeriodCheck;
+    private FhirVersion version;
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSz")
-    OffsetDateTime since;  // required, caller needs to validate and provide default
-    PatientCoverage[] beneficiaries;
-
-    public Iterable<EOBFetchParams> buildParams() {
-        return () -> new Iterator<>() {
-            final Iterator<PatientCoverage> coverageIterator = Arrays.stream(beneficiaries).iterator();
-
-            @Override
-            public boolean hasNext() {
-                return coverageIterator.hasNext();
-            }
-
-            @Override
-            public EOBFetchParams next() {
-                return new EOBFetchParams(JobFetchPayload.this, coverageIterator.next());
-            }
-        };
-    }
+    private OffsetDateTime since;
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSz")
+    private Date attestationDate;
+    private PatientCoverage[] beneficiaries;
 }
