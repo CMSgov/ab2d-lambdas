@@ -104,6 +104,35 @@ allprojects {
 
 }
 
+def getBase64EncodedCredentials() {
+    def s = "$artifactory_user" + ":" + "$artifactory_password"
+    return s.bytes.encodeBase64().toString()
+}
+
+//Check if url exist in the repository
+def urlExists(repositoryUrl) {
+    try {
+        def connection = (HttpURLConnection) new URL(repositoryUrl).openConnection()
+
+        connection.setRequestProperty("Authorization", "Basic " + getBase64EncodedCredentials())
+        connection.setConnectTimeout(10000)
+        connection.setReadTimeout(10000)
+        connection.setRequestMethod("HEAD")
+
+        def responseCode = connection.getResponseCode()
+
+        if (responseCode == 401) {
+            throw new RuntimeException("Unauthorized MavenUser user. Please provide valid username and password.")
+        }
+
+        return (200 == responseCode)
+
+    } catch (IOException ignored) {
+        println(ignored)
+        return false
+    }
+}
+
 task buildZip(type: Zip) {
     dependsOn ':metrics-lambda:buildZip'
     dependsOn ':eob-fetcher:buildZip'
