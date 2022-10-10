@@ -17,14 +17,14 @@ pipeline {
         stage ('Build Lambdas') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'artifactoryuserpass', usernameVariable: 'ARTIFACTORY_USER', passwordVariable: 'ARTIFACTORY_PASSWORD')]) {
-                    sh '.gradlew -b build.gradle '
+                    sh './gradlew -b build.gradle '
                 }
             }
         }
         stage ('Test Lambdas') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'artifactoryuserpass', usernameVariable: 'ARTIFACTORY_USER', passwordVariable: 'ARTIFACTORY_PASSWORD')]) {
-                    sh '.gradlew clean test --info -b build.gradle'
+                    sh './gradlew clean test --info -b build.gradle'
                 }
             }
         }
@@ -32,7 +32,7 @@ pipeline {
         stage ('Build Jars') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'artifactoryuserpass', usernameVariable: 'ARTIFACTORY_USER', passwordVariable: 'ARTIFACTORY_PASSWORD')]) {
-                    sh '.gradlew jar --info -b build.gradle'
+                    sh './gradlew jar --info -b build.gradle'
                 }
             }
         }
@@ -41,7 +41,7 @@ pipeline {
       //          withCredentials([usernamePassword(credentialsId: 'artifactoryuserpass', usernameVariable: 'ARTIFACTORY_USER', passwordVariable: 'ARTIFACTORY_PASSWORD')]) {
       //              // Automatically saves the an id for the SonarQube build
        //             withSonarQubeEnv('CMSSonar') {
-        //                sh '.gradlew sonarqube -Dsonar.projectKey=ab2d-lib-project -Dsonar.host.url=https://sonarqube.cloud.cms.gov'
+        //                sh './gradlew sonarqube -Dsonar.projectKey=ab2d-lib-project -Dsonar.host.url=https://sonarqube.cloud.cms.gov'
          //           }
           //      }
            // }
