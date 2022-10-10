@@ -1,31 +1,29 @@
 plugins {
     id 'java'
-    id 'com.jfrog.artifactory' version '4.29.0' apply false
-    id "org.sonarqube" version "3.4.0.2513"
 }
 
-ext {
-    sourcesRepo = 'ab2d-main'
-    artifactoryLoc = project.hasProperty('artifactory_contextUrl') ? project.artifactory_contextUrl
-            : System.getenv()['ARTIFACTORY_URL']
+configurations {
+    all.collect { configuration ->
+        configuration.exclude group: 'org.springframework.boot'
+        configuration.exclude group: 'com.slack.api'
+        configuration.exclude group: 'org.jetbrains.kotlin'
+        configuration.exclude group: 'org.postgresql'
+        configuration.exclude group: 'com.squareup.okhttp3'
+        configuration.exclude group: 'commons-codec'
+        configuration.exclude group: 'com.squareup.okio'
+        configuration.exclude group: 'org.springframework.cloud'
+        configuration.exclude group: 'org.mock-server'
+        configuration.exclude group: 'software.amazon.awssdk:netty-nio-client'
+        configuration.exclude group: 'io.netty'
+        configuration.exclude group: 'org.testcontainers:testcontainers'
+        // Lombok is amazing but its jar is 2 MBs which is 20% of the total fat jar.
+        // Even when set as compile and annotationProcessor only gradle still adds it to the fat jar
 
-    // Override user and password
-    artifactory_user = project.hasProperty('artifactory_user') ? project.artifactory_user
-            : System.getenv()['ARTIFACTORY_USER']
-    artifactory_password = project.hasProperty('artifactory_password') ? project.artifactory_password
-            : System.getenv()['ARTIFACTORY_PASSWORD']
-}
-
-repositories {
-    mavenCentral()
-    maven {
-        url = "${artifactoryLoc}/${sourcesRepo}"
-        credentials {
-            username = project.artifactory_user
-            password = project.artifactory_password
-        }
     }
+
 }
+
+version "$fetcherVersion"
 
 dependencies {
     compileOnly    'org.projectlombok:lombok:1.18.24'
@@ -54,6 +52,7 @@ task buildZip(type: Zip) {
     into('lib') {
         from configurations.runtimeClasspath
     }
+    archiveFileName = 'eob-fetcher.zip'
 }
 
 java {

@@ -4,8 +4,6 @@ plugins {
 
 version "$metricsVersion"
 
-// The parent project provides a lot of libraries that this lambda doesn't use.
-// To keep the deploy size as small as possible exclude anything unused
 configurations {
     all.collect { configuration ->
         configuration.exclude group: 'org.springframework'
@@ -34,7 +32,7 @@ repositories {
 }
 
 dependencies {
-    implementation project(":ab2d-events-client")
+    implementation 'gov.cms.ab2d:ab2d-events-client:1.6'
     implementation 'com.amazonaws:aws-lambda-java-core:1.2.1'
     implementation 'com.amazonaws:aws-lambda-java-events:3.11.0'
     implementation 'software.amazon.awssdk:cloudwatch:2.17.271'
@@ -56,7 +54,7 @@ task buildZip(type: Zip) {
     into('lib') {
         from configurations.runtimeClasspath
     }
-    archiveFileName = 'ab2d-metrics.zip'
+    archiveFileName = 'metrics-lambda.zip'
 }
 
 java {
@@ -66,6 +64,3 @@ java {
 
 build.dependsOn buildZip
 
-task wrapper(type: Wrapper) {
-    gradleVersion = '7.2'
-}
