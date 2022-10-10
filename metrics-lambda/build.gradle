@@ -1,0 +1,71 @@
+plugins {
+    id 'java'
+}
+
+version "$metricsVersion"
+
+// The parent project provides a lot of libraries that this lambda doesn't use.
+// To keep the deploy size as small as possible exclude anything unused
+configurations {
+    all.collect { configuration ->
+        configuration.exclude group: 'org.springframework'
+        configuration.exclude group: 'org.springframework.boot'
+        configuration.exclude group: 'com.slack.api'
+        configuration.exclude group: 'org.jetbrains.kotlin'
+        configuration.exclude group: 'org.postgresql'
+        configuration.exclude group: 'com.squareup.okhttp3'
+        configuration.exclude group: 'commons-codec'
+        configuration.exclude group: 'com.squareup.okio'
+        configuration.exclude group: 'org.springframework.cloud'
+        configuration.exclude group: 'org.mock-server'
+        configuration.exclude group: 'software.amazon.awssdk:netty-nio-client'
+        configuration.exclude group: 'io.netty'
+        configuration.exclude group: 'org.testcontainers:testcontainers'
+        // Lombok is amazing but its jar is 2 MBs which is 20% of the total fat jar.
+        // Even when set as compile and annotationProcessor only gradle still adds it to the fat jar
+        configuration.exclude group: 'org.projectlombok'
+    }
+
+}
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+}
+
+dependencies {
+    implementation project(":ab2d-events-client")
+    implementation 'com.amazonaws:aws-lambda-java-core:1.2.1'
+    implementation 'com.amazonaws:aws-lambda-java-events:3.11.0'
+    implementation 'software.amazon.awssdk:cloudwatch:2.17.271'
+    implementation 'com.amazonaws:aws-java-sdk-sqs:1.12.300'
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-joda:2.13.4'
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.13.4'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.0'
+    testImplementation 'org.mockito:mockito-core:4.8.0'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+task buildZip(type: Zip) {
+    from compileJava
+    from processResources
+    into('lib') {
+        from configurations.runtimeClasspath
+    }
+    archiveFileName = 'ab2d-metrics.zip'
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+}
+
+build.dependsOn buildZip
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '7.2'
+}
