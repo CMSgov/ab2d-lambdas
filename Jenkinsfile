@@ -58,9 +58,9 @@ pipeline {
       //  }*/
 
         stage ('Publish Lambdas') {
-            when {
-                branch 'main'
-            }
+            //when {
+          //      branch 'main'
+          //  }
             steps {
                 withCredentials([usernamePassword(credentialsId: 'artifactoryuserpass', usernameVariable: 'ARTIFACTORY_USER', passwordVariable: 'ARTIFACTORY_PASSWORD')]) {
                     script {
