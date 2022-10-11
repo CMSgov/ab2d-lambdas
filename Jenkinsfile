@@ -32,7 +32,7 @@ pipeline {
         stage ('Build Jars') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'artifactoryuserpass', usernameVariable: 'ARTIFACTORY_USER', passwordVariable: 'ARTIFACTORY_PASSWORD')]) {
-                    sh './gradlew jar --info -b build.gradle'
+                    sh './gradlew buildZip --info -b build.gradle'
                 }
             }
         }
