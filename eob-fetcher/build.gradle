@@ -1,0 +1,69 @@
+plugins {
+    id 'java'
+}
+
+configurations {
+    all.collect { configuration ->
+        configuration.exclude group: 'org.springframework.boot'
+        configuration.exclude group: 'com.slack.api'
+        configuration.exclude group: 'org.jetbrains.kotlin'
+        configuration.exclude group: 'org.postgresql'
+        configuration.exclude group: 'com.squareup.okhttp3'
+        configuration.exclude group: 'commons-codec'
+        configuration.exclude group: 'com.squareup.okio'
+        configuration.exclude group: 'org.springframework.cloud'
+        configuration.exclude group: 'org.mock-server'
+        configuration.exclude group: 'software.amazon.awssdk:netty-nio-client'
+        configuration.exclude group: 'io.netty'
+        configuration.exclude group: 'org.testcontainers:testcontainers'
+
+    }
+
+}
+
+version "$fetcherVersion"
+
+dependencies {
+    compileOnly    'org.projectlombok:lombok:1.18.24'
+    implementation 'com.amazonaws:aws-lambda-java-core:1.2.1'
+    implementation 'com.amazonaws:aws-lambda-java-events:3.11.0'
+    implementation 'org.springframework:spring-context:5.3.23'
+    implementation 'com.newrelic.agent.java:newrelic-api:7.10.0'
+    implementation 'ca.uhn.hapi.fhir:hapi-fhir-structures-dstu3:6.1.1'
+    implementation 'ca.uhn.hapi.fhir:hapi-fhir-structures-r4:6.1.1'
+    implementation 'gov.cms.ab2d:ab2d-aggregator:1.2.1'
+    implementation 'gov.cms.ab2d:ab2d-bfd:1.3.1'
+    implementation 'gov.cms.ab2d:ab2d-events-client:1.3.1'
+    implementation 'gov.cms.ab2d:ab2d-fhir:1.1.1'
+    implementation 'gov.cms.ab2d:ab2d-filters:1.6.1'
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.13.3'
+    annotationProcessor  "org.projectlombok:lombok:1.18.24"
+}
+
+test {
+    useJUnitPlatform()
+}
+
+task buildZip(type: Zip) {
+    from compileJava
+    from processResources
+    into('lib') {
+        from configurations.runtimeClasspath
+    }
+    archiveFileName = 'eob-fetcher.zip'
+}
+
+task wrapper(type: Wrapper){
+    gradleVersion = '7.5'
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+}
+
+repositories {
+    mavenCentral()
+}
+
+build.dependsOn buildZip
