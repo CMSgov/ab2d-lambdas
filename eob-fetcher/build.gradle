@@ -55,6 +55,10 @@ task buildZip(type: Zip) {
     archiveFileName = 'eob-fetcher.zip'
 }
 
+task wrapper(type: Wrapper){
+    gradleVersion = '7.5'
+}
+
 java {
     sourceCompatibility = JavaVersion.VERSION_11
     targetCompatibility = JavaVersion.VERSION_11
