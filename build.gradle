@@ -18,6 +18,7 @@ ext {
     metricsVersion = '1.0.0'
     fetcherVersion = '1.0.0'
 
+
     sourcesRepo = 'ab2d-maven-repo'
     deployerRepo = 'ab2d-main'
     resolverRepo = 'ab2d-main'
@@ -49,6 +50,11 @@ subprojects {
             }
         }
     }
+
+    sourceCompatibility = 11
+    targetCompatibility = 11
+
+    group 'gov.cms.ab2d'
 
 
     artifactory {
@@ -137,7 +143,6 @@ task buildZip(type: Zip) {
     dependsOn ':metrics-lambda:buildZip'
     dependsOn ':eob-fetcher:buildZip'
 }
-
 
 java {
     sourceCompatibility = JavaVersion.VERSION_11
