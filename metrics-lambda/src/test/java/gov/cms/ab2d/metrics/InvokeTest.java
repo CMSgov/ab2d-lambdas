@@ -87,6 +87,7 @@ class InvokeTest {
         sqs.set(handler, mockedSQS);
         Mockito.when(mockedSQS.getQueueUrl(anyString()))
                 .thenReturn(new GetQueueUrlResult());
+
         String result = handler.handleRequest(event, context);
         assertEquals( "OK", result);
     }
