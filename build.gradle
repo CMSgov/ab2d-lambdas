@@ -2,7 +2,9 @@ plugins {
     id 'java'
     id 'com.jfrog.artifactory' version '4.29.0' apply false
     id "org.sonarqube" version "3.4.0.2513"
+    id "ca.cutterslade.analyze" version "1.9.0"
 }
+
 
 ext {
     sourcesRepo = 'ab2d-main'
@@ -17,11 +19,21 @@ ext {
 
     metricsVersion = '1.0.0'
     fetcherVersion = '1.0.0'
+    auditVersion = '1.0.0'
 
 
     sourcesRepo = 'ab2d-maven-repo'
     deployerRepo = 'ab2d-main'
     resolverRepo = 'ab2d-main'
+}
+
+configurations {
+    all.collect { configuration ->
+        configuration.exclude group: 'com.amazonaws:aws-java-sdk-core'
+        configuration.exclude group: 'com.fasterxml.jackson.core:jackson-annotations'
+        configuration.exclude group: 'com.fasterxml.jackson.core:jackson-databind'
+    }
+
 }
 
 
@@ -88,11 +100,8 @@ allprojects {
 
     task lookForArtifacts {
         doLast {
-            //This is the parent build where nothing gets published. Skip it.
-            if (project.name != 'ab2d-lambdas')
-            //Set path to repository that might exist if previous published on this version.
-            //Sets project name and if it exists in repository. Print out so jenkins can take it.
-                System.out.print("'''" + project.name + ":" + urlExists("${artifactoryLoc}/${deployerRepo}/gov/cms/ab2d/${project.name}/${project.version}/${project.name}-${project.version}.zip"))
+            // Until we figure out how to pass the versions downstream always deploy
+            System.out.print("'''" + project.name + ":" + "${artifactoryLoc}/${deployerRepo}/gov/cms/ab2d/${project.name}/${project.version}/${project.name}-${project.version}.zip")
         }
     }
 
@@ -110,38 +119,10 @@ allprojects {
 
 }
 
-def getBase64EncodedCredentials() {
-    def s = "$artifactory_user" + ":" + "$artifactory_password"
-    return s.bytes.encodeBase64().toString()
-}
-
-//Check if url exist in the repository
-def urlExists(repositoryUrl) {
-    try {
-        def connection = (HttpURLConnection) new URL(repositoryUrl).openConnection()
-
-        connection.setRequestProperty("Authorization", "Basic " + getBase64EncodedCredentials())
-        connection.setConnectTimeout(10000)
-        connection.setReadTimeout(10000)
-        connection.setRequestMethod("HEAD")
-
-        def responseCode = connection.getResponseCode()
-
-        if (responseCode == 401) {
-            throw new RuntimeException("Unauthorized MavenUser user. Please provide valid username and password.")
-        }
-
-        return (200 == responseCode)
-
-    } catch (IOException ignored) {
-        println(ignored)
-        return false
-    }
-}
-
 task buildZip(type: Zip) {
     dependsOn ':metrics-lambda:buildZip'
     dependsOn ':eob-fetcher:buildZip'
+    dependsOn ':audit:buildZip'
 }
 
 java {
