@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 
 public class FileUtil {
     public static void delete(File file, LambdaLogger logger) {
+        logger.log(file.getName() + " deleted");
         try {
             Files.delete(file.toPath());
             logger.log(file.getName() + " deleted");

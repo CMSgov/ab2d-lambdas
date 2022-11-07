@@ -22,14 +22,14 @@ import java.io.IOException;
 public class KinesisFetcherHandler implements RequestHandler<KinesisEvent, String> {
     private final ObjectMapper objectMapper = JsonMapper.builder().addModule(new JavaTimeModule()).build();
 
-    private static final AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(
+    private static final AnnotationConfigApplicationContext CONTEXT = new AnnotationConfigApplicationContext(
             "gov.cms.ab2d.fetcher", "gov.cms.ab2d.worker", "gov.cms.ab2d.bfd");
 
     private final PatientClaimsProcessorImpl patientClaimsProcessor;
 
     public KinesisFetcherHandler(PatientClaimsProcessorImpl patientClaimsProcessor) {
         this.patientClaimsProcessor = patientClaimsProcessor;
-        ctx.getAutowireCapableBeanFactory().autowireBean(this);
+        CONTEXT.getAutowireCapableBeanFactory().autowireBean(this);
     }
 
     @Override

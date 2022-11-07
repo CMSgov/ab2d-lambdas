@@ -12,7 +12,7 @@ import java.util.UUID;
 
 class AuditTest {
     @Test
-    void AuditInvoke() throws IOException {
+    void auditInvoke() throws IOException {
         Properties properties = PropertiesUtil.loadProps();
         File dir = new File(properties.getProperty("AB2D_EFS_MOUNT") + UUID.randomUUID());
         dir.mkdirs();
@@ -28,7 +28,7 @@ class AuditTest {
     }
 
     @Test
-    void AuditInvokeNoDelete() throws IOException {
+    void auditInvokeNoDelete() throws IOException {
         Properties properties = PropertiesUtil.loadProps();
         File dir = new File(properties.getProperty("AB2D_EFS_MOUNT") + UUID.randomUUID());
         dir.mkdirs();
