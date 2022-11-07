@@ -119,6 +119,23 @@ allprojects {
 
 }
 
+sonarqube {
+    properties {
+        property "sonar.projectKey", "ab2d-lambdas"
+    }
+}
+
+node {
+    stage('SCM') {
+        checkout scm
+    }
+    stage('SonarQube Analysis') {
+        withSonarQubeEnv() {
+            sh "./gradlew sonarqube"
+        }
+    }
+}
+
 task buildZip(type: Zip) {
     dependsOn ':metrics-lambda:buildZip'
     dependsOn ':eob-fetcher:buildZip'
