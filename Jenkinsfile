@@ -39,7 +39,7 @@ pipeline {
         stage('SonarQube Analysis') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'artifactoryuserpass', usernameVariable: 'ARTIFACTORY_USER', passwordVariable: 'ARTIFACTORY_PASSWORD')]) {
-                     Automatically saves the an id for the SonarQube build
+                     //Automatically saves the an id for the SonarQube build
                     withSonarQubeEnv('CMSSonar') {
                         sh './gradlew sonarqube -Dsonar.projectKey=ab2d-lambdas -Dsonar.host.url=https:sonarqube.cloud.cms.gov'
                     }
@@ -51,8 +51,8 @@ pipeline {
                 timeout(time: 10, unit: 'MINUTES')
             }
             steps {
-                 Parameter indicates whether to set pipeline to UNSTABLE if Quality Gate fails
-                 true = set pipeline to UNSTABLE, false = don't
+                // Parameter indicates whether to set pipeline to UNSTABLE if Quality Gate fails
+                // true = set pipeline to UNSTABLE, false = don't
                 waitForQualityGate abortPipeline: true
             }
         }
