@@ -9,14 +9,14 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class DtoTest {
     @Test
-    void DimensionsAllArgTest() {
+    void dimensionsAllArgTest() {
         Dimensions dimensions = new Dimensions("a", "a");
         assertEquals("a", dimensions.getName());
         assertEquals("a", dimensions.getValue());
     }
 
     @Test
-    void DimensionsTest() {
+    void dimensionsTest() {
         Dimensions dimensions = new Dimensions();
         dimensions.setName("a");
         dimensions.setValue("a");
@@ -25,7 +25,7 @@ class DtoTest {
     }
 
     @Test
-    void MetricAlarmTest() {
+    void metricAlarmTest() {
         Trigger trigger = new Trigger();
         MetricAlarm metricAlarm = new MetricAlarm();
 
@@ -61,7 +61,7 @@ class DtoTest {
     }
 
     @Test
-    void TriggerTest() {
+    void triggerTest() {
         Dimensions[] dimensions = new Dimensions[]{};
         Trigger trigger = new Trigger();
 

@@ -12,7 +12,7 @@ import static org.mockito.Mockito.doAnswer;
 
 public class TestContext implements Context {
 
-    LambdaLogger logger;
+    private final LambdaLogger logger;
 
     public TestContext() {
         logger = Mockito.mock(LambdaLogger.class);

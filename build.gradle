@@ -53,8 +53,12 @@ test {
 }
 
 subprojects {
+    apply plugin: 'java'
     apply plugin: 'com.jfrog.artifactory'
     apply plugin: 'maven-publish'
+    apply plugin: 'checkstyle'
+    apply plugin: 'jacoco'
+
     publishing {
         publications {
             mavenJava(MavenPublication) {
@@ -94,6 +98,26 @@ subprojects {
             }
         }
     }
+
+    jacocoTestReport {
+        reports {
+            xml.enabled true
+        }
+    }
+
+    test {
+        useJUnitPlatform()
+        finalizedBy jacocoTestReport // report is always generated after tests run
+    }
+
+    jacoco {
+        toolVersion = "0.8.7"
+        reportsDirectory = layout.buildDirectory.dir("$buildDir/reports/jacoco")
+    }
+
+    checkstyle {
+        configFile file("$rootDir/config/checkstyle.xml")
+    }
 }
 
 allprojects {
@@ -127,14 +151,7 @@ sonarqube {
     }
 }
 
-stage('SCM') {
-    checkout scm
-}
-stage('SonarQube Analysis') {
-    withSonarQubeEnv() {
-        sh "./gradlew sonarqube"
-    }
-}
+
 
 task buildZip(type: Zip) {
     dependsOn ':metrics-lambda:buildZip'
