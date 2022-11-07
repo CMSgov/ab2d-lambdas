@@ -117,6 +117,8 @@ allprojects {
     }
 
 
+
+
 }
 
 sonarqube {
@@ -125,14 +127,12 @@ sonarqube {
     }
 }
 
-node {
-    stage('SCM') {
-        checkout scm
-    }
-    stage('SonarQube Analysis') {
-        withSonarQubeEnv() {
-            sh "./gradlew sonarqube"
-        }
+stage('SCM') {
+    checkout scm
+}
+stage('SonarQube Analysis') {
+    withSonarQubeEnv() {
+        sh "./gradlew sonarqube"
     }
 }
 
