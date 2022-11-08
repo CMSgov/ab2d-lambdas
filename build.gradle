@@ -125,7 +125,8 @@ allprojects {
     task lookForArtifacts {
         doLast {
             // Until we figure out how to pass the versions downstream always deploy
-            System.out.print("'''" + project.name + ":" + "${artifactoryLoc}/${deployerRepo}/gov/cms/ab2d/${project.name}/${project.version}/${project.name}-${project.version}.zip")
+            if (project.name != 'ab2d-lambdas')
+                System.out.print("'''" + project.name + ":" + true)
         }
     }
 
@@ -141,8 +142,6 @@ allprojects {
     }
 
 
-
-
 }
 
 sonarqube {
@@ -150,7 +149,6 @@ sonarqube {
         property "sonar.projectKey", "ab2d-lambdas"
     }
 }
-
 
 
 task buildZip(type: Zip) {
