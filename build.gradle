@@ -63,11 +63,14 @@ subprojects {
         //override this in subprojects using ext.set("zipName", '{new value}')
         zipName = project.name
     }
-    System.out.println(zipName)
-    publishing {
-        publications {
-            mavenJava(MavenPublication) {
-                artifact file("build/distributions/${zipName}.zip")
+
+    afterEvaluate {
+        System.out.println(zipName)
+        publishing {
+            publications {
+                mavenJava(MavenPublication) {
+                    artifact file("build/distributions/${zipName}.zip")
+                }
             }
         }
     }
