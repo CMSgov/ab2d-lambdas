@@ -28,6 +28,8 @@ task buildZip(type: Zip) {
     archiveFileName = 'audit-lambda.zip'
 }
 
+ext.set("zipName", 'audit-lambda')
+
 test {
     useJUnitPlatform()
 }
