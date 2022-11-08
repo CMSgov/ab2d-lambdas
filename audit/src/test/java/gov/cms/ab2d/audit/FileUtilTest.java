@@ -3,14 +3,16 @@ package gov.cms.ab2d.audit;
 import net.bytebuddy.utility.RandomString;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.mockito.verification.VerificationMode;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.HashSet;
+import java.util.Set;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.internal.verification.VerificationModeFactory.times;
 
@@ -26,15 +28,17 @@ class FileUtilTest {
         Mockito.verify(context.getLogger(), times(1));
     }
 
-/*    @Test
+    @Test
     void findFiles() throws IOException {
-        String path = System.getProperty("java.io.tmpdir") + "/" + RandomString.make(10) + ".test";
-        Files.write(Paths.get(path), "test".getBytes(StandardCharsets.UTF_8));
-        File file = new File(path);
-        TestContext context = new TestContext();
-        FileUtil.delete(file, context.getLogger());
-        assertFalse(file.exists());
-        Mockito.verify(context.getLogger(), times(1));
-    }*/
+        String path = System.getProperty("java.io.tmpdir") + "/" + RandomString.make(10) + "/";
+        new File(path).mkdirs();
+        Files.write(Paths.get(path + RandomString.make(10) + ".ndjson"), "test".getBytes(StandardCharsets.UTF_8));
+        Files.write(Paths.get(path + RandomString.make(10) + ".ndjson2"), "test".getBytes(StandardCharsets.UTF_8));
+
+        Set<File> files = new HashSet<>();
+        FileUtil.findAllMatchingFilesAndParentDirs(path, files, ".ndjson");
+        assertEquals(1, files.size());
+
+    }
 
 }
