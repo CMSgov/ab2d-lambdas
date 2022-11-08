@@ -23,9 +23,8 @@ public class FileUtil {
         }
     }
 
-    public static void findAllFiles(String directoryName, Set<File> files, String endsWith) {
+    public static void findAllMatchingFilesAndParentDirs(String directoryName, Set<File> files, String endsWith) {
         File directory = new File(directoryName);
-
         // Get all files from a directory.
         File[] fList = directory.listFiles();
         if (fList != null)
@@ -35,7 +34,7 @@ public class FileUtil {
                     files.add(file);
                 }
                 if (file.isDirectory()) {
-                    findAllFiles(file.getAbsolutePath(), files, endsWith);
+                    findAllMatchingFilesAndParentDirs(file.getAbsolutePath(), files, endsWith);
                 }
             }
     }

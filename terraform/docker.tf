@@ -15,13 +15,9 @@ resource "docker_container" "localstack" {
     internal = 4571
     external = 4571
   }
-  ports {
-    internal = 8080
-    external = 8080
-  }
 }
 
-# Find the latest Ubuntu precise image.
 resource "docker_image" "localstack" {
   name = "localstack/localstack:latest"
+
 }
