@@ -59,10 +59,15 @@ subprojects {
     apply plugin: 'checkstyle'
     apply plugin: 'jacoco'
 
+    ext {
+        //override this in subprojects using ext.set("zipName", '{new value}')
+        zipName = project.name
+    }
+    System.out.println(zipName)
     publishing {
         publications {
             mavenJava(MavenPublication) {
-                artifact file("build/distributions/${project.name}.zip")
+                artifact file("build/distributions/${zipName}.zip")
             }
         }
     }
