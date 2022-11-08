@@ -126,7 +126,7 @@ allprojects {
         doLast {
             // Until we figure out how to pass the versions downstream always deploy
             if (project.name != 'ab2d-lambdas')
-                System.out.print("'''" + project.name + ":" + true)
+                System.out.print("'''" + project.name + ":" + false)
         }
     }
 
