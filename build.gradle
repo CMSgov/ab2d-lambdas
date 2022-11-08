@@ -69,7 +69,7 @@ subprojects {
         publishing {
             publications {
                 mavenJava(MavenPublication) {
-                    artifact file("build/distributions/${zipName}.zip")
+                    artifact file("${project.name}/build/distributions/${zipName}.zip")
                 }
             }
         }
