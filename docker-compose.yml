@@ -2,7 +2,7 @@ version: '3'
 
 services:
   terraform:
-    image: hashicorp/terraform:latest
+    image: hashicorp/terraform:1.3.4
     volumes:
       - ./:/tmp/setup
       - ./terraform:/infra

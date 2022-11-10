@@ -38,7 +38,7 @@ public class AuditEventHandler implements RequestStreamHandler {
         Set<File> files = findMatchingDirectories(efs, UUID_PATTERN);
         findAllMatchingFilesAndParentDirs(efs, files, ".ndjson");
         files.forEach(file -> deleteExpired(file, fileTTL, log));
-        outputStream.write("ok".getBytes(StandardCharsets.UTF_8));
+        outputStream.write("{\"status\": \"ok\" }".getBytes(StandardCharsets.UTF_8));
         log.log("Audit Lambda completed");
     }
 
