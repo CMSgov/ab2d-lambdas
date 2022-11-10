@@ -18,6 +18,6 @@ resource "docker_container" "localstack" {
 }
 
 resource "docker_image" "localstack" {
-  name = "localstack/localstack:latest"
+  name = "localstack/localstack:1.2.0"
 
 }

@@ -1,5 +1,3 @@
-
-
 resource "aws_lambda_function" "metrics" {
   depends_on       = [aws_iam_role.iam_for_everything]
   filename         = "/tmp/setup/metrics-lambda/build/distributions/metrics-lambda.zip"
@@ -9,7 +7,10 @@ resource "aws_lambda_function" "metrics" {
   source_code_hash = filebase64sha256("/tmp/setup/metrics-lambda/build/distributions/metrics-lambda.zip")
   runtime          = "java11"
   environment {
-    variables = { "com.amazonaws.sdk.disableCertChecking" = true, IS_LOCALSTACK = true }
+    variables = {
+      "com.amazonaws.sdk.disableCertChecking" = true
+      IS_LOCALSTACK                           = true
+    }
   }
   tags = {
     "key" = "lam"
@@ -26,7 +27,14 @@ resource "aws_lambda_function" "audit" {
   source_code_hash = filebase64sha256("/tmp/setup/audit/build/distributions/audit-lambda.zip")
   runtime          = "java11"
   environment {
-    variables = { "com.amazonaws.sdk.disableCertChecking" = true, IS_LOCALSTACK = true }
+    variables = {
+      "com.amazonaws.sdk.disableCertChecking" = true
+      IS_LOCALSTACK                           = true
+      environment                             = "local"
+      JAVA_TOOL_OPTIONS                       = "-XX:+TieredCompilation -XX:TieredStopAtLevel=1"
+      AB2D_EFS_MOUNT                          = "/tmp/jobdownloads/"
+      "audit.files.ttl.hours"                   = 1
+    }
   }
   tags = {
     "key" = "lam"
