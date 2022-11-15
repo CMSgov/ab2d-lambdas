@@ -56,6 +56,11 @@ pipeline {
        //         waitForQualityGate abortPipeline: true
        //     }
       //  }*/
+        stage("SBOM") {
+            steps {
+                sh 'gradle cyclonedxBom'
+            }
+        }
 
         stage ('Publish Lambdas') {
             //when {
