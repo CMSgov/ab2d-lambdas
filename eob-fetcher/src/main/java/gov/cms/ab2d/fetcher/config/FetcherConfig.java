@@ -7,9 +7,8 @@ import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 
 @Configuration
 @PropertySource(value = {"classpath:fetcher.properties"})
-//CHECKSTYLE:OFF
 public class FetcherConfig {
-//CHECKSTYLE:ON
+    
     private FetcherConfig() {
     }
 
