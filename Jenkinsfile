@@ -56,7 +56,13 @@ pipeline {
        //         waitForQualityGate abortPipeline: true
        //     }
       //  }*/
-
+        stage ('SBOM') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'artifactoryuserpass', usernameVariable: 'ARTIFACTORY_USER', passwordVariable: 'ARTIFACTORY_PASSWORD')]) {
+                    sh './gradlew cyclonedxBom --info -b build.gradle'
+                }
+            }
+        }
         stage ('Publish Lambdas') {
             //when {
           //      branch 'main'
