@@ -1,18 +1,24 @@
-package gov.cms.ab2d.metrics;
+package gov.cms.ab2d.testutils;
 
 import com.amazonaws.services.lambda.runtime.ClientContext;
 import com.amazonaws.services.lambda.runtime.CognitoIdentity;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
-
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doAnswer;
 
 
 public class TestContext implements Context {
 
+    private final LambdaLogger logger;
+
     public TestContext() {
+        logger = Mockito.mock(LambdaLogger.class);
+        Mockito.doAnswer(call -> {
+            System.out.println((String) call.getArgument(0));
+            return null;
+        }).when(logger)
+                .log(ArgumentMatchers.anyString());
     }
 
     public String getAwsRequestId() {
@@ -56,12 +62,6 @@ public class TestContext implements Context {
     }
 
     public LambdaLogger getLogger() {
-        LambdaLogger logger = Mockito.mock(LambdaLogger.class);
-        doAnswer(call -> {
-            System.out.println((String) call.getArgument(0));
-            return null;
-        }).when(logger)
-                .log(anyString());
         return logger;
     }
 

@@ -1,7 +1,9 @@
 package gov.cms.ab2d.audit;
 
+import gov.cms.ab2d.testutils.TestContext;
 import net.bytebuddy.utility.RandomString;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.mockito.Mockito;
 
 import java.io.File;
@@ -14,6 +16,10 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.condition.OS.LINUX;
+import static org.junit.jupiter.api.condition.OS.MAC;
+import static org.junit.jupiter.api.condition.OS.WINDOWS;
 import static org.mockito.internal.verification.VerificationModeFactory.times;
 
 class FileUtilTest {
@@ -40,5 +46,35 @@ class FileUtilTest {
         assertEquals(1, files.size());
 
     }
+
+    @Test
+    void improperRoot() {
+        assertTrue(FileUtil.improperRoot("Δ:/fails"));
+    }
+
+    @Test
+    @EnabledOnOs({LINUX, MAC})
+    void improperRootNix() {
+        assertTrue(FileUtil.improperRoot("Δ:/fails"));
+    }
+
+    @Test
+    @EnabledOnOs({WINDOWS})
+    void improperRootWin() {
+        assertTrue(FileUtil.improperRoot("/fails"));
+    }
+
+    @Test
+    @EnabledOnOs({LINUX, MAC})
+    void properRootNix() throws IOException {
+        assertFalse(FileUtil.improperRoot("/this/should/work"));
+    }
+
+    @Test
+    @EnabledOnOs({WINDOWS})
+    void properRootWin() {
+        assertFalse(FileUtil.improperRoot("c:/this/Should/Work"));
+    }
+
 
 }
