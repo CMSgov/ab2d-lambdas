@@ -153,12 +153,12 @@ public class PatientClaimsProcessorImpl {
 
             // Make first request and begin looping over remaining pages
             eobBundle = bfdClient.requestEOBFromServer(payload.getVersion(),
-                    patientCoverage.getBeneId(), payload.getSince());
+                    patientCoverage.getBeneId(), payload.getSince(), payload.getContract());
             List<IBaseResource> eobs = new ArrayList<>(PatientClaimsFilter.filterEntries(eobBundle, patientCoverage, payload.getAttestationDate(),
                     payload.isSkipBillablePeriodCheck(), payload.getSince(), payload.getVersion()));
 
             while (BundleUtils.getNextLink(eobBundle) != null) {
-                eobBundle = bfdClient.requestNextBundleFromServer(payload.getVersion(), eobBundle);
+                eobBundle = bfdClient.requestNextBundleFromServer(payload.getVersion(), eobBundle, payload.getContract());
                 eobs.addAll(PatientClaimsFilter.filterEntries(eobBundle, patientCoverage, payload.getAttestationDate(),
                         payload.isSkipBillablePeriodCheck(), payload.getSince(), payload.getVersion()));
             }
