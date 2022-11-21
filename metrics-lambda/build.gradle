@@ -1,6 +1,5 @@
 plugins {
     id 'java'
-    id "ca.cutterslade.analyze" version "1.9.0"
     id 'java-library'
 }
 
@@ -26,7 +25,8 @@ repositories {
 }
 
 dependencies {
-    implementation('gov.cms.ab2d:ab2d-events-client:1.6') {
+
+    implementation('gov.cms.ab2d:ab2d-events-client:1.11.2') {
         // Gradle is including these transient dependencies in the zip making it huge
         exclude group: 'org.springframework'
         exclude group: 'org.springframework.boot'
