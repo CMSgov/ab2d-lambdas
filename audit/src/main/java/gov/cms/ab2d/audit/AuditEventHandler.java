@@ -68,7 +68,7 @@ public class AuditEventHandler implements RequestStreamHandler {
                 }
             }
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new AuditException(e);
         }
     }
 

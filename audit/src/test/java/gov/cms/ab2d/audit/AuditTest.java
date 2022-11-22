@@ -11,6 +11,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 import java.util.UUID;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+
 class AuditTest {
     @Test
     void
@@ -26,7 +28,9 @@ class AuditTest {
         }
         System.setProperty("audit.files.ttl.hours", "-1");
         AuditEventHandler eventHandler = new AuditEventHandler();
-        eventHandler.handleRequest(null, System.out, new TestContext());
+        assertDoesNotThrow(() -> {
+            eventHandler.handleRequest(null, System.out, new TestContext());
+        });
     }
 
     @Test
@@ -42,7 +46,9 @@ class AuditTest {
         }
         System.setProperty("audit.files.ttl.hours", "1");
         AuditEventHandler eventHandler = new AuditEventHandler();
-        eventHandler.handleRequest(null, System.out, new TestContext());
+        assertDoesNotThrow(() -> {
+            eventHandler.handleRequest(null, System.out, new TestContext());
+        });
     }
 
 
