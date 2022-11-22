@@ -68,7 +68,7 @@ subprojects {
     }
 
     afterEvaluate {
-        System.out.println(zipName)
+
         publishing {
             publications {
                 mavenJava(MavenPublication) {
@@ -161,7 +161,7 @@ allprojects {
     task lookForArtifacts {
         doLast {
             // Until we figure out how to pass the versions downstream always deploy
-            if (project.name != 'ab2d-lambdas')
+            if (project.name != 'ab2d-lambdas' || project.name != 'lambda-test-utils' )
                 System.out.print("'''" + project.name + ":" + false)
         }
     }
