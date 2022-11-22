@@ -74,7 +74,8 @@ public class AuditEventHandler implements RequestStreamHandler {
 
     /**
      * If a file's creation time is older than the current time minus our file time to live return true
-     * @param file - The file to check
+     *
+     * @param file    - The file to check
      * @param fileTTL - The maximum age of a file based on its creationTime
      * @return - True if a file is older, false if not
      * @throws IOException - Throws when the file doesn't exist
