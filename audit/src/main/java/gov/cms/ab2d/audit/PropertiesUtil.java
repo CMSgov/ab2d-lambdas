@@ -6,6 +6,10 @@ import java.util.Properties;
 
 public class PropertiesUtil {
 
+    private PropertiesUtil(){
+
+    }
+
     public static Properties loadProps() {
         return overrideProps(getProps());
 
@@ -16,7 +20,7 @@ public class PropertiesUtil {
         try (InputStream is = PropertiesUtil.class.getResourceAsStream("/application.properties")) {
             properties.load(is);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new AuditException(e);
         }
         return addEFS(properties);
     }

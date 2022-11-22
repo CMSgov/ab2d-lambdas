@@ -4,10 +4,12 @@ import com.amazonaws.services.lambda.runtime.ClientContext;
 import com.amazonaws.services.lambda.runtime.CognitoIdentity;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
+import lombok.extern.slf4j.Slf4j;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
 
+@Slf4j
 public class TestContext implements Context {
 
     private final LambdaLogger logger;
@@ -15,9 +17,10 @@ public class TestContext implements Context {
     public TestContext() {
         logger = Mockito.mock(LambdaLogger.class);
         Mockito.doAnswer(call -> {
-            System.out.println((String) call.getArgument(0));
-            return null;
-        }).when(logger)
+                    log.info( call.getArgument(0));
+                    return null;
+                })
+                .when(logger)
                 .log(ArgumentMatchers.anyString());
     }
 

@@ -54,16 +54,16 @@ public class FileUtil {
 
     public static void validateEfsMount(String efsMount) {
         if (!efsMount.startsWith(File.separator) && improperRoot(efsMount)) {
-            throw new RuntimeException("EFS Mount must start with a " + File.separator);
+            throw new AuditException("EFS Mount must start with a " + File.separator);
         }
 
         if (efsMount.length() < 5) {
-            throw new RuntimeException("EFS mount must be at least 5 characters");
+            throw new AuditException("EFS mount must be at least 5 characters");
         }
 
         for (String directory : DISALLOWED_DIRECTORIES) {
             if (efsMount.startsWith(directory) && !efsMount.startsWith("/opt/ab2d")) {
-                throw new RuntimeException("EFS mount must not start with a directory that contains important files");
+                throw new AuditException("EFS mount must not start with a directory that contains important files");
             }
         }
     }
