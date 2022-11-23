@@ -33,7 +33,7 @@ resource "aws_lambda_function" "audit" {
       environment                             = "local"
       JAVA_TOOL_OPTIONS                       = "-XX:+TieredCompilation -XX:TieredStopAtLevel=1"
       AB2D_EFS_MOUNT                          = "/tmp/jobdownloads/"
-      "audit.files.ttl.hours"                   = 1
+      audit_files_ttl_hours                   = 1
     }
   }
   tags = {
