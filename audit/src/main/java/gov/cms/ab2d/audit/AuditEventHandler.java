@@ -44,7 +44,7 @@ public class AuditEventHandler implements RequestStreamHandler {
         LambdaLogger log = context.getLogger();
         log.log("Audit Lambda started");
         Properties properties = PropertiesUtil.loadProps();
-        int fileTTL = Integer.parseInt(properties.getProperty("audit.files.ttl.hours"));
+        int fileTTL = Integer.parseInt(properties.getProperty("audit_files_ttl_hours"));
         String efs = properties.getProperty("AB2D_EFS_MOUNT");
         validateEfsMount(efs);
         Set<File> files = findMatchingDirectories(efs, UUID_PATTERN);

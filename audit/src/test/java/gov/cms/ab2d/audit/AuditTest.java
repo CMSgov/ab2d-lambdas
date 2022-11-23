@@ -26,7 +26,7 @@ class AuditTest {
         try (FileOutputStream fileOutputStream = new FileOutputStream(dir.getAbsoluteFile() + String.format("/%s.ndjson", RandomString.make(5)))) {
             fileOutputStream.write("test".getBytes(StandardCharsets.UTF_8));
         }
-        System.setProperty("audit.files.ttl.hours", "-1");
+        System.setProperty("audit_files_ttl_hours", "-1");
         AuditEventHandler eventHandler = new AuditEventHandler();
         assertDoesNotThrow(() -> {
             eventHandler.handleRequest(null, System.out, new TestContext());
@@ -44,7 +44,7 @@ class AuditTest {
         try (FileOutputStream fileOutputStream = new FileOutputStream(dir.getAbsoluteFile() + String.format("/%s.ndjson", RandomString.make(5)))) {
             fileOutputStream.write("test".getBytes(StandardCharsets.UTF_8));
         }
-        System.setProperty("audit.files.ttl.hours", "1");
+        System.setProperty("audit_files_ttl_hours", "1");
         AuditEventHandler eventHandler = new AuditEventHandler();
         assertDoesNotThrow(() -> {
             eventHandler.handleRequest(null, System.out, new TestContext());
