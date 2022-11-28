@@ -8,7 +8,7 @@ import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 @Configuration
 @PropertySource(value = {"classpath:fetcher.properties"})
 public class FetcherConfig {
-
+    
     private FetcherConfig() {
     }
 

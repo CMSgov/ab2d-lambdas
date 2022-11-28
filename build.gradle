@@ -21,11 +21,21 @@ ext {
 
     metricsVersion = '1.0.0'
     fetcherVersion = '1.0.0'
+    auditVersion = '1.0.0'
 
 
     sourcesRepo = 'ab2d-maven-repo'
     deployerRepo = 'ab2d-main'
     resolverRepo = 'ab2d-main'
+}
+
+configurations {
+    all.collect { configuration ->
+        configuration.exclude group: 'com.amazonaws:aws-java-sdk-core'
+        configuration.exclude group: 'com.fasterxml.jackson.core:jackson-annotations'
+        configuration.exclude group: 'com.fasterxml.jackson.core:jackson-databind'
+    }
+
 }
 
 
@@ -45,14 +55,25 @@ test {
 }
 
 subprojects {
+    apply plugin: 'java'
     apply plugin: 'com.jfrog.artifactory'
     apply plugin: 'maven-publish'
+    apply plugin: 'checkstyle'
+    apply plugin: 'jacoco'
     apply plugin: "org.cyclonedx.bom"
 
-    publishing {
-        publications {
-            mavenJava(MavenPublication) {
-                artifact file("build/distributions/${project.name}.zip")
+    ext {
+        //override this in subprojects using ext.set("zipName", '{new value}')
+        zipName = project.name
+    }
+
+    afterEvaluate {
+
+        publishing {
+            publications {
+                mavenJava(MavenPublication) {
+                    artifact file("${project.name}/build/distributions/${zipName}.zip")
+                }
             }
         }
     }
@@ -88,6 +109,26 @@ subprojects {
             }
         }
     }
+
+    jacocoTestReport {
+        reports {
+            xml.enabled true
+        }
+    }
+
+    test {
+        useJUnitPlatform()
+        finalizedBy jacocoTestReport // report is always generated after tests run
+    }
+
+    jacoco {
+        toolVersion = "0.8.7"
+        reportsDirectory = layout.buildDirectory.dir("$buildDir/reports/jacoco")
+    }
+
+    checkstyle {
+        configFile file("$rootDir/config/checkstyle.xml")
+    }
 }
 
 dependencies {
@@ -119,11 +160,9 @@ allprojects {
 
     task lookForArtifacts {
         doLast {
-            //This is the parent build where nothing gets published. Skip it.
-            if (project.name != 'ab2d-lambdas')
-            //Set path to repository that might exist if previous published on this version.
-            //Sets project name and if it exists in repository. Print out so jenkins can take it.
-                System.out.print("'''" + project.name + ":" + urlExists("${artifactoryLoc}/${deployerRepo}/gov/cms/ab2d/${project.name}/${project.version}/${project.name}-${project.version}.zip"))
+            // Until we figure out how to pass the versions downstream always deploy
+            if (project.name != 'ab2d-lambdas' && project.name != 'lambda-test-utils' )
+                System.out.print("'''" + project.name + ":" + false)
         }
     }
 
@@ -141,38 +180,17 @@ allprojects {
 
 }
 
-def getBase64EncodedCredentials() {
-    def s = "$artifactory_user" + ":" + "$artifactory_password"
-    return s.bytes.encodeBase64().toString()
-}
-
-//Check if url exist in the repository
-def urlExists(repositoryUrl) {
-    try {
-        def connection = (HttpURLConnection) new URL(repositoryUrl).openConnection()
-
-        connection.setRequestProperty("Authorization", "Basic " + getBase64EncodedCredentials())
-        connection.setConnectTimeout(10000)
-        connection.setReadTimeout(10000)
-        connection.setRequestMethod("HEAD")
-
-        def responseCode = connection.getResponseCode()
-
-        if (responseCode == 401) {
-            throw new RuntimeException("Unauthorized MavenUser user. Please provide valid username and password.")
-        }
-
-        return (200 == responseCode)
-
-    } catch (IOException ignored) {
-        println(ignored)
-        return false
+sonarqube {
+    properties {
+        property "sonar.projectKey", "ab2d-lambdas"
     }
 }
+
 
 task buildZip(type: Zip) {
     dependsOn ':metrics-lambda:buildZip'
     dependsOn ':eob-fetcher:buildZip'
+    dependsOn ':audit:buildZip'
 }
 
 java {

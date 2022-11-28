@@ -34,7 +34,6 @@ import static gov.cms.ab2d.aggregator.FileOutputType.ERROR;
 public class PatientClaimsProcessorImpl {
 
     private final BFDClient bfdClient;
-    
     private final EventClient eventClient;
 
     private final String efsMount;

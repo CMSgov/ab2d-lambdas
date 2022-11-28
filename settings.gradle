@@ -1,2 +1,4 @@
 rootProject.name = 'ab2d-lambdas'
-include 'eob-fetcher', 'metrics-lambda'
+include 'eob-fetcher', 'metrics-lambda', 'audit'
+include 'lambda-test-utils'
+
