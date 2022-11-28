@@ -29,15 +29,13 @@ import java.util.stream.Stream;
 
 import static gov.cms.ab2d.eventclient.events.MetricsEvent.State.END;
 import static gov.cms.ab2d.eventclient.events.MetricsEvent.State.START;
-import static software.amazon.awssdk.services.cloudwatch.model.StateValue.ALARM;
-import static software.amazon.awssdk.services.cloudwatch.model.StateValue.OK;
 
 
 // Catches cloudwatch alerts, extracts what we care about, then send an event to the ab2d-event sqs queue
 public class CloudwatchEventHandler implements RequestHandler<SNSEvent, String> {
     private static AmazonSQS amazonSQS;
 
-    private final String environment = Optional.ofNullable(System.getenv("PARENT_ENV"))
+    private final String environment = Optional.ofNullable(System.getenv("environment"))
             .orElse("local") + "-";
 
     // AWS sends an object that's not wrapped with type info. The event service expects the wrapper.
@@ -126,9 +124,9 @@ public class CloudwatchEventHandler implements RequestHandler<SNSEvent, String> 
 
     private MetricsEvent.State from(String stateValue) {
         return Stream.of(stateValue)
-                .filter(value1 -> List.of(OK.toString(), ALARM.toString())
+                .filter(value1 -> List.of("OK", "ALARM")
                         .contains(value1))
-                .map(state -> stateValue.equals(OK.toString()) ? END : START)
+                .map(state -> stateValue.equals("OK") ? END : START)
                 .findFirst()
                 .orElseThrow(() -> new EventDataException(String.format("AWS provided Unknown State %s", stateValue)));
     }

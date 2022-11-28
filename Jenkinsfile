@@ -36,26 +36,27 @@ pipeline {
                 }
             }
         }
-      //  stage('SonarQube Analysis') {
-      //      steps {
-      //          withCredentials([usernamePassword(credentialsId: 'artifactoryuserpass', usernameVariable: 'ARTIFACTORY_USER', passwordVariable: 'ARTIFACTORY_PASSWORD')]) {
-      //              // Automatically saves the an id for the SonarQube build
-       //             withSonarQubeEnv('CMSSonar') {
-        //                sh './gradlew sonarqube -Dsonar.projectKey=ab2d-lambdas-project -Dsonar.host.url=https://sonarqube.cloud.cms.gov'
-         //           }
-          //      }
-           // }
-        //}
-       // stage("Quality Gate") {
-        //    options {
-         //       timeout(time: 10, unit: 'MINUTES')
-          //  }
-       //     steps {
+        stage('SonarQube Analysis') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'artifactoryuserpass', usernameVariable: 'ARTIFACTORY_USER', passwordVariable: 'ARTIFACTORY_PASSWORD')]) {
+                    // Automatically saves the an id for the SonarQube build
+                    withSonarQubeEnv('CMSSonar') {
+                        sh './gradlew sonarqube -Dsonar.projectKey=ab2d-lambdas -Dsonar.host.url=https://sonarqube.cloud.cms.gov'
+                    }
+                }
+            }
+        }
+        stage("Quality Gate") {
+            options {
+                timeout(time: 10, unit: 'MINUTES')
+            }
+            steps {
                 // Parameter indicates whether to set pipeline to UNSTABLE if Quality Gate fails
                 // true = set pipeline to UNSTABLE, false = don't
-       //         waitForQualityGate abortPipeline: true
-       //     }
-      //  }*/
+                waitForQualityGate abortPipeline: true
+            }
+        }
+
         stage ('SBOM') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'artifactoryuserpass', usernameVariable: 'ARTIFACTORY_USER', passwordVariable: 'ARTIFACTORY_PASSWORD')]) {
@@ -63,6 +64,7 @@ pipeline {
                 }
             }
         }
+
         stage ('Publish Lambdas') {
             //when {
           //      branch 'main'

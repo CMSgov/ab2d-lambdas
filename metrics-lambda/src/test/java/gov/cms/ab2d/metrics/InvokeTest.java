@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.joda.JodaModule;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import gov.cms.ab2d.testutils.TestContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.platform.commons.util.ReflectionUtils;
@@ -25,7 +26,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 
 class InvokeTest {
 
-    ObjectMapper objectMapper = new ObjectMapper()
+    private final ObjectMapper objectMapper = new ObjectMapper()
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
             .registerModule(new JodaModule())
             .registerModule(new JavaTimeModule());
@@ -37,33 +38,33 @@ class InvokeTest {
 
     @Test
     void invokeTestOk() throws Exception {
-        invoke("ab2d-dev-test","OK", "2022-09-14T19:03:51.523+0100");
+        invoke("ab2d-dev-test", "OK", "2022-09-14T19:03:51.523+0100");
     }
 
     @Test
     void invokeTestAlarm() throws Exception {
-        invoke("ab2d-dev-test","ALARM", "2022-09-14T19:03:51.523+0100");
+        invoke("ab2d-dev-test", "ALARM", "2022-09-14T19:03:51.523+0100");
     }
 
     @Test
     void invokeTestAlarmNameFail() throws Exception {
-        invoke(null,"OK", "2022-09-14T19:03:51.523+0100");
+        invoke(null, "OK", "2022-09-14T19:03:51.523+0100");
     }
 
     @Test
     void invokeTest() throws Exception {
-        invoke("test","OK", "2022-09-14T19:03:51.523+0100");
+        invoke("test", "OK", "2022-09-14T19:03:51.523+0100");
     }
 
     @Test
     void invokeTestFail() throws Exception {
-        invoke("test",null, null);
+        invoke("test", null, null);
     }
 
 
     private void invoke(String alarmName, String state, String time) throws IllegalAccessException, JsonProcessingException {
         MetricAlarm metricAlarm = new MetricAlarm();
-                metricAlarm.setAlarmName(alarmName);
+        metricAlarm.setAlarmName(alarmName);
         metricAlarm.setStateChangeTime(time);
         metricAlarm.setNewStateValue(state);
         Trigger trigger = new Trigger();
@@ -87,8 +88,9 @@ class InvokeTest {
         sqs.set(handler, mockedSQS);
         Mockito.when(mockedSQS.getQueueUrl(anyString()))
                 .thenReturn(new GetQueueUrlResult());
+
         String result = handler.handleRequest(event, context);
-        assertEquals( "OK", result);
+        assertEquals("OK", result);
     }
 
     @Test
@@ -103,7 +105,7 @@ class InvokeTest {
     @Test
     void setupTestLocalstack() throws NoSuchMethodException {
         setEnv("IS_LOCALSTACK", "true");
-        assertEquals( "true", System.getenv("IS_LOCALSTACK"));
+        assertEquals("true", System.getenv("IS_LOCALSTACK"));
         CloudwatchEventHandler handler = new CloudwatchEventHandler();
         Method setup = ReflectionUtils.makeAccessible(CloudwatchEventHandler.class.getDeclaredMethod("setup"));
         assertDoesNotThrow(() -> {
@@ -123,7 +125,6 @@ class InvokeTest {
             throw new IllegalStateException("Failed to set environment variable", e);
         }
     }
-
 
 
 }
