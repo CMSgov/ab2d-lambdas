@@ -6,3 +6,5 @@ docker-compose -f ./docker-compose.yml run --rm terraform destroy  --auto-approv
 # Since destroy kills the localstack docker image that isn't true
 # Deleting the lock files resets the state
 rm  -f ./terraform/terraform.tfstate ./terraform/terraform.tfstate.backup
+
+docker-compose down

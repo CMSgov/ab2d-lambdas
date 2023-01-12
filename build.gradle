@@ -8,6 +8,12 @@ plugins {
 version = "1.0"
 group = "gov.cms.ab2d"
 
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.1'
+    testImplementation 'org.junit.platform:junit-platform-commons:1.9.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.1'
+}
+
 ext {
     sourcesRepo = 'ab2d-main'
     artifactoryLoc = project.hasProperty('artifactory_contextUrl') ? project.artifactory_contextUrl
@@ -22,6 +28,10 @@ ext {
     metricsVersion = '1.0.0'
     fetcherVersion = '1.0.0'
     auditVersion = '1.0.0'
+    coverageVersion = '1.0.0'
+    databaseVersion = '1.0.0'
+    lambdalibsVersion = '1.0.0'
+    testutilsVersion = '1.0.0'
 
 
     sourcesRepo = 'ab2d-maven-repo'
@@ -191,6 +201,8 @@ task buildZip(type: Zip) {
     dependsOn ':metrics-lambda:buildZip'
     dependsOn ':eob-fetcher:buildZip'
     dependsOn ':audit:buildZip'
+    dependsOn ':coverage-counts:buildZip'
+
 }
 
 java {

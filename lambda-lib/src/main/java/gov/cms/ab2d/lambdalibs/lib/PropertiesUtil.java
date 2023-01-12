@@ -1,4 +1,6 @@
-package gov.cms.ab2d.audit;
+package gov.cms.ab2d.lambdalibs.lib;
+
+import gov.cms.ab2d.lambdalibs.exceptions.PropertiesException;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,16 +13,26 @@ public class PropertiesUtil {
     }
 
     public static Properties loadProps() {
-        return overrideProps(getProps());
+        return addEnviProps(addSysProps(overrideProps(getProps())));
 
     }
 
-    private static java.util.Properties getProps() {
+    private static Properties addEnviProps(Properties props) {
+        props.putAll(System.getProperties());
+        return props;
+    }
+
+    private static Properties addSysProps(Properties props) {
+        props.putAll(System.getenv());
+        return props;
+    }
+
+    private static Properties getProps() {
         java.util.Properties properties = new java.util.Properties();
         try (InputStream is = PropertiesUtil.class.getResourceAsStream("/application.properties")) {
             properties.load(is);
         } catch (IOException e) {
-            throw new AuditException(e);
+            throw new PropertiesException(e);
         }
         return addEFS(properties);
     }
