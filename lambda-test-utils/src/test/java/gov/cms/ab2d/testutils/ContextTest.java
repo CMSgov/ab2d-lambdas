@@ -1,11 +1,15 @@
-import gov.cms.ab2d.testutils.TestContext;
-import lombok.extern.slf4j.Slf4j;
+package gov.cms.ab2d.testutils;
+
+
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
-@Slf4j
 public class ContextTest {
+
+    Logger log = org.slf4j.LoggerFactory.getLogger(this.getClass());
 
     @Test
     void testContext() {

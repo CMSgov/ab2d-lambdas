@@ -4,15 +4,16 @@ import com.amazonaws.services.lambda.runtime.ClientContext;
 import com.amazonaws.services.lambda.runtime.CognitoIdentity;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
-import lombok.extern.slf4j.Slf4j;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
+import org.slf4j.Logger;
 
 
-@Slf4j
 public class TestContext implements Context {
 
     private final LambdaLogger logger;
+    Logger log = org.slf4j.LoggerFactory.getLogger(this.getClass());
+
 
     public TestContext() {
         logger = Mockito.mock(LambdaLogger.class);

@@ -6,3 +6,5 @@ export TF_LOG="TRACE"
 
 docker-compose -f ./docker-compose.yml run --rm terraform init -upgrade
 docker-compose -f ./docker-compose.yml run --rm terraform apply --auto-approve
+
+docker-compose up db
