@@ -17,6 +17,9 @@ import java.util.Properties;
 
 public class DatabaseUtil {
 
+    private DatabaseUtil() {
+    }
+
     public static Connection getConnection() throws SQLException {
         Properties properties = PropertiesUtil.loadProps();
         return DriverManager.getConnection(properties.get("DB_URL") + "", properties.get("DB_USERNAME") + "", properties.get("DB_PASSWORD") + "");

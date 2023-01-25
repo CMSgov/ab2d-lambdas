@@ -4,7 +4,6 @@ import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
 import com.amazonaws.services.lambda.runtime.events.SNSEvent;
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.joda.JodaModule;
@@ -45,47 +44,50 @@ public class CoverageCountsHandler implements RequestStreamHandler {
         SNSEvent event = mapper.readValue(eventString, SNSEvent.class);
         context.getLogger()
                 .log(event.toString());
-        Connection connection = DatabaseUtil.getConnection();
-        PreparedStatement stmt = connection.prepareStatement("INSERT INTO lambda.coverage_counts\n" +
-                "(CONTRACT_NUMBER, SERVICE, COUNT, YEAR, MONTH, CREATE_AT, COUNTED_AT) \n" +
-                "VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP, ?)");
-        context.getLogger()
-                .log(String.valueOf(event.getRecords()));
-        Optional.ofNullable(event.getRecords())
-                .orElse(new ArrayList<>())
-                .forEach(record -> {
-                    context.getLogger()
-                            .log("checking records");
-                    try {
-                        Arrays.asList(mapper.readValue(record.getSNS()
-                                        .getMessage(), CoverageCountDTO[].class))
-                                .forEach(count -> {
-                                    context.getLogger()
-                                            .log("populating obj");
-                                    context.getLogger()
-                                            .log(count.getContractNumber());
-                                    try {
-                                        stmt.setString(1, count.getContractNumber());
-                                        stmt.setString(2, count.getService());
-                                        stmt.setInt(3, count.getCount());
-                                        stmt.setInt(4, count.getYear());
-                                        stmt.setInt(5, count.getMonth());
-                                        stmt.setTimestamp(6, count.getCountedAt());
-                                        stmt.addBatch();
-                                    } catch (SQLException e) {
-                                        context.getLogger()
-                                                .log(e.getMessage());
-                                        throw new RuntimeException(e);
-                                    }
-                                });
-                    } catch (Exception e) {
-                        context.getLogger()
-                                .log(e.getMessage());
-                        throw new RuntimeException(e);
-                    }
-                });
+        int[] id = new int[]{0};
 
-        int[] id = stmt.executeBatch();
+        Connection connection = DatabaseUtil.getConnection();
+        try (PreparedStatement stmt = connection.prepareStatement("INSERT INTO lambda.coverage_counts\n" +
+                "(CONTRACT_NUMBER, SERVICE, COUNT, YEAR, MONTH, CREATE_AT, COUNTED_AT) \n" +
+                "VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP, ?)")) {
+            context.getLogger()
+                    .log(String.valueOf(event.getRecords()));
+            Optional.ofNullable(event.getRecords())
+                    .orElse(new ArrayList<>())
+                    .forEach(snsRecord -> {
+                        context.getLogger()
+                                .log("checking records");
+                        try {
+                            Arrays.asList(mapper.readValue(snsRecord.getSNS()
+                                            .getMessage(), CoverageCountDTO[].class))
+                                    .forEach(count -> {
+                                        context.getLogger()
+                                                .log("populating obj");
+                                        context.getLogger()
+                                                .log(count.getContractNumber());
+                                        try {
+                                            stmt.setString(1, count.getContractNumber());
+                                            stmt.setString(2, count.getService());
+                                            stmt.setInt(3, count.getCount());
+                                            stmt.setInt(4, count.getYear());
+                                            stmt.setInt(5, count.getMonth());
+                                            stmt.setTimestamp(6, count.getCountedAt());
+                                            stmt.addBatch();
+                                        } catch (SQLException e) {
+                                            context.getLogger()
+                                                    .log(e.getMessage());
+                                            throw new CoverageCountException(e);
+                                        }
+                                    });
+                        } catch (Exception e) {
+                            context.getLogger()
+                                    .log(e.getMessage());
+                            throw new CoverageCountException(e);
+                        }
+                    });
+
+            id = stmt.executeBatch();
+        }
 
         outputStream.write(("{\"status\": \"ok\", \"Updated\":\"" + Arrays.toString(id) + "\" }").getBytes(StandardCharsets.UTF_8));
     }
