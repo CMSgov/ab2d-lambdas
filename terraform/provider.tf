@@ -2,7 +2,7 @@ terraform {
   required_providers {
     docker = {
       source  = "kreuzwerker/docker"
-      version = "2.23.0"
+      version = "3.0.1"
     }
     aws = {
       source = "hashicorp/aws"
@@ -26,6 +26,7 @@ provider "aws" {
 
   endpoints {
     sqs    = "http://host.docker.internal:4566"
+    sns    = "http://host.docker.internal:4566"
     lambda = "http://host.docker.internal:4566"
     iam    = "http://host.docker.internal:4566"
     kinesis = "http://host.docker.internal:4566"
