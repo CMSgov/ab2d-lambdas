@@ -2,7 +2,7 @@ plugins {
     id 'java'
     id 'com.jfrog.artifactory' version '4.29.0' apply false
     id "org.sonarqube" version "3.4.0.2513"
-    id 'org.cyclonedx.bom' version '1.7.2' apply true
+    id 'org.cyclonedx.bom' version '1.7.3' apply true
 }
 
 version = "1.0"
