@@ -1,8 +1,8 @@
 plugins {
     id 'java'
     id 'com.jfrog.artifactory' version '4.29.0' apply false
-    id "org.sonarqube" version "3.4.0.2513"
-    id 'org.cyclonedx.bom' version '1.7.2' apply true
+    id "org.sonarqube" version "3.5.0.2730"
+    id 'org.cyclonedx.bom' version '1.7.3' apply true
 }
 
 version = "1.0"
@@ -19,9 +19,9 @@ ext {
     artifactory_password = project.hasProperty('artifactory_password') ? project.artifactory_password
             : System.getenv()['ARTIFACTORY_PASSWORD']
 
-    metricsVersion = '1.0.0'
-    fetcherVersion = '1.0.0'
-    auditVersion = '1.0.0'
+    metricsVersion = '1.0.1'
+    fetcherVersion = '1.0.1'
+    auditVersion = '1.0.1'
 
 
     sourcesRepo = 'ab2d-maven-repo'
