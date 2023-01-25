@@ -1,4 +1,6 @@
-CREATE TABLE if not exists coverage_counts
+CREATE SCHEMA if not exists lambda;
+
+CREATE TABLE if not exists lambda.coverage_counts
 (
     id              bigserial      NOT NULL,
     contract_number varchar        NOT NULL,
@@ -9,3 +11,6 @@ CREATE TABLE if not exists coverage_counts
     create_at       timestamp      NOT NULL, -- track when the row was written
     counted_at      timestamp      NOT NULL -- sent from the services, used as a version for a series of counts, also used to find newest counts
 );
+
+
+
