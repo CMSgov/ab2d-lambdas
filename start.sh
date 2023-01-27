@@ -1,5 +1,4 @@
 #!/bin/bash
-
 timeoutPortable() {
 
     expect
@@ -36,4 +35,5 @@ timeoutPortable 30 "while docker container inspect -f '{{.State.Running}}' postg
 if [ ! -f ./terraform/terraform.tfstate ]; then
   docker-compose -f ./docker-compose.yml run --rm terraform init -upgrade
 fi
-docker-compose -f ./docker-compose.yml run --rm terraform apply --auto-approve
+
+docker-compose -f ./docker-compose.yml run --rm terraform apply --auto-approve -var branch_name="${name}"
