@@ -83,7 +83,7 @@ public class CoverageCountsHandler implements RequestStreamHandler {
                         } catch (Exception e) {
                             context.getLogger()
                                     .log(e.getMessage());
-                            throw +new CoverageCountException(e);
+                            throw new CoverageCountException(e);
                         }
                     });
 
