@@ -5,7 +5,7 @@ plugins {
 version "$fetcherVersion"
 
 dependencies {
-    compileOnly    'org.projectlombok:lombok:1.18.24'
+    compileOnly 'org.projectlombok:lombok:1.18.24'
     implementation 'com.amazonaws:aws-lambda-java-core:1.2.1'
     implementation 'com.amazonaws:aws-lambda-java-events:3.11.0'
     implementation 'org.springframework:spring-context:5.3.23'
@@ -18,7 +18,7 @@ dependencies {
     implementation 'gov.cms.ab2d:ab2d-fhir:1.1.5'
     implementation 'gov.cms.ab2d:ab2d-filters:1.6.5'
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.13.3'
-    annotationProcessor  "org.projectlombok:lombok:1.18.24"
+    annotationProcessor "org.projectlombok:lombok:1.18.24"
 }
 
 test {
@@ -31,10 +31,11 @@ task buildZip(type: Zip) {
     into('lib') {
         from configurations.runtimeClasspath
     }
+    destinationDir(file('../'))
     archiveFileName = 'eob-fetcher.zip'
 }
 
-task wrapper(type: Wrapper){
+task wrapper(type: Wrapper) {
     gradleVersion = '7.5'
 }
 

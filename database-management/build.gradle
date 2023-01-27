@@ -42,6 +42,7 @@ task buildZip(type: Zip) {
     into('lib') {
         from configurations.runtimeClasspath
     }
+    destinationDir(file('../'))
     archiveFileName = 'database-management.zip'
 }
 

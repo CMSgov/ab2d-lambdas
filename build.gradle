@@ -146,6 +146,15 @@ dependencies {
     implementation "org.cyclonedx:cyclonedx-core-java:5.0.4"
 }
 
+def getCurrentBranch() {
+    def branch = ""
+    def proc = "git rev-parse --abbrev-ref HEAD".execute()
+    proc.in.eachLine { line -> branch = line }
+    proc.err.eachLine { line -> println line }
+    proc.waitFor()
+    branch = branch.toString().replaceAll("[\\ /'\"_]", "-")
+}
+
 allprojects {
     cyclonedxBom {
         // includeConfigs is the list of configuration names to include when generating the BOM (leave empty to include every configuration)
@@ -198,11 +207,6 @@ sonarqube {
 
 
 task buildZip(type: Zip) {
-    dependsOn ':metrics-lambda:buildZip'
-    dependsOn ':eob-fetcher:buildZip'
-    dependsOn ':audit:buildZip'
-    dependsOn ':coverage-counts:buildZip'
-
 }
 
 java {

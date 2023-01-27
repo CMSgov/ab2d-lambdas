@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.joda.JodaModule;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import gov.cms.ab2d.databasemanagement.DatabaseUtil;
+import gov.cms.ab2d.snsclient.messages.CoverageCountDTO;
 import lombok.SneakyThrows;
 
 import java.io.InputStream;
