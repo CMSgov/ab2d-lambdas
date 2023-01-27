@@ -1,6 +1,7 @@
 package gov.cms.ab2d.coveragecounts;
 
 import com.amazonaws.services.lambda.runtime.Context;
+import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
 import com.amazonaws.services.lambda.runtime.events.SNSEvent;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -39,8 +40,8 @@ public class CoverageCountsHandler implements RequestStreamHandler {
     @Override
     public void handleRequest(InputStream inputStream, OutputStream outputStream, Context context) {
         String eventString = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
-        context.getLogger()
-                .log(eventString);
+        LambdaLogger logger = context.getLogger();
+        logger.log(eventString);
         SNSEvent event = mapper.readValue(eventString, SNSEvent.class);
         context.getLogger()
                 .log(event.toString());
@@ -74,15 +75,11 @@ public class CoverageCountsHandler implements RequestStreamHandler {
                                             stmt.setTimestamp(6, count.getCountedAt());
                                             stmt.addBatch();
                                         } catch (Exception e) {
-                                            context.getLogger()
-                                                    .log(e.getMessage());
-                                            throw new CoverageCountException(e);
+                                            log(e, logger);
                                         }
                                     });
                         } catch (Exception e) {
-                            context.getLogger()
-                                    .log(e.getMessage());
-                            throw new CoverageCountException(e);
+                            log(e, logger);
                         }
                     });
 
@@ -90,5 +87,10 @@ public class CoverageCountsHandler implements RequestStreamHandler {
         }
 
         outputStream.write(("{\"status\": \"ok\", \"Updated\":\"" + Arrays.toString(id) + "\" }").getBytes(StandardCharsets.UTF_8));
+    }
+
+    private void log(Exception exception, LambdaLogger logger) {
+        logger.log(exception.getMessage());
+        throw new CoverageCountException(exception);
     }
 }
