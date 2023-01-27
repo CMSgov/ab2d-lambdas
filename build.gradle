@@ -4,8 +4,7 @@ plugins {
     id "org.sonarqube" version "3.4.0.2513"
     id 'org.cyclonedx.bom' version '1.7.2' apply true
 }
-
-version = "1.0"
+version = "1.0.0"
 group = "gov.cms.ab2d"
 
 dependencies {
@@ -25,13 +24,14 @@ ext {
     artifactory_password = project.hasProperty('artifactory_password') ? project.artifactory_password
             : System.getenv()['ARTIFACTORY_PASSWORD']
 
-    metricsVersion = '1.0.0'
-    fetcherVersion = '1.0.0'
-    auditVersion = '1.0.0'
-    coverageVersion = '1.0.0'
-    databaseVersion = '1.0.0'
-    lambdalibsVersion = '1.0.0'
-    testutilsVersion = '1.0.0'
+    //use the same version for all projects for now to make deploy easier
+    metricsVersion = '$version'
+    fetcherVersion = '$version'
+    auditVersion = '$version'
+    coverageVersion = '$version'
+    databaseVersion = '$version'
+    lambdalibsVersion = '$version'
+    testutilsVersion = '$version'
 
 
     sourcesRepo = 'ab2d-maven-repo'
@@ -144,15 +144,6 @@ subprojects {
 dependencies {
     implementation "org.cyclonedx:cyclonedx-gradle-plugin:1.4.0"
     implementation "org.cyclonedx:cyclonedx-core-java:5.0.4"
-}
-
-def getCurrentBranch() {
-    def branch = ""
-    def proc = "git rev-parse --abbrev-ref HEAD".execute()
-    proc.in.eachLine { line -> branch = line }
-    proc.err.eachLine { line -> println line }
-    proc.waitFor()
-    branch = branch.toString().replaceAll("[\\ /'\"_]", "-")
 }
 
 allprojects {

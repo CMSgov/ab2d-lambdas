@@ -31,7 +31,6 @@ task buildZip(type: Zip) {
     into('lib') {
         from configurations.runtimeClasspath
     }
-    destinationDir(file('../'))
     archiveFileName = 'eob-fetcher.zip'
 }
 

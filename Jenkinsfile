@@ -96,6 +96,10 @@ pipeline {
                         if(deployScript != '') {
                             sh "./gradlew ${deployScript} -b build.gradle"
                         }
+                        def version = sh(
+                            script: ./gradlew properties -q | grep "version:" | awk '{print $2}'
+                            returnStdout: true
+                        )
                     }
                 }
             }
