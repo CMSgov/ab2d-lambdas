@@ -100,7 +100,7 @@ pipeline {
                             script: "./gradlew properties -q | grep \"version:\" | awk '{print \$2}'",
                             returnStdout: true
                         )
-                        env.buildVersion = ip # HERE IS THE MAGIC.
+                        env.buildVersion = buildVersion
                     }
                 }
             }
