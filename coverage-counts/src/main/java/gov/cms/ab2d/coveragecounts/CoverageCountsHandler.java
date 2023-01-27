@@ -45,7 +45,7 @@ public class CoverageCountsHandler implements RequestStreamHandler {
         SNSEvent event = mapper.readValue(eventString, SNSEvent.class);
         context.getLogger()
                 .log(event.toString());
-        int[] id = new int[]{0};
+        int[] id;
 
         Connection connection = DatabaseUtil.getConnection();
         try (PreparedStatement stmt = connection.prepareStatement("INSERT INTO lambda.coverage_counts\n" +
@@ -74,7 +74,7 @@ public class CoverageCountsHandler implements RequestStreamHandler {
                                             stmt.setInt(5, count.getMonth());
                                             stmt.setTimestamp(6, count.getCountedAt());
                                             stmt.addBatch();
-                                        } catch (SQLException e) {
+                                        } catch (Exception e) {
                                             context.getLogger()
                                                     .log(e.getMessage());
                                             throw new CoverageCountException(e);
@@ -83,7 +83,7 @@ public class CoverageCountsHandler implements RequestStreamHandler {
                         } catch (Exception e) {
                             context.getLogger()
                                     .log(e.getMessage());
-                            throw new CoverageCountException(e);
+                            throw +new CoverageCountException(e);
                         }
                     });
 
