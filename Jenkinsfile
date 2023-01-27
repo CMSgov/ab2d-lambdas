@@ -97,7 +97,7 @@ pipeline {
                             sh "./gradlew ${deployScript} -b build.gradle"
                         }
                         def buildVersion = sh(
-                            script: "./gradlew properties -q | grep \"version:\" | awk '{print \$2}'"
+                            script: "./gradlew properties -q | grep \"version:\" | awk '{print \$2}'",
                             returnStdout: true
                         )
                         env.buildVersion = ip # HERE IS THE MAGIC.
