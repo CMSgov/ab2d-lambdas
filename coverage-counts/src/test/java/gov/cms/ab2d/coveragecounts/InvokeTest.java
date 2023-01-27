@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import gov.cms.ab2d.databasemanagement.DatabaseUtil;
+import gov.cms.ab2d.snsclient.messages.CoverageCountDTO;
 import gov.cms.ab2d.testutils.AB2DPostgresqlContainer;
 import gov.cms.ab2d.testutils.TestContext;
 import liquibase.exception.LiquibaseException;
