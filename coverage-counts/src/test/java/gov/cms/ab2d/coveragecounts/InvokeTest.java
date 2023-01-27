@@ -79,8 +79,10 @@ class InvokeTest {
         event.setRecords(List.of(message));
         CoverageCountsHandler eventHandler = new CoverageCountsHandler();
         String value = mapper.writeValueAsString(event);
+        ByteArrayInputStream array = new ByteArrayInputStream(value.getBytes(StandardCharsets.UTF_8));
+        TestContext context = new TestContext();
         assertThrows(CoverageCountException.class, () -> {
-            eventHandler.handleRequest(new ByteArrayInputStream(value.getBytes(StandardCharsets.UTF_8)), System.out, new TestContext());
+            eventHandler.handleRequest(array, System.out, context);
         });
     }
 
