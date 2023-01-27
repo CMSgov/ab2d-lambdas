@@ -1,5 +1,6 @@
 package gov.cms.ab2d.coveragecounts;
 
+import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.amazonaws.services.lambda.runtime.events.SNSEvent;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -16,6 +17,8 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.io.ByteArrayInputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -83,6 +86,18 @@ class InvokeTest {
         TestContext context = new TestContext();
         assertThrows(CoverageCountException.class, () -> {
             eventHandler.handleRequest(array, System.out, context);
+        });
+    }
+
+    @Test
+    void testLog() throws NoSuchMethodException {
+        CoverageCountsHandler eventHandler = new CoverageCountsHandler();
+        TestContext context = new TestContext();
+
+        Method m = CoverageCountsHandler.class.getDeclaredMethod("log", Exception.class, LambdaLogger.class);
+        m.setAccessible(true);
+        assertThrows(InvocationTargetException.class, () -> {
+            m.invoke(eventHandler, new Exception("test"), context.getLogger());
         });
     }
 
