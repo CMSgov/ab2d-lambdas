@@ -23,8 +23,7 @@ class InvokeTest {
 
     @Test
     void database() throws SQLException {
-        DatabaseUtil database = new DatabaseUtil();
-        Connection conn = database.getConnection();
+        Connection conn = DatabaseUtil.getConnection();
         PreparedStatement stmt = conn.prepareStatement("SELECT 1 as res");
         ResultSet resultSet = stmt.executeQuery();
         resultSet.next();
@@ -33,8 +32,7 @@ class InvokeTest {
 
     @Test
     void liquibase() throws SQLException, LiquibaseException {
-        DatabaseUtil database = new DatabaseUtil();
-        Connection conn = database.setupDb(database.getConnection());
+        Connection conn = DatabaseUtil.setupDb(DatabaseUtil.getConnection());
         PreparedStatement stmt = conn.prepareStatement("SELECT 1 as res");
         ResultSet resultSet = stmt.executeQuery();
         resultSet.next();
