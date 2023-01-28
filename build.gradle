@@ -25,13 +25,13 @@ ext {
             : System.getenv()['ARTIFACTORY_PASSWORD']
 
     //use the same version for all projects for now to make deploy easier
-    metricsVersion = '$version'
-    fetcherVersion = '$version'
-    auditVersion = '$version'
-    coverageVersion = '$version'
-    databaseVersion = '$version'
-    lambdalibsVersion = '$version'
-    testutilsVersion = '$version'
+    metricsVersion = $version
+    fetcherVersion = $version
+    auditVersion = $version
+    coverageVersion = $version
+    databaseVersion = $version
+    lambdalibsVersion = $version
+    testutilsVersion = $version
 
 
     sourcesRepo = 'ab2d-maven-repo'
