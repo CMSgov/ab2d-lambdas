@@ -35,7 +35,7 @@ public class CoverageCountsHandler implements RequestStreamHandler {
             .registerModule(new ParameterNamesModule(JsonCreator.Mode.PROPERTIES))
             .registerModule(new JodaModule());
 
-    private final static String INSERT_COUNT = "INSERT INTO lambda.coverage_counts\n" +
+    private static final String INSERT_COUNT = "INSERT INTO lambda.coverage_counts\n" +
             "(CONTRACT_NUMBER, SERVICE, COUNT, YEAR, MONTH, CREATE_AT, COUNTED_AT) \n" +
             "VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP, ?)";
 
