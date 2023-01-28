@@ -71,12 +71,12 @@ class InvokeTest {
     void coverageInvokeFail() throws JsonProcessingException {
         SNSEvent.SNSRecord message = new SNSEvent.SNSRecord();
         List<CoverageCountDTO> coverageCountDTO = Arrays.asList(
-                new CoverageCountDTO(null, "test", 432432, 2024, 12, Timestamp.from(Instant.now())),
+                new CoverageCountDTO(null, null, 432432, 2024, 12, null),
                 new CoverageCountDTO("test2", "test2", 45434332, 2022, 9, Timestamp.from(Instant.now()))
 
         );
         SNSEvent.SNS sns = new SNSEvent.SNS();
-        sns.setMessage(mapper.writeValueAsString(null));
+        sns.setMessage(mapper.writeValueAsString("dfds"));
         message.setSns(sns);
         SNSEvent event = new SNSEvent();
         event.setRecords(List.of(message));
