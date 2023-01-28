@@ -171,7 +171,7 @@ allprojects {
     task lookForArtifacts {
         doLast {
             // Until we figure out how to pass the versions downstream always deploy
-            if (project.name != 'ab2d-lambdas' && project.name != 'lambda-test-utils' )
+            if (project.name != 'ab2d-lambdas' && project.name != 'lambda-test-utils' && project.name != 'lambda-lib' )
                 System.out.print("'''" + project.name + ":" + false)
         }
     }
