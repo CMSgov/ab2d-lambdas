@@ -35,6 +35,9 @@ public class CoverageCountsHandler implements RequestStreamHandler {
             .registerModule(new ParameterNamesModule(JsonCreator.Mode.PROPERTIES))
             .registerModule(new JodaModule());
 
+    private final static String INSERT_COUNT = "INSERT INTO lambda.coverage_counts\n" +
+            "(CONTRACT_NUMBER, SERVICE, COUNT, YEAR, MONTH, CREATE_AT, COUNTED_AT) \n" +
+            "VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP, ?)";
 
     @SneakyThrows
     @Override
@@ -45,48 +48,40 @@ public class CoverageCountsHandler implements RequestStreamHandler {
         SNSEvent event = mapper.readValue(eventString, SNSEvent.class);
         context.getLogger()
                 .log(event.toString());
-        int[] id;
+        int[] id = new int[]{};
 
         Connection connection = DatabaseUtil.getConnection();
-        try (PreparedStatement stmt = connection.prepareStatement("INSERT INTO lambda.coverage_counts\n" +
-                "(CONTRACT_NUMBER, SERVICE, COUNT, YEAR, MONTH, CREATE_AT, COUNTED_AT) \n" +
-                "VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP, ?)")) {
-            context.getLogger()
-                    .log(String.valueOf(event.getRecords()));
+        try (PreparedStatement stmt = connection.prepareStatement(INSERT_COUNT)) {
             Optional.ofNullable(event.getRecords())
                     .orElse(new ArrayList<>())
-                    .forEach(snsRecord -> {
-                        context.getLogger()
-                                .log("checking records");
-                        try {
-                            Arrays.asList(mapper.readValue(snsRecord.getSNS()
-                                            .getMessage(), CoverageCountDTO[].class))
-                                    .forEach(count -> {
-                                        context.getLogger()
-                                                .log("populating obj");
-                                        context.getLogger()
-                                                .log(count.getContractNumber());
-                                        try {
-                                            stmt.setString(1, count.getContractNumber());
-                                            stmt.setString(2, count.getService());
-                                            stmt.setInt(3, count.getCount());
-                                            stmt.setInt(4, count.getYear());
-                                            stmt.setInt(5, count.getMonth());
-                                            stmt.setTimestamp(6, count.getCountedAt());
-                                            stmt.addBatch();
-                                        } catch (Exception e) {
-                                            log(e, logger);
-                                        }
-                                    });
-                        } catch (Exception e) {
-                            log(e, logger);
-                        }
-                    });
-
+                    .forEach(snsRecord -> processRecords(snsRecord, logger, stmt));
             id = stmt.executeBatch();
+        } catch (Exception e) {
+            log(e, logger);
         }
 
         outputStream.write(("{\"status\": \"ok\", \"Updated\":\"" + Arrays.toString(id) + "\" }").getBytes(StandardCharsets.UTF_8));
+    }
+
+    @SneakyThrows
+    private void processRecords(SNSEvent.SNSRecord snsRecord, LambdaLogger logger, PreparedStatement stmt) {
+        logger.log("checking records");
+        Arrays.stream(mapper.readValue(snsRecord.getSNS()
+                        .getMessage(), CoverageCountDTO[].class))
+                .forEach(coverageCountDTO -> prepareCountInserts(coverageCountDTO, logger, stmt));
+    }
+
+    @SneakyThrows
+    private void prepareCountInserts(CoverageCountDTO count, LambdaLogger logger, PreparedStatement stmt) {
+        logger.log("populating obj");
+        logger.log(count.getContractNumber());
+        stmt.setString(1, count.getContractNumber());
+        stmt.setString(2, count.getService());
+        stmt.setInt(3, count.getCount());
+        stmt.setInt(4, count.getYear());
+        stmt.setInt(5, count.getMonth());
+        stmt.setTimestamp(6, count.getCountedAt());
+        stmt.addBatch();
     }
 
     private void log(Exception exception, LambdaLogger logger) {
