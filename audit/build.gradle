@@ -26,7 +26,7 @@ task buildZip(type: Zip) {
     into('lib') {
         from configurations.runtimeClasspath
     }
-    archiveFileName = 'audit-lambda.zip'
+    archiveFileName = 'audit.zip'
 }
 
 ext.set("zipName", 'audit-lambda')

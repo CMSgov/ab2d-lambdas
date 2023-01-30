@@ -1,11 +1,11 @@
 
 resource "aws_lambda_function" "metrics" {
   depends_on       = [aws_iam_role.iam_for_everything]
-  filename         = "/tmp/setup/metrics-lambda.zip"
+  filename         = "/tmp/setup/metrics-lambda/build/distributions/metrics-lambda.zip"
   function_name    = "CloudwatchEventHandler"
   role             = aws_iam_role.iam_for_everything.arn
   handler          = "gov.cms.ab2d.metrics.CloudwatchEventHandler"
-  source_code_hash = filebase64sha256("/tmp/setup/metrics-lambda.zip")
+  source_code_hash = filebase64sha256("/tmp/setup/metrics-lambda/build/distributions/metrics-lambda.zip")
   runtime          = "java11"
   environment {
     variables = {
@@ -20,11 +20,11 @@ resource "aws_lambda_function" "metrics" {
 
 resource "aws_lambda_function" "audit" {
   depends_on       = [aws_iam_role.iam_for_everything]
-  filename         = "/tmp/setup/audit-lambda.zip"
+  filename         = "/tmp/setup/audit/build/distributions/audit.zip"
   function_name    = "AuditEventHandler"
   role             = aws_iam_role.iam_for_everything.arn
   handler          = "gov.cms.ab2d.audit.AuditEventHandler"
-  source_code_hash = filebase64sha256("/tmp/setup/audit-lambda.zip")
+  source_code_hash = filebase64sha256("/tmp/setup/audit/build/distributions/audit.zip")
   runtime          = "java11"
   environment {
     variables = {
@@ -46,11 +46,11 @@ resource "aws_lambda_function" "coverage_count" {
     aws_iam_role.iam_for_everything, aws_lambda_function.database_management,
     data.aws_lambda_invocation.update_database_schema
   ]
-  filename         = "/tmp/setup/coverage-count.zip"
+  filename         = "/tmp/setup/coverage-counts/build/distributions/coverage-counts.zip"
   function_name    = "CoverageCountsHandler"
   role             = aws_iam_role.iam_for_everything.arn
   handler          = "gov.cms.ab2d.coveragecounts.CoverageCountsHandler"
-  source_code_hash = filebase64sha256("/tmp/setup/coverage-count.zip")
+  source_code_hash = filebase64sha256("/tmp/setup/coverage-counts/build/distributions/coverage-counts.zip")
   runtime          = "java11"
   environment {
     variables = {
@@ -80,11 +80,11 @@ resource "aws_sns_topic_subscription" "user_updates_lampda_target" {
 
 resource "aws_lambda_function" "database_management" {
   depends_on       = [aws_iam_role.iam_for_everything]
-  filename         = "/tmp/setup/database-management.zip"
+  filename         = "/tmp/setup/database-management/build/distributions/database-management.zip"
   function_name    = "DatabaseManagementHandler"
   role             = aws_iam_role.iam_for_everything.arn
   handler          = "gov.cms.ab2d.databasemanagement.DatabaseManagementHandler"
-  source_code_hash = filebase64sha256("/tmp/setup/database-management.zip")
+  source_code_hash = filebase64sha256("/tmp/setup/database-management/build/distributions/database-management.zip")
   runtime          = "java11"
   environment {
     variables = {
