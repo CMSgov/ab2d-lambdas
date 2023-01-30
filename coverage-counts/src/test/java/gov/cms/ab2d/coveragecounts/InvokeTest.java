@@ -55,6 +55,7 @@ class InvokeTest {
                 new CoverageCountDTO("test2", "test2", 45434332, 2022, 9, Timestamp.from(Instant.now()))
 
         );
+        System.out.println(mapper.writeValueAsString(coverageCountDTO));
         SNSEvent.SNS sns = new SNSEvent.SNS();
         sns.setMessage(mapper.writeValueAsString(coverageCountDTO));
         message.setSns(sns);

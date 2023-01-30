@@ -1,5 +1,6 @@
 package gov.cms.ab2d.databasemanagement;
 
+import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import gov.cms.ab2d.lambdalibs.lib.PropertiesUtil;
 import liquibase.Contexts;
 import liquibase.LabelExpression;
