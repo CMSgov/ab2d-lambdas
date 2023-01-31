@@ -4,6 +4,7 @@ package gov.cms.ab2d.audit;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
+import gov.cms.ab2d.lambdalibs.lib.PropertiesUtil;
 
 import java.io.File;
 import java.io.IOException;

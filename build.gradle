@@ -4,9 +4,14 @@ plugins {
     id "org.sonarqube" version "3.5.0.2730"
     id 'org.cyclonedx.bom' version '1.7.3' apply true
 }
-
-version = "1.0"
+version = "1.0.1"
 group = "gov.cms.ab2d"
+
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.1'
+    testImplementation 'org.junit.platform:junit-platform-commons:1.9.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.1'
+}
 
 ext {
     sourcesRepo = 'ab2d-main'
@@ -19,9 +24,14 @@ ext {
     artifactory_password = project.hasProperty('artifactory_password') ? project.artifactory_password
             : System.getenv()['ARTIFACTORY_PASSWORD']
 
-    metricsVersion = '1.0.1'
-    fetcherVersion = '1.0.1'
-    auditVersion = '1.0.1'
+    //use the same version for all projects for now to make deploy easier
+    metricsVersion = project.version
+    fetcherVersion = project.version
+    auditVersion = project.version
+    coverageVersion = project.version
+    databaseVersion = project.version
+    lambdalibsVersion = project.version
+    testutilsVersion = project.version
 
 
     sourcesRepo = 'ab2d-maven-repo'
@@ -161,7 +171,7 @@ allprojects {
     task lookForArtifacts {
         doLast {
             // Until we figure out how to pass the versions downstream always deploy
-            if (project.name != 'ab2d-lambdas' && project.name != 'lambda-test-utils' )
+            if (project.name != 'ab2d-lambdas' && project.name != 'lambda-test-utils' && project.name != 'lambda-lib' )
                 System.out.print("'''" + project.name + ":" + false)
         }
     }
@@ -188,9 +198,6 @@ sonarqube {
 
 
 task buildZip(type: Zip) {
-    dependsOn ':metrics-lambda:buildZip'
-    dependsOn ':eob-fetcher:buildZip'
-    dependsOn ':audit:buildZip'
 }
 
 java {
