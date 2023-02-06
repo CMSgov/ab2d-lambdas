@@ -1,6 +1,6 @@
 This project encapsulates all AB2D lambdas managed by the dev team. AB2D ops manages some lambdas.
 The goals of this project are: 
-- Streamline creating, testing, and deploying lambds to aws
+- Streamline creating, testing, and deploying lambdas to aws
 - Share code between out lambdas while limiting the need to import external libraries. 
   - Lambdas should be a small and fast. External libraries tend to cover large usecases
     - An example would be Spring. Spring is amazing but it's also HUGE
