@@ -1,12 +1,18 @@
+## Description 
 A simple lambda that converts Cloudwatch events to messages the event service can accept. 
 
-## Build
+## Overreaching objective
 
-AWS lambdas need to be zipped. The follow command will build the code and zip the resulting jar.
-```
-gradle buildZip
-```
+AB2D occasionally has issues with services and upstream partners. 
+To better track KPI these issues need to be recorded. 
+There are currently 5 main areas of focus: BFD, HPMS, RDS, EFS, and API
+RDS, EFS, and API are monitored by cloudwatch alerts. Whenever there's an issue the alarm triggers and sends a message to this lambda
+HPMS and BFD issues are captured by the AB2D applications.
 
-## Deploy
+All issues are sent to the event service which stores them in a metrics table. 
 
-For the time being this process is manual. Log into AWS, find the metric lambda, and upload the zip from the build process. 
+There are multiple quicksight dashboards to visualize the data. 
+
+## Build/Deploy/etc
+
+Please see the [README.md](../README.md) in the root directory of this project.

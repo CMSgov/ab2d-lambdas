@@ -1,3 +1,76 @@
+terraform {
+  required_providers {
+    docker = {
+      source  = "kreuzwerker/docker"
+      version = "3.0.1"
+    }
+    aws = {
+      source = "hashicorp/aws"
+      version = "4.38.0"
+    }
+  }
+  required_version = "~> 1.0"
+}
+
+
+provider "docker" {
+}
+
+provider "aws" {
+  access_key                  = "mock_access_key"
+  region                      = "us-east-1"
+  s3_use_path_style         = true
+  secret_key                  = "mock_secret_key"
+  skip_credentials_validation = true
+  skip_metadata_api_check     = true
+  skip_requesting_account_id  = true
+
+  endpoints {
+    sqs    = "http://host.docker.internal:4566"
+    sns    = "http://host.docker.internal:4566"
+    lambda = "http://host.docker.internal:4566"
+    iam    = "http://host.docker.internal:4566"
+    kinesis = "http://host.docker.internal:4566"
+    cloudwatchevents = "http://host.docker.internal:4566"
+  }
+}
+
+resource "aws_iam_role" "iam_for_everything" {
+  name               = "iam"
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "Stmt1572416334166",
+      "Action": "*",
+      "Effect": "Allow",
+      "Resource": "*"
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_cloudwatch_event_rule" "profile_generator_lambda_event_rule" {
+  name = "profile-generator-lambda-event-rule"
+  description = "retry scheduled every 2 min"
+  schedule_expression = "rate(2 minutes)"
+}
+
+resource "aws_cloudwatch_event_target" "profile_generator_lambda_target" {
+  arn = aws_lambda_function.audit.arn
+  rule = aws_cloudwatch_event_rule.profile_generator_lambda_event_rule.name
+}
+
+resource "aws_lambda_permission" "allow_cloudwatch_to_call_rw_fallout_retry_step_deletion_lambda" {
+  statement_id = "AllowExecutionFromCloudWatch"
+  action = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.audit.arn
+  principal = "events.amazonaws.com"
+  source_arn = aws_cloudwatch_event_rule.profile_generator_lambda_event_rule.arn
+}
+
 
 resource "aws_lambda_function" "metrics" {
   depends_on       = [aws_iam_role.iam_for_everything]
@@ -104,15 +177,3 @@ resource "aws_lambda_function" "database_management" {
   }
 }
 
-data aws_lambda_invocation "update_database_schema" {
-  depends_on    = [aws_lambda_function.database_management]
-  function_name = aws_lambda_function.database_management.function_name
-  input         = <<JSON
-  {
-  }
-  JSON
-}
-
-output "result_entry" {
-  value = jsondecode(data.aws_lambda_invocation.update_database_schema.result)
-}

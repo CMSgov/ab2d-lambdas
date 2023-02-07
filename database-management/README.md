@@ -1,12 +1,17 @@
-Receives coverage counts from other services through SNS messages. 
+Ab2D uses [Liquibase](https://www.liquibase.org/) to manage database changes. For traditional applications Liguibase runs once during app startup.
+Lambdas work best when they run as fast as possible so sunning liquibase each time a lambda is invoked isn't idea. 
+This lambda bridges that gap. During deploys the ops terraform triggers this lambda once. 
 
-## Build
+This project also acts as a small smoke test. 
+If it successfully runs then any lambda that interfaces with the database should also work since they all share the same AWS settings.   
 
-AWS lambdas need to be zipped. The follow command will build the code and zip the resulting jar.
-```
-gradle buildZip
-```
+Finally, this project should be a used as library from any other lambda that needs database access.
+To use in another lambda project add this to that projects build.gradle
+`implementation project(':database-management')`
+Request a connection to the database
+`Connection connection = DatabaseUtil.getConnection();`
+Once a connection is created use Java's built in PreparedStatement to interact with database objects.  
 
-## Deploy
+## Build/Deploy/etc
 
-https://jenkins.ab2d.cms.gov/job/AB2D-Ops/job/Terraform/job/Deploy%20Lambda/
+Please see the [README.md](../README.md) in the root directory of this project.
