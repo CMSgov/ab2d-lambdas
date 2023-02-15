@@ -5,7 +5,7 @@ terraform {
       version = "3.0.1"
     }
     aws = {
-      source = "hashicorp/aws"
+      source  = "hashicorp/aws"
       version = "4.38.0"
     }
   }
@@ -19,18 +19,18 @@ provider "docker" {
 provider "aws" {
   access_key                  = "mock_access_key"
   region                      = "us-east-1"
-  s3_use_path_style         = true
+  s3_use_path_style           = true
   secret_key                  = "mock_secret_key"
   skip_credentials_validation = true
   skip_metadata_api_check     = true
   skip_requesting_account_id  = true
 
   endpoints {
-    sqs    = "http://host.docker.internal:4566"
-    sns    = "http://host.docker.internal:4566"
-    lambda = "http://host.docker.internal:4566"
-    iam    = "http://host.docker.internal:4566"
-    kinesis = "http://host.docker.internal:4566"
+    sqs              = "http://host.docker.internal:4566"
+    sns              = "http://host.docker.internal:4566"
+    lambda           = "http://host.docker.internal:4566"
+    iam              = "http://host.docker.internal:4566"
+    kinesis          = "http://host.docker.internal:4566"
     cloudwatchevents = "http://host.docker.internal:4566"
   }
 }
@@ -52,23 +52,24 @@ resource "aws_iam_role" "iam_for_everything" {
 EOF
 }
 
-resource "aws_cloudwatch_event_rule" "profile_generator_lambda_event_rule" {
-  name = "profile-generator-lambda-event-rule"
-  description = "retry scheduled every 2 min"
+resource "aws_cloudwatch_event_rule" "lambda_event_rule" {
+  name                = "profile-generator-lambda-event-rule"
+  description         = "retry scheduled every 2 min"
   schedule_expression = "rate(2 minutes)"
 }
 
-resource "aws_cloudwatch_event_target" "profile_generator_lambda_target" {
-  arn = aws_lambda_function.audit.arn
-  rule = aws_cloudwatch_event_rule.profile_generator_lambda_event_rule.name
+
+resource "aws_cloudwatch_event_target" "cloudwatch_audit_lambda_target" {
+  arn  = aws_lambda_function.audit.arn
+  rule = aws_cloudwatch_event_rule.lambda_event_rule.name
 }
 
-resource "aws_lambda_permission" "allow_cloudwatch_to_call_rw_fallout_retry_step_deletion_lambda" {
-  statement_id = "AllowExecutionFromCloudWatch"
-  action = "lambda:InvokeFunction"
+resource "aws_lambda_permission" "allow_cloudwatch_to_call_audit_lambda" {
+  statement_id  = "AllowExecutionFromCloudWatch"
+  action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.audit.arn
-  principal = "events.amazonaws.com"
-  source_arn = aws_cloudwatch_event_rule.profile_generator_lambda_event_rule.arn
+  principal     = "events.amazonaws.com"
+  source_arn    = aws_cloudwatch_event_rule.lambda_event_rule.arn
 }
 
 
@@ -176,4 +177,40 @@ resource "aws_lambda_function" "database_management" {
     "key" = "lam"
   }
 }
+
+resource "aws_cloudwatch_event_target" "cloudwatch_hpms_lambda_target" {
+  arn  = aws_lambda_function.hpms_counts.arn
+  rule = aws_cloudwatch_event_rule.lambda_event_rule.name
+}
+
+resource "aws_lambda_permission" "allow_cloudwatch_to_call_hpms_lambda" {
+  statement_id  = "AllowExecutionFromCloudWatch"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.hpms_counts.arn
+  principal     = "events.amazonaws.com"
+  source_arn    = aws_cloudwatch_event_rule.lambda_event_rule.arn
+}
+
+resource "aws_lambda_function" "hpms_counts" {
+  depends_on       = [aws_iam_role.iam_for_everything]
+  filename         = "/tmp/setup/retrieve-hpms-counts/build/distributions/retrieve-hpms-counts.zip"
+  function_name    = "HPMSCountsHandler"
+  role             = aws_iam_role.iam_for_everything.arn
+  handler          = "gov.cms.ab2d.retrievehpmscounts.HPMSCountsHandler"
+  source_code_hash = filebase64sha256("/tmp/setup/retrieve-hpms-counts/build/distributions/retrieve-hpms-counts.zip")
+  runtime          = "java11"
+  environment {
+    variables = {
+      "com.amazonaws.sdk.disableCertChecking" = true
+      IS_LOCALSTACK                           = true
+      environment                             = "local"
+      JAVA_TOOL_OPTIONS                       = "-XX:+TieredCompilation -XX:TieredStopAtLevel=1"
+      "property_service_url"                  = "http://host.docker.internal:8070"
+    }
+  }
+  tags = {
+    "key" = "lam"
+  }
+}
+
 
