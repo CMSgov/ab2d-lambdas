@@ -95,7 +95,7 @@ public class HPMSCountsHandler implements RequestStreamHandler {
     @Override
     public void handleRequest(InputStream inputStream, OutputStream outputStream, Context context) {
         Properties prop = PropertiesUtil.loadProps();
-        String url = prop.get("property_service_url") + "";
+        String url = prop.get("contract_service_url") + "";
         String envi = Optional.ofNullable(prop.get("environment")).orElse("local") + "";
         HttpGet request = new HttpGet(url + "/contracts");
         HttpClientResponseHandler<String> handler = new BasicHttpClientResponseHandler();

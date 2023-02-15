@@ -205,7 +205,7 @@ resource "aws_lambda_function" "hpms_counts" {
       IS_LOCALSTACK                           = true
       environment                             = "local"
       JAVA_TOOL_OPTIONS                       = "-XX:+TieredCompilation -XX:TieredStopAtLevel=1"
-      "property_service_url"                  = "http://host.docker.internal:8070"
+      "contract_service_url"                  = "http://host.docker.internal:8070"
     }
   }
   tags = {
