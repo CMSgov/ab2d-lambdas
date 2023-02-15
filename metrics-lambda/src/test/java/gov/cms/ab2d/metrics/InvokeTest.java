@@ -9,11 +9,14 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.joda.JodaModule;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import gov.cms.ab2d.testutils.AB2DLocalstackContainer;
 import gov.cms.ab2d.testutils.TestContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.platform.commons.util.ReflectionUtils;
 import org.mockito.Mockito;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -24,8 +27,13 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyString;
 
+
+@Testcontainers
 class InvokeTest {
 
+    @Container
+    @SuppressWarnings({"unused"})
+    private static final AB2DLocalstackContainer localstackContainer = new AB2DLocalstackContainer();
     private final ObjectMapper objectMapper = new ObjectMapper()
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
             .registerModule(new JodaModule())
@@ -33,7 +41,7 @@ class InvokeTest {
 
     @BeforeEach
     public void before() {
-        setEnv("IS_LOCALSTACK", "");
+        setEnv("IS_LOCALSTACK", "true");
     }
 
     @Test

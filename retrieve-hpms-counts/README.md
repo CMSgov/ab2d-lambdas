@@ -1,18 +1,15 @@
 ## Description 
-Receives coverage counts from other services through SNS messages.
+Retrieve coverage counts from the contract service and send them to the coverage count lambda. 
 
 ## Goal
-Occasionally the data AB2D pulls from BFD is incorrect. HPMS also maintains current bene counts.
-By comparing the counts from BFD and HPMS it's possible to detect these data issues. 
-AB2D's counts before updating from BFD are also included to check if AB2S has already been affected by incorrect data. 
+The contract service pulls contract information from HPMS on a schedule. That information also contains the coverage counts.
+Instead of adding another schedule and more dependencies to the contract service have a lambda handle requesting count updates.    
 
 ## Overall design
 
-New beneficiaries are pulled from BFD once a week for the past 3 months. AB2D workers currently handle this task.
-Before initiating the pull, workers will send current counts for all contracts that will be updated. 
-After each contract/year/month task is completed the counts will be sent to coverage-counts lambda.
-
-HPMS counts will flow from the contract service. A separate lambda will be scheduled to request the counts from contract service then forward them to this lambda.  
+Make a GET request to contract service's /contracts endpoint. Loop through the results and extract the contract number and MedicareEligible count.
+Since HPMS only provides the current month's counts find the systems current month and year.
+Load all contract/count/year/month into a list of new CoverageCountDTO and send them to the coverage-counts lambda for storage. 
 
 
 ## Build/Deploy/etc

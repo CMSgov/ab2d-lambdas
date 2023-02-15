@@ -64,8 +64,8 @@ class InvokeTest {
     hpmsCountInvoke() {
         Properties props = PropertiesUtil.loadProps();
 
-        ContractDTO contractDTO = new ContractDTO(1l, "test.json", "test.json", OffsetDateTime.now(), Contract.ContractType.NORMAL);
-        ContractDTO contractDTO2 = new ContractDTO(2l, "test2", "test2", OffsetDateTime.now(), Contract.ContractType.NORMAL);
+        ContractDTO contractDTO = new ContractDTO(1L, "test.json", "test.json", OffsetDateTime.now(), Contract.ContractType.NORMAL, 100, 100);
+        ContractDTO contractDTO2 = new ContractDTO(2L, "test2", "test2", OffsetDateTime.now(), Contract.ContractType.NORMAL, 200, 200);
         CloseableHttpClient httpResponse = mock(CloseableHttpClient.class);
         HPMSCountsHandler eventHandler = new HPMSCountsHandler(httpResponse, getSNSClient(props.get("AWS_SNS_URL") + ""));
         Mockito.when(httpResponse.execute(any(), any(BasicHttpClientResponseHandler.class))).thenReturn(mapper.writeValueAsString(List.of(contractDTO, contractDTO2)));
@@ -75,11 +75,11 @@ class InvokeTest {
 
     @Test
     @SneakyThrows
-    void  hpmsCountInvokeSend() {
+    void hpmsCountInvokeSend() {
         Properties props = PropertiesUtil.loadProps();
 
-        ContractDTO contractDTO = new ContractDTO(1l, "test.json", "test.json", OffsetDateTime.now(), Contract.ContractType.NORMAL);
-        ContractDTO contractDTO2 = new ContractDTO(2l, "test2", "test2", OffsetDateTime.now(), Contract.ContractType.NORMAL);
+        ContractDTO contractDTO = new ContractDTO(1l, "test.json", "test.json", OffsetDateTime.now(), Contract.ContractType.NORMAL, 200, 200);
+        ContractDTO contractDTO2 = new ContractDTO(2l, "test2", "test2", OffsetDateTime.now(), Contract.ContractType.NORMAL, 300, 300);
         CloseableHttpClient httpResponse = mock(CloseableHttpClient.class);
         HPMSCountsHandler eventHandler = new HPMSCountsHandler(httpResponse, getSNSClient(props.get("AWS_SNS_URL") + ""));
         Mockito.when(httpResponse.execute(any(), any(BasicHttpClientResponseHandler.class))).thenReturn(mapper.writeValueAsString(List.of(contractDTO, contractDTO2)));
