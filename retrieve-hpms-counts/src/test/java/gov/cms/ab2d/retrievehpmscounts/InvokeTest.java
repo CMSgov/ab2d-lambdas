@@ -18,7 +18,6 @@ import gov.cms.ab2d.contracts.model.ContractDTO;
 import gov.cms.ab2d.lambdalibs.lib.PropertiesUtil;
 import gov.cms.ab2d.testutils.AB2DLocalstackContainer;
 import gov.cms.ab2d.testutils.TestContext;
-import lombok.SneakyThrows;
 import org.apache.hc.client5.http.impl.classic.BasicHttpClientResponseHandler;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.junit.jupiter.api.BeforeAll;
@@ -28,6 +27,7 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -59,9 +59,8 @@ class InvokeTest {
 
 
     @Test
-    @SneakyThrows
     void
-    hpmsCountInvoke() {
+    hpmsCountInvoke() throws IOException {
         Properties props = PropertiesUtil.loadProps();
 
         ContractDTO contractDTO = new ContractDTO(1L, "test.json", "test.json", OffsetDateTime.now(), Contract.ContractType.NORMAL, 100, 100);
@@ -74,8 +73,7 @@ class InvokeTest {
     }
 
     @Test
-    @SneakyThrows
-    void hpmsCountInvokeSend() {
+    void hpmsCountInvokeSend() throws IOException {
         Properties props = PropertiesUtil.loadProps();
 
         ContractDTO contractDTO = new ContractDTO(1l, "test.json", "test.json", OffsetDateTime.now(), Contract.ContractType.NORMAL, 200, 200);

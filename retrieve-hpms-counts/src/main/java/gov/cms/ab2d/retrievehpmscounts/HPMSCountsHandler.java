@@ -6,11 +6,9 @@ import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.lambda.runtime.Context;
-import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
 import com.amazonaws.services.sns.AmazonSNSClient;
 import com.amazonaws.services.sns.AmazonSNSClientBuilder;
-import com.amazonaws.services.sqs.AmazonSQSAsyncClientBuilder;
 import com.amazonaws.util.StringUtils;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -24,7 +22,6 @@ import gov.cms.ab2d.lambdalibs.lib.PropertiesUtil;
 import gov.cms.ab2d.snsclient.clients.SNSClient;
 import gov.cms.ab2d.snsclient.clients.SNSConfig;
 import gov.cms.ab2d.snsclient.messages.CoverageCountDTO;
-import lombok.SneakyThrows;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.impl.classic.BasicHttpClientResponseHandler;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
@@ -32,14 +29,12 @@ import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.core5.http.io.HttpClientResponseHandler;
 import org.joda.time.DateTime;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoField;
-import java.time.temporal.TemporalField;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -91,9 +86,8 @@ public class HPMSCountsHandler implements RequestStreamHandler {
         this.snsClient = snsClient;
     }
 
-    @SneakyThrows
     @Override
-    public void handleRequest(InputStream inputStream, OutputStream outputStream, Context context) {
+    public void handleRequest(InputStream inputStream, OutputStream outputStream, Context context) throws IOException {
         Properties prop = PropertiesUtil.loadProps();
         String url = prop.get("contract_service_url") + "";
         String envi = Optional.ofNullable(prop.get("environment")).orElse("local") + "";
@@ -109,7 +103,8 @@ public class HPMSCountsHandler implements RequestStreamHandler {
         String hpms = HPMS.toString();
         List<CoverageCountDTO> coverage =
                 Arrays.stream(mapperIn.readValue(response, ContractDTO[].class))
-                        .map(contract -> new CoverageCountDTO(contract.getContractNumber(), hpms, contract.getMedicareEligible(), year, month, version))
+                        .filter(Objects::nonNull)
+                        .map(contract -> new CoverageCountDTO(contract.getContractNumber(), hpms, Optional.ofNullable(contract.getMedicareEligible()).orElse(0), year, month, version))
                         .collect(Collectors.toList());
         client.sendMessage(COVERAGE_COUNTS.getValue(), coverage);
         outputStream.write(("{\"status\": \"ok\"}").getBytes(StandardCharsets.UTF_8));
