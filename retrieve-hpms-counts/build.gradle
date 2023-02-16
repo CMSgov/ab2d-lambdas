@@ -31,7 +31,7 @@ dependencies {
     implementation project(':lambda-lib')
     //annotationProcessor 'org.projectlombok:lombok:1.18.24'
     //compileOnly 'org.projectlombok:lombok:1.18.24'
-    implementation ('gov.cms.ab2d:ab2d-contracts-client:1.0.3')
+    implementation ('gov.cms.ab2d:ab2d-contracts-client:1.1')
     implementation 'org.slf4j:slf4j-api:2.0.5'
     implementation 'com.amazonaws:aws-java-sdk-sns:1.12.405'
 
