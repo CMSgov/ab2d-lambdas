@@ -17,7 +17,7 @@ dependencies {
     implementation 'gov.cms.ab2d:ab2d-events-client:1.11.2'
     implementation 'gov.cms.ab2d:ab2d-fhir:1.1.5'
     implementation 'gov.cms.ab2d:ab2d-filters:1.6.5'
-    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.13.3'
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.14.2'
     annotationProcessor "org.projectlombok:lombok:1.18.24"
 }
 
