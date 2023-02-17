@@ -4,7 +4,7 @@ plugins {
     id "org.sonarqube" version "3.5.0.2730"
     id 'org.cyclonedx.bom' version '1.7.3' apply true
 }
-version = "1.0.1"
+version = "1.1.0"
 group = "gov.cms.ab2d"
 
 dependencies {
@@ -32,6 +32,7 @@ ext {
     databaseVersion = project.version
     lambdalibsVersion = project.version
     testutilsVersion = project.version
+    retrieveVersion = project.version
 
 
     sourcesRepo = 'ab2d-maven-repo'
@@ -53,10 +54,6 @@ repositories {
     mavenCentral()
     maven {
         url = "${artifactoryLoc}/${sourcesRepo}"
-        credentials {
-            username = project.artifactory_user
-            password = project.artifactory_password
-        }
     }
 }
 
@@ -168,10 +165,10 @@ allprojects {
         componentVersion = "2.0.0"
     }
 
-    task lookForArtifacts {
+    tasks.register('lookForArtifacts') {
         doLast {
             // Until we figure out how to pass the versions downstream always deploy
-            if (project.name != 'ab2d-lambdas' && project.name != 'lambda-test-utils' && project.name != 'lambda-lib' )
+            if (project.name != 'ab2d-lambdas' && project.name != 'lambda-test-utils' && project.name != 'lambda-lib')
                 System.out.print("'''" + project.name + ":" + false)
         }
     }
@@ -196,8 +193,7 @@ sonarqube {
     }
 }
 
-
-task buildZip(type: Zip) {
+tasks.register('buildZip', Zip) {
 }
 
 java {

@@ -33,7 +33,7 @@ class InvokeTest {
 
     @BeforeEach
     public void before() {
-        setEnv("IS_LOCALSTACK", "");
+        setEnv("IS_LOCALSTACK", "true");
     }
 
     @Test
