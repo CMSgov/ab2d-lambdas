@@ -58,7 +58,7 @@ dependencies {
         exclude group: 'org.projectlombok'
     }
 
-    testImplementation 'org.mockito:mockito-core:4.11.0'
+    testImplementation 'org.mockito:mockito-core:5.1.1'
     testImplementation project(':lambda-lib')
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.2'
     testImplementation 'org.junit.platform:junit-platform-commons:1.9.2'
