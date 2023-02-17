@@ -25,6 +25,8 @@ dependencies {
     implementation 'org.projectlombok:lombok:1.18.24'
     implementation 'org.slf4j:slf4j-api:2.0.4'
     implementation 'org.slf4j:slf4j-reload4j:2.0.4'
+    implementation 'org.testcontainers:localstack:1.17.6'
+
 
     //test
     testImplementation 'org.slf4j:slf4j-api:2.0.6'
