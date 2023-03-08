@@ -104,7 +104,7 @@ public class HPMSCountsHandler implements RequestStreamHandler {
         List<CoverageCountDTO> coverage =
                 Arrays.stream(mapperIn.readValue(response, ContractDTO[].class))
                         .filter(Objects::nonNull)
-                        .map(contract -> new CoverageCountDTO(contract.getContractNumber(), hpms, Optional.ofNullable(contract.getMedicareEligible()).orElse(0), year, month, version))
+                        .map(contract -> new CoverageCountDTO(contract.getContractNumber(), hpms, Optional.ofNullable(contract.getTotalEnrollment()).orElse(0), year, month, version))
                         .collect(Collectors.toList());
         client.sendMessage(COVERAGE_COUNTS.getValue(), coverage);
         outputStream.write(("{\"status\": \"ok\"}").getBytes(StandardCharsets.UTF_8));
