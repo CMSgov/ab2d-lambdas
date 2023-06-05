@@ -23,13 +23,13 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok:1.18.24'
     compileOnly 'org.projectlombok:lombok:1.18.24'
     implementation 'org.projectlombok:lombok:1.18.24'
-    implementation 'org.slf4j:slf4j-api:2.0.4'
+    implementation 'org.slf4j:slf4j-api:2.0.7'
     implementation 'org.slf4j:slf4j-reload4j:2.0.4'
     implementation 'org.testcontainers:localstack:1.17.6'
 
 
     //test
-    testImplementation 'org.slf4j:slf4j-api:2.0.6'
+    testImplementation 'org.slf4j:slf4j-api:2.0.7'
     testImplementation 'org.slf4j:slf4j-reload4j:2.0.6'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.2'
     testImplementation 'org.junit.platform:junit-platform-commons:1.9.2'
