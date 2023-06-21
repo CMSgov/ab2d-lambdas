@@ -33,6 +33,7 @@ ext {
     lambdalibsVersion = project.version
     testutilsVersion = project.version
     retrieveVersion = project.version
+    optoutVersion = project.version
 
 
     sourcesRepo = 'ab2d-maven-repo'
