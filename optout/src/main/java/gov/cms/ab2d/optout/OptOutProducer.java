@@ -27,6 +27,7 @@ public class OptOutProducer implements Runnable {
             logger.log("File processing completed");
         } catch (InterruptedException ex) {
             logger.log("File processing failed with exception: " + ex.getMessage());
+            Thread.currentThread().interrupt();
         } finally {
             latch.countDown();
         }
@@ -41,17 +42,20 @@ public class OptOutProducer implements Runnable {
     }
 
     private void parseFile() throws IOException, InterruptedException {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
-        String line;
-        while ((line = reader.readLine()) != null) {
-            try {
-                OptOutInformation information = new OptOutInformation(line, logger);
-                queue.put(new OptOutMessage(information, false));
-            } catch (IllegalArgumentException ex) {
-                logger.log("Data is invalid");
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                try {
+                    OptOutInformation information = new OptOutInformation(line, logger);
+                    queue.put(new OptOutMessage(information, false));
+                } catch (IllegalArgumentException ex) {
+                    logger.log("Data is invalid");
+                }
             }
+        } finally {
+            queue.put(new OptOutMessage(null, true));
         }
-        queue.put(new OptOutMessage(null, true));
+
     }
 
 }

@@ -41,6 +41,7 @@ public class OptOutConsumer implements Runnable {
             }
         } catch (InterruptedException ex) {
             logger.log("Queue consumer is failed with exception: " + ex.getMessage());
+            Thread.currentThread().interrupt();
         } finally {
             latch.countDown();
         }
