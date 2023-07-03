@@ -2,19 +2,27 @@ package gov.cms.ab2d.optout;
 
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CountDownLatch;
 
+import static gov.cms.ab2d.optout.DatabaseUtil.BATCH_INSERT_SIZE;
+import static gov.cms.ab2d.optout.DatabaseUtil.UPDATE_WITH_OPTOUT;
+
 public class OptOutConsumer implements Runnable {
 
     private final BlockingQueue<OptOutMessage> queue;
+    private final Connection dbConnection;
     private final CountDownLatch latch;
     private final LambdaLogger logger;
 
-    public OptOutConsumer(BlockingQueue<OptOutMessage> queue, CountDownLatch latch, LambdaLogger logger) {
+    public OptOutConsumer(BlockingQueue<OptOutMessage> queue, Connection dbConnection, CountDownLatch latch, LambdaLogger logger) {
         this.queue = queue;
+        this.dbConnection = dbConnection;
         this.latch = latch;
         this.logger = logger;
     }
@@ -31,8 +39,7 @@ public class OptOutConsumer implements Runnable {
                     break;
                 }
                 // collect messages for batch insert
-                //ToDo: update the magic batch size = 100
-                if (optOutBatch.size() < 100)
+                if (optOutBatch.size() < BATCH_INSERT_SIZE)
                     optOutBatch.add(message.getOptOutInformation());
                 else {
                     process(optOutBatch);
@@ -48,8 +55,14 @@ public class OptOutConsumer implements Runnable {
     }
 
     private void process(List<OptOutInformation> messages) throws InterruptedException {
-        for (OptOutInformation optOut : messages) {
-            logger.log("Mbi: " + optOut.getMbi() + ", OptOut Flag: " + optOut.isOptOut() + ", Effective date: " + optOut.getEffectiveDate());
+        try (PreparedStatement statement = dbConnection.prepareStatement(UPDATE_WITH_OPTOUT)) {
+            for (OptOutInformation optOut : messages) {
+                logger.log("Mbi: " + optOut.getMbi() + ", OptOut Flag: " + optOut.isOptOut() + ", Effective date: " + optOut.getEffectiveDate());
+                DatabaseUtil.prepareInsert(optOut, statement);
+            }
+            statement.executeBatch();
+        } catch (SQLException ex) {
+            logger.log(ex.getMessage());
         }
     }
 }
