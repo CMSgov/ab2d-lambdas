@@ -9,6 +9,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Objects;
 import java.util.concurrent.*;
 
@@ -30,12 +32,13 @@ public class OptOutHandler implements RequestStreamHandler {
         ClassLoader classLoader = getClass().getClassLoader();
         try {
             File file = new File(Objects.requireNonNull(classLoader.getResource("optOutDummy.txt")).getFile());
+            Connection dbConnection = DatabaseUtil.getConnection();
 
             executorService.execute(new OptOutProducer(queue, file, latch, logger));
-            executorService.execute(new OptOutConsumer(queue, latch, logger));
+            executorService.execute(new OptOutConsumer(queue, dbConnection, latch, logger));
 
             latch.await();
-        } catch (NullPointerException | InterruptedException ex) {
+        } catch (NullPointerException | SQLException | InterruptedException ex) {
             logger.log(ex.getMessage());
             outputStream.write(ex.getMessage().getBytes(StandardCharsets.UTF_8));
             throw new OptOutException(ex);
