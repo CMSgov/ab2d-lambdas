@@ -2,21 +2,20 @@ package gov.cms.ab2d.optout;
 
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
 
-import java.time.*;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
+import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class OptOutInformation {
 
     private final int mbi;
 
-    private final OffsetDateTime effectiveDate;
+    private final Timestamp effectiveDate;
 
     private final boolean optOutFlag;
 
-    private final ZoneId zoneId = ZoneId.of("UTC");
-
-    public OptOutInformation(int mbi, OffsetDateTime effectiveDate, boolean optOutFlag) {
+    public OptOutInformation(int mbi, Timestamp effectiveDate, boolean optOutFlag) {
         this.mbi = mbi;
         this.optOutFlag = optOutFlag;
         this.effectiveDate = effectiveDate;
@@ -27,7 +26,7 @@ public class OptOutInformation {
             this.mbi = Integer.parseInt(information.substring(0, 11).trim());
             this.optOutFlag = (information.charAt(368) == 'N');
             this.effectiveDate = convertToOffsetDateTime(information.substring(354, 362));
-        } catch (NumberFormatException | StringIndexOutOfBoundsException | DateTimeParseException ex) {
+        } catch (NumberFormatException | StringIndexOutOfBoundsException | ParseException ex) {
             logger.log("Lambda can not parse the string: " + information);
             throw new IllegalArgumentException();
         }
@@ -37,7 +36,7 @@ public class OptOutInformation {
         return mbi;
     }
 
-    public OffsetDateTime getEffectiveDate() {
+    public Timestamp getEffectiveDate() {
         return effectiveDate;
     }
 
@@ -45,10 +44,10 @@ public class OptOutInformation {
         return optOutFlag;
     }
 
-    private OffsetDateTime convertToOffsetDateTime(String dateString) {
-        LocalDateTime date = LocalDate.parse(dateString, DateTimeFormatter.ofPattern("yyyyMMdd")).atStartOfDay();
-        ZoneOffset offset = zoneId.getRules().getOffset(date);
-        return OffsetDateTime.of(date, offset);
+    private Timestamp convertToOffsetDateTime(String dateString) throws ParseException {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
+        Date parsedDate = dateFormat.parse(dateString);
+        return new Timestamp(parsedDate.getTime());
     }
 
 }
