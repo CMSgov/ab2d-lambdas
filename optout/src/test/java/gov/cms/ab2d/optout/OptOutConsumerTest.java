@@ -2,7 +2,6 @@ package gov.cms.ab2d.optout;
 
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
 import java.sql.Connection;
