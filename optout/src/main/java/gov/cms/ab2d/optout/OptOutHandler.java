@@ -1,19 +1,14 @@
 package gov.cms.ab2d.optout;
 
-import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3ClientBuilder;
-import com.amazonaws.services.s3.model.S3Object;
-import com.amazonaws.services.s3.model.S3ObjectInputStream;
+import gov.cms.ab2d.databasemanagement.DatabaseUtil;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Objects;
 import java.util.concurrent.*;
 
 public class OptOutHandler implements RequestStreamHandler {
@@ -33,14 +28,13 @@ public class OptOutHandler implements RequestStreamHandler {
         CountDownLatch latch = new CountDownLatch(threadCount);
 
         //ToDo: replace on S3
-        ClassLoader classLoader = getClass().getClassLoader();
         try {
-            File file = new File(Objects.requireNonNull(classLoader.getResource(Constants.fileName)).getFile());
+            InputStream fileInputStream = getClass().getResourceAsStream(OptOutUtils.fileName);
             //for s3
           //  File file = new File(Constants.filePath);
             Connection dbConnection = DatabaseUtil.getConnection();
 
-            executorService.execute(new OptOutProducer(queue, file, latch, logger));
+            executorService.execute(new OptOutProducer(queue, fileInputStream, latch, logger));
             executorService.execute(new OptOutConsumer(queue, dbConnection, latch, logger));
 
             latch.await();

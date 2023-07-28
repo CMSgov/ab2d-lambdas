@@ -1,14 +1,19 @@
 package gov.cms.ab2d.optout;
 
-import gov.cms.ab2d.lambdalibs.lib.PropertiesUtil;
+import com.amazonaws.regions.Regions;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.Properties;
 
-public class DatabaseUtil {
+public class OptOutUtils {
+
+    public static final String s3BucketName = "ab2d-opt-out-temp-349849222861-us-east-1";
+
+    public static final Regions s3Region = Regions.US_EAST_1;
+
+    public static final String fileName = "/optOutDummy.txt";
+
+    public static final String filePath = "/opt" + fileName;
 
     public static final int BATCH_INSERT_SIZE = 10000;
     public static final String UPDATE_WITH_OPTOUT = "UPDATE public.coverage\n" +
@@ -16,10 +21,6 @@ public class DatabaseUtil {
             "effective_date = ?\n" +
             "WHERE beneficiary_id = ?";
 
-    public static Connection getConnection() throws SQLException {
-        Properties properties = PropertiesUtil.loadProps();
-        return DriverManager.getConnection(properties.getProperty("DB_URL"), properties.getProperty("DB_USERNAME"), properties.getProperty("DB_PASSWORD"));
-    }
 
     public static void prepareInsert(OptOutInformation optOut, PreparedStatement statement) throws SQLException {
         statement.setBoolean(1, optOut.isOptOut());
@@ -27,4 +28,7 @@ public class DatabaseUtil {
         statement.setInt(3, optOut.getMbi());
         statement.addBatch();
     }
+
+
+
 }

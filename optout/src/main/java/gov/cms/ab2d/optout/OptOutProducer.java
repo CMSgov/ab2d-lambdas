@@ -9,13 +9,13 @@ import java.util.concurrent.CountDownLatch;
 public class OptOutProducer implements Runnable {
 
     private final BlockingQueue<OptOutMessage> queue;
-    private final File file;
+    private final InputStream inputStream;
     private final CountDownLatch latch;
     private final LambdaLogger logger;
 
-    public OptOutProducer(BlockingQueue<OptOutMessage> queue, File file, CountDownLatch latch, LambdaLogger logger) {
+    public OptOutProducer(BlockingQueue<OptOutMessage> queue, InputStream inputStream, CountDownLatch latch, LambdaLogger logger) {
         this.queue = queue;
-        this.file = file;
+        this.inputStream = inputStream;
         this.latch = latch;
         this.logger = logger;
     }
@@ -42,7 +42,7 @@ public class OptOutProducer implements Runnable {
     }
 
     private void parseFile() throws IOException, InterruptedException {
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)))) {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 try {

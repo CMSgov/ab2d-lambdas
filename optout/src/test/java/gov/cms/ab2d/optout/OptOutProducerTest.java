@@ -4,8 +4,7 @@ import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import java.io.File;
-import java.util.Objects;
+import java.io.InputStream;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -22,10 +21,9 @@ public class OptOutProducerTest {
     public void optOutProducerRunTest() {
         BlockingQueue<OptOutMessage> queue = new LinkedBlockingQueue<>();
 
-        ClassLoader classLoader = getClass().getClassLoader();
-        File file = new File(Objects.requireNonNull(classLoader.getResource("optOutDummy.txt")).getFile());
+        InputStream inputStream = getClass().getResourceAsStream(OptOutUtils.fileName);
 
-        new OptOutProducer(queue, file, latch, logger).run();
+        new OptOutProducer(queue, inputStream, latch, logger).run();
 
         assertEquals(3, queue.size()); // 1 for poisonPill
         OptOutMessage message = queue.poll();
@@ -45,9 +43,8 @@ public class OptOutProducerTest {
     @Test
     public void invalidLineTest() {
         BlockingQueue<OptOutMessage> queue = new LinkedBlockingQueue<>();
-        ClassLoader classLoader = getClass().getClassLoader();
-        File file = new File(Objects.requireNonNull(classLoader.getResource("invalidLine.txt")).getFile());
-        assertDoesNotThrow(() -> new OptOutProducer(queue, file, latch, logger).run());
+        InputStream inputStream = getClass().getResourceAsStream("/invalidLine.txt");
+        assertDoesNotThrow(() -> new OptOutProducer(queue, inputStream, latch, logger).run());
         assertEquals(3, queue.size()); // 2 valid lines and 1 poisonPill
     }
 }

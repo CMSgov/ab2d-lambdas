@@ -10,8 +10,9 @@ import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CountDownLatch;
 
-import static gov.cms.ab2d.optout.DatabaseUtil.BATCH_INSERT_SIZE;
-import static gov.cms.ab2d.optout.DatabaseUtil.UPDATE_WITH_OPTOUT;
+import static gov.cms.ab2d.optout.OptOutUtils.BATCH_INSERT_SIZE;
+import static gov.cms.ab2d.optout.OptOutUtils.UPDATE_WITH_OPTOUT;
+
 
 public class OptOutConsumer implements Runnable {
 
@@ -58,7 +59,7 @@ public class OptOutConsumer implements Runnable {
         try (PreparedStatement statement = dbConnection.prepareStatement(UPDATE_WITH_OPTOUT)) {
             for (OptOutInformation optOut : messages) {
                 logger.log("Mbi: " + optOut.getMbi() + ", OptOut Flag: " + optOut.isOptOut() + ", Effective date: " + optOut.getEffectiveDate());
-                DatabaseUtil.prepareInsert(optOut, statement);
+                OptOutUtils.prepareInsert(optOut, statement);
             }
             statement.executeBatch();
         } catch (SQLException ex) {
