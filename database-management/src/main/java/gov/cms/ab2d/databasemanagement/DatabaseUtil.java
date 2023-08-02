@@ -1,6 +1,5 @@
 package gov.cms.ab2d.databasemanagement;
 
-import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import gov.cms.ab2d.lambdalibs.lib.PropertiesUtil;
 import liquibase.Contexts;
 import liquibase.LabelExpression;
@@ -15,15 +14,18 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class DatabaseUtil {
+    private DatabaseUtil() {
+    }
 
-    public static ArrayList<String> schemas = Stream.of("lambda", "public").collect(Collectors.toCollection(ArrayList::new));
+    public static final List<String> SCHEMAS = Stream.of("lambda", "public").collect(Collectors.toCollection(ArrayList::new));
 
-    public static String createSchemaStatement = "CREATE SCHEMA if not exists ";
+    public static final String CREATE_SCHEMA_STATEMENT = "CREATE SCHEMA if not exists ";
 
     public static Connection getConnection() throws SQLException {
         Properties properties = PropertiesUtil.loadProps();

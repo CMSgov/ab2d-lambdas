@@ -12,7 +12,6 @@ import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.ArrayList;
 
 public class DatabaseManagementHandler implements RequestStreamHandler {
 
@@ -23,7 +22,7 @@ public class DatabaseManagementHandler implements RequestStreamHandler {
         Connection connection;
         try {
             connection = DatabaseUtil.getConnection();
-            createSchemas(DatabaseUtil.schemas, connection, logger);
+            createSchemas(connection, logger);
 
             DatabaseUtil.setupDb(connection);
         } catch (Exception e) {
@@ -32,10 +31,10 @@ public class DatabaseManagementHandler implements RequestStreamHandler {
         outputStream.write("{\"status\": \"database update complete\", \"Updated\":\"\" }".getBytes(StandardCharsets.UTF_8));
     }
 
-    private void createSchemas(ArrayList<String> schemas, Connection connection, LambdaLogger logger) {
-        for (String schema : schemas) {
+    private void createSchemas(Connection connection, LambdaLogger logger) {
+        for (String schema : DatabaseUtil.SCHEMAS) {
             try (PreparedStatement stmt = connection
-                    .prepareStatement(DatabaseUtil.createSchemaStatement + schema)) {
+                    .prepareStatement(DatabaseUtil.CREATE_SCHEMA_STATEMENT + schema)) {
                 stmt.execute();
             } catch (SQLException e) {
                 logger.log(e.getMessage());
