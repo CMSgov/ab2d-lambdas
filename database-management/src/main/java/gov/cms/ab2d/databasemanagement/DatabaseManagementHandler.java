@@ -22,8 +22,8 @@ public class DatabaseManagementHandler implements RequestStreamHandler {
         Connection connection;
         try {
             connection = DatabaseUtil.getConnection();
-            createSchemas(connection, logger);
-
+            createSchemas(connection, DatabaseUtil.CREATE_LAMBDA_SCHEMA_STATEMENT, logger);
+            createSchemas(connection, DatabaseUtil.CREATE_PUBLIC_SCHEMA_STATEMENT, logger);
             DatabaseUtil.setupDb(connection);
         } catch (Exception e) {
             logger.log(e.getMessage());
@@ -31,15 +31,13 @@ public class DatabaseManagementHandler implements RequestStreamHandler {
         outputStream.write("{\"status\": \"database update complete\", \"Updated\":\"\" }".getBytes(StandardCharsets.UTF_8));
     }
 
-    private void createSchemas(Connection connection, LambdaLogger logger) {
-        for (String schema : DatabaseUtil.SCHEMAS) {
-            String statement = DatabaseUtil.CREATE_SCHEMA_STATEMENT + schema;
-            try (PreparedStatement stmt = connection.prepareStatement(statement)) {
-                stmt.execute();
-            } catch (SQLException e) {
-                logger.log(e.getMessage());
-            }
+    private void createSchemas(Connection connection, String statement, LambdaLogger logger) {
+        try (PreparedStatement stmt = connection.prepareStatement(statement)) {
+            stmt.execute();
+        } catch (SQLException e) {
+            logger.log(e.getMessage());
         }
     }
-
 }
+
+

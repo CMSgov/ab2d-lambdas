@@ -13,19 +13,14 @@ import liquibase.resource.ClassLoaderResourceAccessor;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Properties;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class DatabaseUtil {
     private DatabaseUtil() {
     }
 
-    protected static final List<String> SCHEMAS = Stream.of("lambda", "public").collect(Collectors.toCollection(ArrayList::new));
-
-    public static final String CREATE_SCHEMA_STATEMENT = "CREATE SCHEMA if not exists ";
+    public static final String CREATE_LAMBDA_SCHEMA_STATEMENT = "CREATE SCHEMA if not exists lambda";
+    public static final String CREATE_PUBLIC_SCHEMA_STATEMENT = "CREATE SCHEMA if not exists public";
 
     public static Connection getConnection() throws SQLException {
         Properties properties = PropertiesUtil.loadProps();
