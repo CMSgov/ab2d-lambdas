@@ -55,7 +55,7 @@ public class OptOutConsumer implements Runnable {
         }
     }
 
-    private void process(List<OptOutInformation> messages) throws InterruptedException {
+    private void process(List<OptOutInformation> messages) {
         try (PreparedStatement statement = dbConnection.prepareStatement(UPDATE_WITH_OPTOUT)) {
             for (OptOutInformation optOut : messages) {
                 logger.log("Mbi: " + optOut.getMbi() + ", OptOut Flag: " + optOut.isOptOut() + ", Effective date: " + optOut.getEffectiveDate());

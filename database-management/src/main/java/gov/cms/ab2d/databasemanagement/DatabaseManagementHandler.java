@@ -33,8 +33,8 @@ public class DatabaseManagementHandler implements RequestStreamHandler {
 
     private void createSchemas(Connection connection, LambdaLogger logger) {
         for (String schema : DatabaseUtil.SCHEMAS) {
-            try (PreparedStatement stmt = connection
-                    .prepareStatement(DatabaseUtil.CREATE_SCHEMA_STATEMENT + schema)) {
+            String statement = DatabaseUtil.CREATE_SCHEMA_STATEMENT + schema;
+            try (PreparedStatement stmt = connection.prepareStatement(statement)) {
                 stmt.execute();
             } catch (SQLException e) {
                 logger.log(e.getMessage());
