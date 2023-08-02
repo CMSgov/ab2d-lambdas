@@ -23,7 +23,7 @@ public class DatabaseUtil {
     private DatabaseUtil() {
     }
 
-    public static final List<String> SCHEMAS = Stream.of("lambda", "public").collect(Collectors.toCollection(ArrayList::new));
+    protected static final List<String> SCHEMAS = Stream.of("lambda", "public").collect(Collectors.toCollection(ArrayList::new));
 
     public static final String CREATE_SCHEMA_STATEMENT = "CREATE SCHEMA if not exists ";
 
