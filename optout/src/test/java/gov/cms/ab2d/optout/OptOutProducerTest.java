@@ -20,8 +20,7 @@ public class OptOutProducerTest {
     @Test
     public void optOutProducerRunTest() {
         BlockingQueue<OptOutMessage> queue = new LinkedBlockingQueue<>();
-
-        InputStream inputStream = getClass().getResourceAsStream(OptOutUtils.FILE_NAME);
+        InputStream inputStream = getClass().getResourceAsStream("/" + OptOutUtils.FILE_NAME);
 
         new OptOutProducer(queue, inputStream, latch, logger).run();
 
