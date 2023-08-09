@@ -8,7 +8,6 @@ import gov.cms.ab2d.databasemanagement.DatabaseUtil;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.concurrent.*;
 
 public class OptOutHandler implements RequestStreamHandler {

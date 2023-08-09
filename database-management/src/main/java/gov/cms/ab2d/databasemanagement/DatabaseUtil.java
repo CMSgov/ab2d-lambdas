@@ -19,9 +19,6 @@ public class DatabaseUtil {
     private DatabaseUtil() {
     }
 
-    public static final String CREATE_LAMBDA_SCHEMA_STATEMENT = "CREATE SCHEMA if not exists lambda";
-    public static final String CREATE_PUBLIC_SCHEMA_STATEMENT = "CREATE SCHEMA if not exists public";
-
     public static Connection getConnection() {
         Properties properties = PropertiesUtil.loadProps();
         try {
