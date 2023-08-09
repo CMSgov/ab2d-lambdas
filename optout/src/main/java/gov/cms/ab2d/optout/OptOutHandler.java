@@ -49,7 +49,7 @@ public class OptOutHandler implements RequestStreamHandler {
             }
 
  */
-        } catch (NullPointerException | SQLException | InterruptedException ex) {
+        } catch (NullPointerException | InterruptedException ex) {
             logger.log(ex.getMessage());
             outputStream.write(ex.getMessage().getBytes(StandardCharsets.UTF_8));
             throw new OptOutException(ex);

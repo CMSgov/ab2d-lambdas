@@ -22,9 +22,14 @@ public class DatabaseUtil {
     public static final String CREATE_LAMBDA_SCHEMA_STATEMENT = "CREATE SCHEMA if not exists lambda";
     public static final String CREATE_PUBLIC_SCHEMA_STATEMENT = "CREATE SCHEMA if not exists public";
 
-    public static Connection getConnection() throws SQLException {
+    public static Connection getConnection() {
         Properties properties = PropertiesUtil.loadProps();
-        return DriverManager.getConnection(properties.get("DB_URL") + "", properties.get("DB_USERNAME") + "", properties.get("DB_PASSWORD") + "");
+        try {
+            return DriverManager.getConnection(properties.get("DB_URL") + "", properties.get("DB_USERNAME") + "", properties.get("DB_PASSWORD") + "");
+        }
+        catch (SQLException ex){
+            throw new DatabaseManagementException("Unable to get connection to ab2d database", ex);
+        }
     }
 
     public static Connection setupDb(Connection connection) throws LiquibaseException {
