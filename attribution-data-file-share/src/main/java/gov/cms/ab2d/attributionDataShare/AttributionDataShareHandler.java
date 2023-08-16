@@ -76,6 +76,8 @@ public class AttributionDataShareHandler implements RequestStreamHandler {
             ResultSet resultset = statement.executeQuery(SELECT_ALL_FROM_COVERAGE);
 
             while(resultset.next()) {
+                // This will need to be changed to support multiple data columns.
+                // Currently will just return the value in the first column only.
                 outputData.add(resultset.getString(1));
             }
         } catch (SQLException ex) {
