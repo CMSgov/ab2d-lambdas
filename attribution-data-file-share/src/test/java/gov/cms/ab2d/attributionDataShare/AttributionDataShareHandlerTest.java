@@ -1,6 +1,5 @@
 package gov.cms.ab2d.attributionDataShare;
 
-import gov.cms.ab2d.attributionDataShare.AttributionDataShare;
 import gov.cms.ab2d.testutils.AB2DPostgresqlContainer;
 import gov.cms.ab2d.testutils.TestContext;
 
@@ -12,7 +11,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 @Testcontainers
-public class AttributionDataShareTest {
+public class AttributionDataShareHandlerTest {
 
     @SuppressWarnings({"rawtypes", "unused"})
     @Container
@@ -20,15 +19,15 @@ public class AttributionDataShareTest {
 
     @Test
     void attributionDataShareInvoke() {
-        AttributionDataShare attributionDataShare = new AttributionDataShare();
+        AttributionDataShareHandler attributionDataShareHandler = new AttributionDataShareHandler();
 
         assertDoesNotThrow(() -> {
-            attributionDataShare.handleRequest(new TestContext());
+            attributionDataShareHandler.handleRequest(null, System.out, new TestContext());
         });
 
-        String filePath = attributionDataShare.handleRequest(new TestContext());
+      //  String filePath = attributionDataShareHandler.handleRequest(null, System.out, new TestContext());
         
-        System.out.println("AttrutionDataShareTest: The File Path is: \n" + filePath);
+     //  System.out.println("AttrutionDataShareTest: The File Path is: \n" + filePath);
 
     }
 
