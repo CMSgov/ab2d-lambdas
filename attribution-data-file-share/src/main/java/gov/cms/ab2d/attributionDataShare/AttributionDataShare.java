@@ -87,5 +87,6 @@ public class AttributionDataShare {
         } finally {
             logger.log("coverage attribution data retrieved.");
         }
+        return outputData;
     }
 }
