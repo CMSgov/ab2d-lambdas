@@ -29,7 +29,7 @@ public class AttributionDataShare {
     private static final String SELECT_ALL_FROM_COVERAGE = "SELECT beneficiary_id from public.coverage";
 
     // Returns a string with the fileFullPath to the file we wrote out.
-    // I.E: "ab2d-beneids_16_08_"
+    // I.E: "ab2d-beneids_2023-08-16T12:08:56.235-0700.txt"
     public String handleRequest(Context context) throws IOException {
         LambdaLogger logger = context.getLogger();
         logger.log("AttributionDataShare Lambda is started");
