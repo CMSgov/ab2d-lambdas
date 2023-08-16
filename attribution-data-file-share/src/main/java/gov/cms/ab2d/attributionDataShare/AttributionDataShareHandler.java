@@ -1,25 +1,27 @@
 package gov.cms.ab2d.attributionDataShare;
 
+
+
+import com.amazonaws.services.lambda.runtime.Context;
+import com.amazonaws.services.lambda.runtime.LambdaLogger;
+import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
 import gov.cms.ab2d.lambdalibs.lib.PropertiesUtil;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 
-import com.amazonaws.services.lambda.runtime.Context;
-import com.amazonaws.services.lambda.runtime.LambdaLogger;
 
-public class AttributionDataShare {
+
+public class AttributionDataShareHandler implements RequestStreamHandler {
     
     private static final String filePartialName = "ab2d-beneids_";
     private static final String fileFormat = ".txt";
@@ -30,36 +32,30 @@ public class AttributionDataShare {
 
     // Returns a string with the fileFullPath to the file we wrote out.
     // I.E: "ab2d-beneids_2023-08-16T12:08:56.235-0700.txt"
-    public String handleRequest(Context context) throws IOException {
+    public void handleRequest(InputStream inputStream, OutputStream outputStream, Context context) throws IOException {
         LambdaLogger logger = context.getLogger();
         logger.log("AttributionDataShare Lambda is started");
 
         String currentDate = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(new Date());
 
-        String fileFullName = filePartialName + currentDate + fileFormat;
-        
-        String fileFullPath = filePath + fileFullName;
+        String fileFullPath = filePath + filePartialName + currentDate + fileFormat;
 
-        try {
+        try (FileWriter fileWriter = new FileWriter(fileFullPath)) {
             Connection dbConnection = getConnection();
-            List<String> coverageDataList = fetchCoverageData(dbConnection, SELECT_ALL_FROM_COVERAGE);
+            List<String> coverageDataList = fetchCoverageData(dbConnection, logger);
 
-            FileWriter fileWriter = new FileWriter(fileFullPath);
             logger.log("Trying write to file: " + fileFullPath);
-
 
             for (String result : coverageDataList) {
                 fileWriter.write(result + System.lineSeparator());
             }
 
-        } catch (NullPointerException | SQLException | InterruptedException ex) {
+        } catch (NullPointerException | SQLException ex) {
             logger.log(ex.getMessage());
         } finally {
-            fileWriter.close();
             logger.log("File was written to successfully.");
             logger.log("AttributionDataShare Lambda is completed");
         }
-        return fileFullPath;
     }
 
     // Maybe since this is reused, we could put it in some kind of common Utils class
@@ -70,17 +66,17 @@ public class AttributionDataShare {
         return DriverManager.getConnection(properties.getProperty("DB_URL"), properties.getProperty("DB_USERNAME"), properties.getProperty("DB_PASSWORD"));
     }
 
-    private List<String> fetchCoverageData(Connection connection, String query) throws SQLException {
+    private List<String> fetchCoverageData(Connection connection, LambdaLogger logger) throws SQLException {
         logger.log("fetching coverage arrtibution data...");
 
-        List<String> outputData = new ArrayList<String>();
+        List<String> outputData = new ArrayList<>();
 
         try {
             Statement statement = connection.createStatement();
-            ResultSet resultset = statement.executeQuery(query);
+            ResultSet resultset = statement.executeQuery(SELECT_ALL_FROM_COVERAGE);
 
-            while(rs.next()) {
-                outputData.add(rs.getString(1));
+            while(resultset.next()) {
+                outputData.add(resultset.getString(1));
             }
         } catch (SQLException ex) {
             logger.log(ex.getMessage());
