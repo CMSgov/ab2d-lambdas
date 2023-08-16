@@ -80,6 +80,8 @@ public class AttributionDataShare {
             ResultSet resultset = statement.executeQuery(query);
 
             while(rs.next()) {
+                // This will need to be changed to support multiple data columns.
+                // Currently will just return the value in the first column only.
                 outputData.add(rs.getString(1));
             }
         } catch (SQLException ex) {
