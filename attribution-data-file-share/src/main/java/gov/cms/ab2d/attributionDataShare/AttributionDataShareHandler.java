@@ -43,15 +43,16 @@ public class AttributionDataShareHandler implements RequestStreamHandler {
         try (FileWriter fileWriter = new FileWriter(fileFullPath)) {
             Connection dbConnection = getConnection();
             List<String> coverageDataList = fetchCoverageData(dbConnection, logger);
+            BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
 
             logger.log("Trying write to file: " + fileFullPath);
 
             for (String result : coverageDataList) {
-                fileWriter.write(result + System.lineSeparator());
+                bufferedWriter.write(result + System.lineSeparator());
             }
 
         } catch (NullPointerException | SQLException ex) {
-            logger.log(ex.getMessage());
+            log(ex, logger);
         } finally {
             logger.log("File was written to successfully.");
             logger.log("AttributionDataShare Lambda is completed");
@@ -87,4 +88,17 @@ public class AttributionDataShareHandler implements RequestStreamHandler {
         }
         return outputData;
     }
+
+    // Handle writing to the target destination.
+    // This may not be necessary, but I am assuming we will want to store these files somewhere 
+    // other than the disk the container is running on. Requirements still to be determined.
+    private void writeFileToFinalDestination() {
+        // TODO
+    }
+
+    private void log(Exception exception, LambdaLogger logger) {
+        logger.log(exception.getMessage());
+        throw new AttributionDataShareException(exception);
+    }
+
 }
