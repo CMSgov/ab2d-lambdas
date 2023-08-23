@@ -24,11 +24,6 @@ public class AttributionDataShareHandlerTest {
         assertDoesNotThrow(() -> {
             attributionDataShareHandler.handleRequest(null, System.out, new TestContext());
         });
-
-      //  String filePath = attributionDataShareHandler.handleRequest(null, System.out, new TestContext());
-        
-     //  System.out.println("AttrutionDataShareTest: The File Path is: \n" + filePath);
-
     }
 
 }

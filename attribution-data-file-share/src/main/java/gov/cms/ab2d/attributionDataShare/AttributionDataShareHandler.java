@@ -50,11 +50,10 @@ public class AttributionDataShareHandler implements RequestStreamHandler {
             for (String result : coverageDataList) {
                 bufferedWriter.write(result + System.lineSeparator());
             }
-
+            logger.log("File was written to successfully.");
         } catch (NullPointerException | SQLException ex) {
             log(ex, logger);
         } finally {
-            logger.log("File was written to successfully.");
             logger.log("AttributionDataShare Lambda is completed");
         }
     }
