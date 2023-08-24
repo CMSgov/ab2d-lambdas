@@ -1,19 +1,13 @@
 package gov.cms.ab2d.optout;
 
-import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3ClientBuilder;
-import com.amazonaws.services.s3.model.S3Object;
-import com.amazonaws.services.s3.model.S3ObjectInputStream;
+import gov.cms.ab2d.databasemanagement.DatabaseUtil;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.Objects;
 import java.util.concurrent.*;
 
 public class OptOutHandler implements RequestStreamHandler {
@@ -33,24 +27,28 @@ public class OptOutHandler implements RequestStreamHandler {
         CountDownLatch latch = new CountDownLatch(threadCount);
 
         //ToDo: replace on S3
-        ClassLoader classLoader = getClass().getClassLoader();
         try {
-            File file = new File(Objects.requireNonNull(classLoader.getResource(Constants.fileName)).getFile());
-            //for s3
-          //  File file = new File(Constants.filePath);
+            InputStream fileInputStream = getClass().getResourceAsStream("/" + OptOutUtils.FILE_NAME);
+/*
+            for s3
+            File file = new File(OptOutUtils.FILE_PATH);
+
+ */
             Connection dbConnection = DatabaseUtil.getConnection();
 
-            executorService.execute(new OptOutProducer(queue, file, latch, logger));
+            executorService.execute(new OptOutProducer(queue, fileInputStream, latch, logger));
             executorService.execute(new OptOutConsumer(queue, dbConnection, latch, logger));
 
             latch.await();
+/*
+            if (file.delete()) {
+                System.out.println("Deleted the file: " + OptOutUtils.FILE_NAME);
+            } else {
+                System.out.println("Failed to delete the file.");
+            }
 
-//            if (file.delete()) {
-//                System.out.println("Deleted the file: " + Constants.fileName);
-//            } else {
-//                System.out.println("Failed to delete the file.");
-//            }
-        } catch (NullPointerException | SQLException | InterruptedException ex) {
+ */
+        } catch (NullPointerException | InterruptedException ex) {
             logger.log(ex.getMessage());
             outputStream.write(ex.getMessage().getBytes(StandardCharsets.UTF_8));
             throw new OptOutException(ex);
@@ -62,13 +60,13 @@ public class OptOutHandler implements RequestStreamHandler {
     //Commented to avoid unnecessary work with temporary credentials
 /*
     private void downloadFileFromS3(LambdaLogger logger) {
-        logger.log("Downloading " + Constants.fileName + " from S3 bucket " + Constants.s3BucketName);
+        logger.log("Downloading " + OptOutUtils.FILE_NAME + " from S3 bucket " + OptOutUtils.S3_BUCKET_NAME);
         final AmazonS3 s3 = AmazonS3ClientBuilder.standard()
-                .withRegion(Constants.s3Region).build();
+                .withRegion(OptOutUtils.S3_REGION).build();
         try {
-            S3Object o = s3.getObject(Constants.s3BucketName, Constants.fileName);
+            S3Object o = s3.getObject(OptOutUtils.S3_BUCKET_NAME, OptOutUtils.FILE_NAME);
             S3ObjectInputStream s3is = o.getObjectContent();
-            FileOutputStream fos = new FileOutputStream(Constants.filePath);
+            FileOutputStream fos = new FileOutputStream(OptOutUtils.FILE_PATH);
             byte[] read_buf = new byte[1024];
             int read_len = 0;
             while ((read_len = s3is.read(read_buf)) > 0) {
@@ -84,8 +82,7 @@ public class OptOutHandler implements RequestStreamHandler {
             throw new OptOutException(ex);
         }
     }
-
- */
+*/
 
     private void shutdownAndAwaitTermination(ExecutorService executorService, LambdaLogger logger) {
         logger.log("Call ThreadPoll shutdown");
