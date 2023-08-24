@@ -1,6 +1,5 @@
 package gov.cms.ab2d.databasemanagement;
 
-import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import gov.cms.ab2d.lambdalibs.lib.PropertiesUtil;
 import liquibase.Contexts;
 import liquibase.LabelExpression;
@@ -17,13 +16,17 @@ import java.sql.SQLException;
 import java.util.Properties;
 
 public class DatabaseUtil {
-
     private DatabaseUtil() {
     }
 
-    public static Connection getConnection() throws SQLException {
+    public static Connection getConnection() {
         Properties properties = PropertiesUtil.loadProps();
-        return DriverManager.getConnection(properties.get("DB_URL") + "", properties.get("DB_USERNAME") + "", properties.get("DB_PASSWORD") + "");
+        try {
+            return DriverManager.getConnection(properties.get("DB_URL") + "", properties.get("DB_USERNAME") + "", properties.get("DB_PASSWORD") + "");
+        }
+        catch (SQLException ex){
+            throw new DatabaseManagementException("Unable to get connection to ab2d database", ex);
+        }
     }
 
     public static Connection setupDb(Connection connection) throws LiquibaseException {
