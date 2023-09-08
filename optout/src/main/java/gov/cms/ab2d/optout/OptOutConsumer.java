@@ -58,10 +58,8 @@ public class OptOutConsumer implements Runnable {
     private void process(List<OptOutInformation> messages) {
         try (PreparedStatement statement = dbConnection.prepareStatement(UPDATE_WITH_OPTOUT)) {
             for (OptOutInformation optOut : messages) {
-                if (optOut.isOptOut()) {
-                    logger.log("Mbi: " + optOut.getMbi() + ", OptOut Flag: " + optOut.isOptOut());
-                      OptOutUtils.prepareInsert(optOut, statement);
-                }
+                logger.log("Mbi: " + optOut.getMbi() + ", OptOut Flag: " + optOut.isOptOut());
+                OptOutUtils.prepareInsert(optOut, statement);
             }
             statement.executeBatch();
         } catch (SQLException ex) {
