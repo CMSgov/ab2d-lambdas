@@ -1,7 +1,5 @@
 package gov.cms.ab2d.attributionDataShare;
 
-
-
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
@@ -19,16 +17,14 @@ import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 
-
-
 public class AttributionDataShareHandler implements RequestStreamHandler {
-    
-    private static final String filePartialName = "ab2d-beneids_";
-    private static final String fileFormat = ".txt";
 
-    private static final String filePath = "/opt/";
+    private static final String FILE_PARTIAL_NAME = "ab2d-beneids_";
+    private static final String FILE_FORMAT = ".txt";
 
-    private static final String SELECT_ALL_FROM_COVERAGE = "SELECT beneficiary_id from public.coverage";
+    private static final String FILE_PATH = "/opt/";
+
+    private static final String SELECT_ALL_FROM_COVERAGE = "SELECT current_mbi from public.coverage";
 
     // Returns a string with the fileFullPath to the file we wrote out.
     // I.E: "ab2d-beneids_2023-08-16T12:08:56.235-0700.txt"
@@ -38,19 +34,26 @@ public class AttributionDataShareHandler implements RequestStreamHandler {
 
         String currentDate = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(new Date());
 
-        String fileFullPath = filePath + filePartialName + currentDate + fileFormat;
+        String fileFullPath = FILE_PATH + FILE_PARTIAL_NAME + currentDate + FILE_FORMAT;
 
         try (FileWriter fileWriter = new FileWriter(fileFullPath)) {
             Connection dbConnection = getConnection();
             List<String> coverageDataList = fetchCoverageData(dbConnection, logger);
             BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
 
-            logger.log("Trying write to file: " + fileFullPath);
+            logger.log("Coverage Data List Size = " + coverageDataList.size());
 
-            for (String result : coverageDataList) {
-                bufferedWriter.write(result + System.lineSeparator());
+            if (!coverageDataList.isEmpty()) {
+                logger.log("Trying write to file: " + fileFullPath);
+
+                for (String result : coverageDataList) {
+                    bufferedWriter.write(result + System.lineSeparator());
+                }
+                logger.log("File was written to successfully.");
+            } else {
+                logger.log("There is no data to write...skipping");
             }
-            logger.log("File was written to successfully.");
+
         } catch (NullPointerException | SQLException ex) {
             log(ex, logger);
         } finally {
@@ -73,12 +76,14 @@ public class AttributionDataShareHandler implements RequestStreamHandler {
 
         try {
             Statement statement = connection.createStatement();
-            ResultSet resultset = statement.executeQuery(SELECT_ALL_FROM_COVERAGE);
+            ResultSet resultSet = statement.executeQuery(SELECT_ALL_FROM_COVERAGE);
 
-            while(resultset.next()) {
+            while (resultSet.next()) {
                 // This will need to be changed to support multiple data columns.
                 // Currently will just return the value in the first column only.
-                outputData.add(resultset.getString(1));
+                if (resultSet.getString(1) != null && resultSet.getString(1) != "") {
+                    outputData.add(resultSet.getString(1));
+                }
             }
         } catch (SQLException ex) {
             logger.log(ex.getMessage());
@@ -89,7 +94,7 @@ public class AttributionDataShareHandler implements RequestStreamHandler {
     }
 
     // Handle writing to the target destination.
-    // This may not be necessary, but I am assuming we will want to store these files somewhere 
+    // This may not be necessary, but I am assuming we will want to store these files somewhere
     // other than the disk the container is running on. Requirements still to be determined.
     private void writeFileToFinalDestination() {
         // TODO

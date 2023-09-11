@@ -11,7 +11,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 @Testcontainers
-public class AttributionDataShareHandlerTest {
+class AttributionDataShareHandlerTest {
 
     @SuppressWarnings({"rawtypes", "unused"})
     @Container
@@ -21,6 +21,7 @@ public class AttributionDataShareHandlerTest {
     void attributionDataShareInvoke() {
         AttributionDataShareHandler attributionDataShareHandler = new AttributionDataShareHandler();
 
+        System.out.println("WE DID THE TEST");
         assertDoesNotThrow(() -> {
             attributionDataShareHandler.handleRequest(null, System.out, new TestContext());
         });
