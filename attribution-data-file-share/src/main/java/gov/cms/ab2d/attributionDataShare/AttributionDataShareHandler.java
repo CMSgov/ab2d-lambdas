@@ -25,7 +25,7 @@ public class AttributionDataShareHandler implements RequestStreamHandler {
 
     private static final String SELECT_ALL_FROM_COVERAGE = "SELECT current_mbi FROM public.coverage";
 
-    // Returns a string with the fileFullPath to the file we wrote out.
+    // Writes out a file to the FILE_PATH.
     // I.E: "ab2d-beneids_2023-08-16T12:08:56.235-0700.txt"
     public void handleRequest(InputStream inputStream, OutputStream outputStream, Context context) throws IOException {
         LambdaLogger logger = context.getLogger();
@@ -36,21 +36,24 @@ public class AttributionDataShareHandler implements RequestStreamHandler {
 
         try (FileWriter fileWriter = new FileWriter(fileFullPath)) {
             Connection dbConnection = getConnection();
-            List<String> coverageDataList = fetchCoverageData(dbConnection, logger);
+
+            Statement statement = dbConnection.createStatement();
+            ResultSet resultSet = statement.executeQuery(SELECT_ALL_FROM_COVERAGE);
+
             BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
 
-            logger.log("Coverage Data List Size = " + coverageDataList.size());
-
-            if (!coverageDataList.isEmpty()) {
-                logger.log("Trying write to file: " + fileFullPath);
-
-                for (String result : coverageDataList) {
-                    bufferedWriter.write(result + System.lineSeparator());
-                }
-                logger.log("File was written to successfully.");
+            if (resultSet.next() == false) {
+                logger.log("ResultSet is empty...skipping writing to file");
             } else {
-                logger.log("List is empty: There is no data to write...skipping");
+                logger.log("Writing to file...");
+                do {
+                    String result = resultSet.getString(1);
+                    if (result != null || result != "") {
+                        bufferedWriter.write(result);
+                    }
+                } while (resultSet.next());
             }
+
             bufferedWriter.flush();
             bufferedWriter.close();
 
@@ -67,30 +70,6 @@ public class AttributionDataShareHandler implements RequestStreamHandler {
     private Connection getConnection() throws SQLException {
         Properties properties = PropertiesUtil.loadProps();
         return DriverManager.getConnection(properties.getProperty("DB_URL"), properties.getProperty("DB_USERNAME"), properties.getProperty("DB_PASSWORD"));
-    }
-
-    private List<String> fetchCoverageData(Connection connection, LambdaLogger logger) throws SQLException {
-        logger.log("fetching coverage arrtibution data...");
-
-        List<String> outputData = new ArrayList<>();
-
-        try {
-            Statement statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery(SELECT_ALL_FROM_COVERAGE);
-
-            while (resultSet.next()) {
-                // This will need to be changed to support multiple data columns if requirements dictate.
-                // Currently will just return the value in the first column only.
-                if (resultSet.getString(1) != null && resultSet.getString(1) != "") {
-                    outputData.add(resultSet.getString(1));
-                }
-            }
-        } catch (SQLException ex) {
-            logger.log(ex.getMessage());
-        } finally {
-            logger.log("coverage attribution data retrieved.");
-        }
-        return outputData;
     }
 
     // Handle writing to the target destination.
