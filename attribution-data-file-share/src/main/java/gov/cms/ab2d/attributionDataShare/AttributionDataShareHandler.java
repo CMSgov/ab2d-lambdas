@@ -23,7 +23,7 @@ public class AttributionDataShareHandler implements RequestStreamHandler {
     private static final String FILE_PARTIAL_NAME = "ab2d-beneids_";
     private static final String FILE_FORMAT = ".txt";
 
-    private static final String SELECT_ALL_FROM_COVERAGE = "SELECT current_mbi FROM public.coverage";
+    private static final String SELECT_ALL_FROM_COVERAGE = "SELECT DISTINCT current_mbi FROM public.coverage";
 
     // Writes out a file to the FILE_PATH.
     // I.E: "ab2d-beneids_2023-08-16T12:08:56.235-0700.txt"
