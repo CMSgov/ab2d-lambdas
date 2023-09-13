@@ -19,12 +19,11 @@ import java.util.Properties;
 
 public class AttributionDataShareHandler implements RequestStreamHandler {
 
+    private static final String FILE_PATH = "/opt/";
     private static final String FILE_PARTIAL_NAME = "ab2d-beneids_";
     private static final String FILE_FORMAT = ".txt";
 
-    private static final String FILE_PATH = "/opt/";
-
-    private static final String SELECT_ALL_FROM_COVERAGE = "SELECT current_mbi from public.coverage";
+    private static final String SELECT_ALL_FROM_COVERAGE = "SELECT current_mbi FROM public.coverage";
 
     // Returns a string with the fileFullPath to the file we wrote out.
     // I.E: "ab2d-beneids_2023-08-16T12:08:56.235-0700.txt"
@@ -33,7 +32,6 @@ public class AttributionDataShareHandler implements RequestStreamHandler {
         logger.log("AttributionDataShare Lambda is started");
 
         String currentDate = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(new Date());
-
         String fileFullPath = FILE_PATH + FILE_PARTIAL_NAME + currentDate + FILE_FORMAT;
 
         try (FileWriter fileWriter = new FileWriter(fileFullPath)) {
@@ -51,7 +49,7 @@ public class AttributionDataShareHandler implements RequestStreamHandler {
                 }
                 logger.log("File was written to successfully.");
             } else {
-                logger.log("There is no data to write...skipping");
+                logger.log("List is empty: There is no data to write...skipping");
             }
             bufferedWriter.flush();
             bufferedWriter.close();
@@ -81,7 +79,7 @@ public class AttributionDataShareHandler implements RequestStreamHandler {
             ResultSet resultSet = statement.executeQuery(SELECT_ALL_FROM_COVERAGE);
 
             while (resultSet.next()) {
-                // This will need to be changed to support multiple data columns.
+                // This will need to be changed to support multiple data columns if requirements dictate.
                 // Currently will just return the value in the first column only.
                 if (resultSet.getString(1) != null && resultSet.getString(1) != "") {
                     outputData.add(resultSet.getString(1));
