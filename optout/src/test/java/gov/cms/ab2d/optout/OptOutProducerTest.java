@@ -27,10 +27,13 @@ public class OptOutProducerTest {
         assertEquals(3, queue.size()); // 1 for poisonPill
         OptOutMessage message = queue.poll();
         assertNotNull(message);
-        assertEquals(1000000019, message.getOptOutInformation().getMbi());
+        assertEquals("7GU6ME5FA64", message.getOptOutInformation().getMbi());
+        assertFalse(message.getOptOutInformation().isOptOut());
+        assertFalse(message.isPoisonPill());
+        message = queue.poll();
+        assertEquals("9GE7P86TE35", message.getOptOutInformation().getMbi());
         assertTrue(message.getOptOutInformation().isOptOut());
         assertFalse(message.isPoisonPill());
-        queue.poll();
         message = queue.poll();
         assertNotNull(message);
         assertNull(message.getOptOutInformation());
@@ -44,6 +47,6 @@ public class OptOutProducerTest {
         BlockingQueue<OptOutMessage> queue = new LinkedBlockingQueue<>();
         InputStream inputStream = getClass().getResourceAsStream("/invalidLine.txt");
         assertDoesNotThrow(() -> new OptOutProducer(queue, inputStream, latch, logger).run());
-        assertEquals(3, queue.size()); // 2 valid lines and 1 poisonPill
+        assertEquals(2, queue.size()); // 1 valid lines and 1 poisonPill
     }
 }

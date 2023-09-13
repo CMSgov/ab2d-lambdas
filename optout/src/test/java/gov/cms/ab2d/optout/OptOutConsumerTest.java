@@ -7,8 +7,6 @@ import org.mockito.Mockito;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -28,7 +26,7 @@ public class OptOutConsumerTest {
         LambdaLogger logger = Mockito.mock(LambdaLogger.class);
         BlockingQueue<OptOutMessage> queue = new LinkedBlockingQueue<>();
 
-        queue.put(new OptOutMessage(new OptOutInformation(1, Timestamp.valueOf(LocalDateTime.now()), true), false));
+        queue.put(new OptOutMessage(new OptOutInformation("1", true), false));
         queue.put(new OptOutMessage(null, true));
 
         new OptOutConsumer(queue, dbConnection, latch, logger).run();
