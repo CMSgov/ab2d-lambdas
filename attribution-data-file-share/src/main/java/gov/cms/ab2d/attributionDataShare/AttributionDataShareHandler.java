@@ -53,6 +53,8 @@ public class AttributionDataShareHandler implements RequestStreamHandler {
             } else {
                 logger.log("There is no data to write...skipping");
             }
+            bufferedWriter.flush();
+            bufferedWriter.close();
 
         } catch (NullPointerException | SQLException ex) {
             log(ex, logger);
