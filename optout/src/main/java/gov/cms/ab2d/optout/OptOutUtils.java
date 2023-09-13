@@ -20,15 +20,14 @@ public class OptOutUtils {
 
     public static final int BATCH_INSERT_SIZE = 10000;
     public static final String UPDATE_WITH_OPTOUT = "UPDATE public.coverage\n" +
-            "SET opt_out_flag = ?, " +
-            "effective_date = ?\n" +
-            "WHERE beneficiary_id = ?";
+            "SET opt_out_flag = ?\n" +
+            "WHERE current_mbi = ? OR historic_mbis LIKE CONCAT( '%',?,'%')";
 
 
     public static void prepareInsert(OptOutInformation optOut, PreparedStatement statement) throws SQLException {
         statement.setBoolean(1, optOut.isOptOut());
-        statement.setTimestamp(2, optOut.getEffectiveDate());
-        statement.setInt(3, optOut.getMbi());
+        statement.setString(2, optOut.getMbi());
+        statement.setString(3, optOut.getMbi());
         statement.addBatch();
     }
 
