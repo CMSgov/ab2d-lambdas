@@ -252,28 +252,28 @@ resource "aws_lambda_function" "hpms_counts" {
   }
 }
 
-#resource "aws_lambda_function" "optout" {
-#  depends_on       = [aws_iam_role.iam_for_everything]
-#  filename         = "/tmp/setup/optout/build/distributions/optout.zip"
-#  function_name    = "OptOutHandler"
-#  role             = aws_iam_role.iam_for_everything.arn
-#  handler          = "gov.cms.ab2d.optout.OptOutHandler"
-#  source_code_hash = filebase64sha256("/tmp/setup/optout/build/distributions/optout.zip")
-#  runtime          = "java11"
-#  environment {
-#    variables = {
-#      "com.amazonaws.sdk.disableCertChecking" = true
-#      IS_LOCALSTACK                           = true
-#      environment                             = "local"
-#      JAVA_TOOL_OPTIONS                       = "-XX:+TieredCompilation -XX:TieredStopAtLevel=1"
-#      DB_URL                                  = "jdbc:postgresql://host.docker.internal:5432/ab2d"
-#      DB_USERNAME                             = "ab2d"
-#      DB_PASSWORD                             = "ab2d"
-#    }
-#  }
-#  tags = {
-#    "key" = "lam"
-#  }
-#}
+resource "aws_lambda_function" "optout" {
+  depends_on       = [aws_iam_role.iam_for_everything]
+  filename         = "/tmp/setup/optout/build/distributions/optout.zip"
+  function_name    = "OptOutHandler"
+  role             = aws_iam_role.iam_for_everything.arn
+  handler          = "gov.cms.ab2d.optout.OptOutHandler"
+  source_code_hash = filebase64sha256("/tmp/setup/optout/build/distributions/optout.zip")
+  runtime          = "java11"
+  environment {
+    variables = {
+      "com.amazonaws.sdk.disableCertChecking" = true
+      IS_LOCALSTACK                           = true
+      environment                             = "local"
+      JAVA_TOOL_OPTIONS                       = "-XX:+TieredCompilation -XX:TieredStopAtLevel=1"
+      DB_URL                                  = "jdbc:postgresql://host.docker.internal:5432/ab2d"
+      DB_USERNAME                             = "ab2d"
+      DB_PASSWORD                             = "ab2d"
+    }
+  }
+  tags = {
+    "key" = "lam"
+  }
+}
 
 
