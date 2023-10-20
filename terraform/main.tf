@@ -73,24 +73,24 @@ resource "aws_lambda_permission" "allow_cloudwatch_to_call_audit_lambda" {
   source_arn    = aws_cloudwatch_event_rule.lambda_event_rule.arn
 }
 
-resource "aws_cloudwatch_event_rule" "lambda_ones_a_day_event_rule" {
-  name                = "profile-generator-lambda-ones-a-day-event-rule"
-  description         = "run at 12:00 am every day"
-  schedule_expression = "cron(0 0 * * ? *)"
-}
-
-resource "aws_cloudwatch_event_target" "cloudwatch_optout_lambda_target" {
-  arn  = aws_lambda_function.optout.arn
-  rule = aws_cloudwatch_event_rule.lambda_ones_a_day_event_rule.name
-}
-
-resource "aws_lambda_permission" "allow_cloudwatch_to_call_optout_lambda" {
-  statement_id  = "AllowExecutionFromCloudWatch"
-  action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.optout.arn
-  principal     = "events.amazonaws.com"
-  source_arn    = aws_cloudwatch_event_rule.lambda_ones_a_day_event_rule.arn
-}
+#resource "aws_cloudwatch_event_rule" "lambda_ones_a_day_event_rule" {
+#  name                = "profile-generator-lambda-ones-a-day-event-rule"
+#  description         = "run at 12:00 am every day"
+#  schedule_expression = "cron(0 0 * * ? *)"
+#}
+#
+#resource "aws_cloudwatch_event_target" "cloudwatch_optout_lambda_target" {
+#  arn  = aws_lambda_function.optout.arn
+#  rule = aws_cloudwatch_event_rule.lambda_ones_a_day_event_rule.name
+#}
+#
+#resource "aws_lambda_permission" "allow_cloudwatch_to_call_optout_lambda" {
+#  statement_id  = "AllowExecutionFromCloudWatch"
+#  action        = "lambda:InvokeFunction"
+#  function_name = aws_lambda_function.optout.arn
+#  principal     = "events.amazonaws.com"
+#  source_arn    = aws_cloudwatch_event_rule.lambda_ones_a_day_event_rule.arn
+#}
 
 resource "aws_cloudwatch_event_rule" "profile_generator_lambda_event_rule" {
   name                = "profile-generator-lambda-event-rule"
