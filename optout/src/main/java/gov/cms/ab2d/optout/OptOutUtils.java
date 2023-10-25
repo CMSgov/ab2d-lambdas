@@ -10,7 +10,9 @@ public class OptOutUtils {
     private OptOutUtils() {
     }
 
-    public static final String S3_BUCKET_NAME = "ab2d-opt-out-temp-349849222861-us-east-1";
+    public static final String BFD_S3_BUCKET_NAME = "ab2d-opt-out-temp-349849222861-us-east-1";
+
+    public static final String AB2D_S3_BUCKET_NAME = "ab2d-opt-out-temp-349849222861-us-east-1";
 
     public static final Regions S3_REGION = Regions.US_EAST_1;
 
@@ -30,7 +32,9 @@ public class OptOutUtils {
         statement.setString(3, optOut.getMbi());
         statement.addBatch();
     }
-
-
-
 }
+
+
+
+
+
