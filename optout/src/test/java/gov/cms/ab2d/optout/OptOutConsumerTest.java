@@ -19,7 +19,7 @@ import static org.mockito.Mockito.when;
 public class OptOutConsumerTest {
 
     @Test
-    public void optOutConsumerRunTest() throws InterruptedException, SQLException {
+     void optOutConsumerRunTest() throws InterruptedException, SQLException {
         Connection dbConnection = Mockito.mock(Connection.class);
         when(dbConnection.prepareStatement(any())).thenReturn(Mockito.mock(PreparedStatement.class));
         CountDownLatch latch = Mockito.mock(CountDownLatch.class);

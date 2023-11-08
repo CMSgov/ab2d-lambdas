@@ -1,24 +1,17 @@
 package gov.cms.ab2d.optout;
 
-import com.amazonaws.regions.Regions;
-
+import java.io.IOException;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.LinkOption;
+import java.nio.file.Path;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-public class OptOutUtils {
+public final class OptOutUtils {
 
     private OptOutUtils() {
     }
-
-    public static final String BFD_S3_BUCKET_NAME = "ab2d-opt-out-temp-349849222861-us-east-1";
-
-    public static final String AB2D_S3_BUCKET_NAME = "ab2d-opt-out-temp-349849222861-us-east-1";
-
-    public static final Regions S3_REGION = Regions.US_EAST_1;
-
-    public static final String FILE_NAME = "optOutDummy.txt";
-
-    public static final String FILE_PATH = "/opt/" + FILE_NAME;
 
     public static final int BATCH_INSERT_SIZE = 10000;
     public static final String UPDATE_WITH_OPTOUT = "UPDATE public.coverage\n" +
@@ -32,6 +25,18 @@ public class OptOutUtils {
         statement.setString(3, optOut.getMbi());
         statement.addBatch();
     }
+
+    public static void deleteDirectoryRecursion(Path path) throws IOException {
+        if (Files.isDirectory(path, LinkOption.NOFOLLOW_LINKS)) {
+            try (DirectoryStream<Path> entries = Files.newDirectoryStream(path)) {
+                for (Path entry : entries) {
+                    deleteDirectoryRecursion(entry);
+                }
+            }
+        }
+        if (Files.exists(path))  Files.delete(path);
+    }
+
 }
 
 

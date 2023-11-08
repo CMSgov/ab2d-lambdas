@@ -3,19 +3,20 @@ package gov.cms.ab2d.optout;
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
 
 import java.io.*;
+import java.util.Objects;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CountDownLatch;
 
 public class OptOutProducer implements Runnable {
 
+    private final String path;
     private final BlockingQueue<OptOutMessage> queue;
-    private final InputStream inputStream;
     private final CountDownLatch latch;
     private final LambdaLogger logger;
 
-    public OptOutProducer(BlockingQueue<OptOutMessage> queue, InputStream inputStream, CountDownLatch latch, LambdaLogger logger) {
+    public OptOutProducer(String path, BlockingQueue<OptOutMessage> queue, CountDownLatch latch, LambdaLogger logger) {
+        this.path = path;
         this.queue = queue;
-        this.inputStream = inputStream;
         this.latch = latch;
         this.logger = logger;
     }
@@ -33,16 +34,22 @@ public class OptOutProducer implements Runnable {
         }
     }
 
-    private void process() throws InterruptedException {
+    public void process() throws InterruptedException {
         try {
-            parseFile();
+            for (File file : Objects.requireNonNull(new File(path).listFiles())) {
+                if (file.isFile()) {
+                    parseFile(file);
+                }
+            }
         } catch (IOException ex) {
             logger.log("File processing failed with exception: " + ex.getMessage());
+        } finally {
+            queue.put(new OptOutMessage(null, true));
         }
     }
 
-    private void parseFile() throws IOException, InterruptedException {
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+    public void parseFile(File file) throws IOException, InterruptedException {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 try {
@@ -52,12 +59,8 @@ public class OptOutProducer implements Runnable {
                     logger.log("Data is invalid");
                 }
             }
-        } finally {
-            queue.put(new OptOutMessage(null, true));
         }
-
     }
-
 }
 
 
