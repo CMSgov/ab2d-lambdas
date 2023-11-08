@@ -7,6 +7,7 @@ import gov.cms.ab2d.databasemanagement.DatabaseUtil;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.*;
 import java.sql.Connection;
 import java.util.concurrent.*;
 
@@ -30,36 +31,26 @@ public class OptOutHandler implements RequestStreamHandler {
             //ToDo: important! add capacity for backpressure
             BlockingQueue<OptOutMessage> queue = new LinkedBlockingQueue<>();
 
-
-            File file = new File(OptOutUtils.FILE_PATH);
-            FileInputStream fileInputStream = new FileInputStream(file);
-
             Connection dbConnection = DatabaseUtil.getConnection();
 
             latch = new CountDownLatch(threadCount);
 
-            executorService.execute(new OptOutProducer(queue, fileInputStream, latch, logger)); //parse file
+            executorService.execute(new OptOutProducer(OptOutS3.FILE_PATH, queue, latch, logger)); //parse file
             executorService.execute(new OptOutConsumer(queue, dbConnection, latch, logger)); //update database
 
             latch.await();
-
-            if (file.delete()) {
-                System.out.println("Deleted the file: " + OptOutUtils.FILE_NAME);
-            } else {
-                System.out.println("Failed to delete the file.");
-            }
-        } catch (NullPointerException | InterruptedException ex) {
+        } catch (NullPointerException | InterruptedException | CompletionException ex) {
             logger.log(ex.getMessage());
             outputStream.write(ex.getMessage().getBytes(StandardCharsets.UTF_8));
             throw new OptOutException(ex);
         } finally {
+            OptOutUtils.deleteDirectoryRecursion(Paths.get(OptOutS3.FILE_PATH));
             shutdownAndAwaitTermination(executorService, logger);
             outputStream.write("OptOut Lambda Completed".getBytes(StandardCharsets.UTF_8));
         }
     }
 
-
-    private void shutdownAndAwaitTermination(ExecutorService executorService, LambdaLogger logger) {
+     void shutdownAndAwaitTermination(ExecutorService executorService, LambdaLogger logger) {
         logger.log("Call ThreadPoll shutdown");
         executorService.shutdown();
         try {

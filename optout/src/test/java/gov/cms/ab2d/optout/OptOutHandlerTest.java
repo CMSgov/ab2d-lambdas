@@ -4,11 +4,17 @@ import gov.cms.ab2d.testutils.AB2DPostgresqlContainer;
 import gov.cms.ab2d.testutils.TestContext;
 
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import java.io.IOException;
+import java.nio.file.*;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 @Testcontainers
 public class OptOutHandlerTest {
@@ -19,10 +25,19 @@ public class OptOutHandlerTest {
 
     @Test
     void optOutHandlerInvoke() {
-        OptOutHandler optOutHandler = new OptOutHandler();
+        OptOutHandler handler = new OptOutHandler();
         assertDoesNotThrow(() -> {
-            optOutHandler.handleRequest(null, System.out, new TestContext());
+            handler.handleRequest(null, System.out, new TestContext());
         });
+        assertFalse(Files.exists(Paths.get(OptOutS3.FILE_PATH)));
     }
 
+    @Test
+    void optOutHandlerNullPointerExceptionTest() throws IOException {
+        OptOutHandler handler = Mockito.mock(OptOutHandler.class);
+        doThrow(new NullPointerException()).when(handler).handleRequest(any(), any(), any());
+        assertThrows(NullPointerException.class, () -> {
+            handler.handleRequest(null, System.out, new TestContext());
+        });
+    }
 }
