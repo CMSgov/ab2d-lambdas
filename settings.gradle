@@ -3,4 +3,5 @@ include 'eob-fetcher', 'metrics-lambda', 'audit', 'coverage-counts', 'database-m
 include 'lambda-test-utils'
 include 'retrieve-hpms-counts'
 include 'optout'
+include 'attribution-data-file-share'
 
