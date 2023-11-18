@@ -4,6 +4,7 @@ import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
 import gov.cms.ab2d.databasemanagement.DatabaseUtil;
+import gov.cms.ab2d.lambdalibs.lib.FileUtil;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -44,7 +45,7 @@ public class OptOutHandler implements RequestStreamHandler {
             outputStream.write(ex.getMessage().getBytes(StandardCharsets.UTF_8));
             throw new OptOutException(ex);
         } finally {
-            OptOutUtils.deleteDirectoryRecursion(Paths.get(OptOutS3.FILE_PATH));
+            FileUtil.deleteDirectoryRecursion(Paths.get(OptOutS3.FILE_PATH));
             shutdownAndAwaitTermination(executorService, logger);
             outputStream.write("OptOut Lambda Completed".getBytes(StandardCharsets.UTF_8));
         }

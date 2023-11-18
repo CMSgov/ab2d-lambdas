@@ -26,9 +26,7 @@ public class OptOutHandlerTest {
     @Test
     void optOutHandlerInvoke() {
         OptOutHandler handler = new OptOutHandler();
-        assertDoesNotThrow(() -> {
-            handler.handleRequest(null, System.out, new TestContext());
-        });
+        assertDoesNotThrow(() -> handler.handleRequest(null, System.out, new TestContext()));
         assertFalse(Files.exists(Paths.get(OptOutS3.FILE_PATH)));
     }
 
@@ -36,8 +34,6 @@ public class OptOutHandlerTest {
     void optOutHandlerNullPointerExceptionTest() throws IOException {
         OptOutHandler handler = Mockito.mock(OptOutHandler.class);
         doThrow(new NullPointerException()).when(handler).handleRequest(any(), any(), any());
-        assertThrows(NullPointerException.class, () -> {
-            handler.handleRequest(null, System.out, new TestContext());
-        });
+        assertThrows(NullPointerException.class, () -> handler.handleRequest(null, System.out, new TestContext()));
     }
 }

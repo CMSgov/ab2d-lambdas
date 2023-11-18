@@ -99,13 +99,6 @@ public class OptOutProducerTest {
         doThrow(new IOException()).when(p).parseFile(any());
         assertDoesNotThrow(p::run);
     }
-    @Test
-    void temporaryFileDeletionTest() throws URISyntaxException, IOException {
-        copyFileFromResources("optOutDummy.txt");
-        Path p = Paths.get(path);
-        OptOutUtils.deleteDirectoryRecursion(p);
-        assertFalse(Files.exists(p));
-    }
 
     private void copyFileFromResources(String fileName) throws URISyntaxException, IOException {
         Path pathIn = Paths.get(Objects.requireNonNull(getClass().getResource("/" + fileName)).toURI());
