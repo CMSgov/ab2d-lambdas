@@ -25,18 +25,6 @@ public final class OptOutUtils {
         statement.setString(3, optOut.getMbi());
         statement.addBatch();
     }
-
-    public static void deleteDirectoryRecursion(Path path) throws IOException {
-        if (Files.isDirectory(path, LinkOption.NOFOLLOW_LINKS)) {
-            try (DirectoryStream<Path> entries = Files.newDirectoryStream(path)) {
-                for (Path entry : entries) {
-                    deleteDirectoryRecursion(entry);
-                }
-            }
-        }
-        if (Files.exists(path))  Files.delete(path);
-    }
-
 }
 
 
