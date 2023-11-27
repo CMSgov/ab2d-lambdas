@@ -24,17 +24,12 @@ public class OptOutHandler implements RequestStreamHandler {
         CountDownLatch latch = new CountDownLatch(threadCount);
 
         try {
-            executorService.execute(new OptOutS3(true, latch, logger)); // download file from BFD S3 locally
-            executorService.execute(new OptOutS3(false, latch, logger)); // copy files from BFD S3 to AB2D S3
-
-            latch.await();
+           OptOutS3.downloadFilesToDirectory(logger); // download file from BFD S3 locally
 
             //ToDo: important! add capacity for backpressure
             BlockingQueue<OptOutMessage> queue = new LinkedBlockingQueue<>();
 
             Connection dbConnection = DatabaseUtil.getConnection();
-
-            latch = new CountDownLatch(threadCount);
 
             executorService.execute(new OptOutProducer(OptOutS3.FILE_PATH, queue, latch, logger)); //parse file
             executorService.execute(new OptOutConsumer(queue, dbConnection, latch, logger)); //update database
