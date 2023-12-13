@@ -1,107 +1,71 @@
 package gov.cms.ab2d.optout;
 
+import com.amazonaws.services.s3.model.AmazonS3Exception;
+import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
-import com.amazonaws.services.lambda.runtime.LambdaLogger;
-import software.amazon.awssdk.regions.Region;
-import software.amazon.awssdk.services.s3.S3AsyncClient;
-import software.amazon.awssdk.services.s3.model.*;
-import software.amazon.awssdk.transfer.s3.S3TransferManager;
-import software.amazon.awssdk.transfer.s3.model.*;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
-import java.util.List;
-import java.nio.file.Paths;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
-import java.util.concurrent.CountDownLatch;
+import static gov.cms.ab2d.optout.OptOutConstants.*;
 
+public class OptOutS3 {
 
-public class OptOutS3 implements Runnable {
-
-    private final boolean isLocal;
-    private final CountDownLatch latch;
-
-    private final LambdaLogger logger;
-
-    public OptOutS3(boolean isLocal, CountDownLatch latch, LambdaLogger logger) {
-        this.isLocal = isLocal;
-        this.latch = latch;
-        this.logger = logger;
+    private OptOutS3() {
     }
 
-    public static final String BFD_S3_BUCKET_NAME = "ab2d-opt-out-temp-349849222861-us-east-1";
-
-    public static final String AB2D_S3_BUCKET_NAME = "ab2d-opt-out-temp-349849222861-us-east-1";
-
-    public static final Region S3_REGION = Region.US_EAST_1;
-    public static final String FILE_PATH = "/opt/optout/";
-    private static final S3AsyncClient S3_CLIENT = S3AsyncClient.builder()
+    public static final S3Client S3_CLIENT = S3Client.builder()
             .region(S3_REGION)
             .build();
 
-    private static final S3TransferManager TRANSFER_MANAGER = S3TransferManager.builder()
-            .s3Client(S3_CLIENT)
-            .build();
+    public static BufferedReader openFileS3(String fileName) {
+        var getObjectRequest = GetObjectRequest.builder()
+                .bucket(BFD_S3_BUCKET_NAME)
+                .key(fileName)
+                .build();
 
-    @Override
-    public void run() {
-        if (isLocal) downloadFilesToDirectory();
-        else copyFilesFromS3();
+        var s3ObjectResponse = S3_CLIENT.getObject(getObjectRequest);
+        return new BufferedReader(new InputStreamReader(s3ObjectResponse));
     }
 
-    public void downloadFilesToDirectory() {
-        DirectoryDownload directoryDownload =
-                TRANSFER_MANAGER.downloadDirectory(DownloadDirectoryRequest.builder()
-                        .destination(Paths.get(FILE_PATH))
-                        .bucket(BFD_S3_BUCKET_NAME)
-                        .build());
+    public static void createResponseOptOutFile(String responseContent) {
         try {
-            CompletedDirectoryDownload completedDirectoryDownload = directoryDownload.completionFuture().join();
+            var objectRequest = PutObjectRequest.builder()
+                    .bucket(BFD_S3_BUCKET_NAME)
+                    .key(RESPONSE_FILE_NAME + new SimpleDateFormat(RESPONSE_FILE_NAME_PATTERN).format(new Date()))
+                    .build();
 
-            completedDirectoryDownload.failedTransfers().forEach(fail ->
-                    logger.log("Object failed to transfer. " + fail.toString()));
-        } catch (CompletionException ex) {
-            logger.log(ex.getMessage());
-        } finally {
-            latch.countDown();
+            S3_CLIENT.putObject(objectRequest, RequestBody.fromString(responseContent));
+
+        } catch (AmazonS3Exception ex) {
+            // handle exception
+            // Alert?
         }
     }
 
-    // Code works, but need to comment because of SonarQube test coverage check
-    // Will be uncommented in future
-    public void copyFilesFromS3() {
-//        ListObjectsRequest listObjects = ListObjectsRequest
-//                .builder()
-//                .bucket(BFD_S3_BUCKET_NAME)
-//                .build();
-//        try {
-//            CompletableFuture<ListObjectsResponse> res = S3_CLIENT.listObjects(listObjects);
-//            res.whenComplete((resp, err) -> {
-//                if (resp != null) {
-//                    List<S3Object> objects = resp.contents();
-//                    for (S3Object myValue : objects) {
-//                        CopyObjectRequest copyObjectRequest = CopyObjectRequest.builder()
-//                                .sourceBucket(BFD_S3_BUCKET_NAME)
-//                                .sourceKey(myValue.key())
-//                                .destinationBucket(AB2D_S3_BUCKET_NAME)
-//                                .destinationKey("new_" + myValue.key())
-//                                .build();
+    //ToDo: AB2D-5796 Delete Opt-out file from S3 (inbound)
+//    public static void deleteFileFromS3() {
+//        // The map always contains 2 lines: the first and last from the optout file.
+//        if (optOutResultMap.size() == 2) {
+//            try {
+//                var request = DeleteObjectRequest.builder()
+//                        .bucket(BFD_S3_BUCKET_NAME)
+//                        .key(fileName)
+//                        .build();
 //
-//                        CopyRequest copyRequest = CopyRequest.builder()
-//                                .copyObjectRequest(copyObjectRequest)
-//                                .build();
-//
-//                        Copy copy = TRANSFER_MANAGER.copy(copyRequest);
-//                        copy.completionFuture().join();
-//                    }
-//                } else {
-//                    logger.log(err.getMessage());
-//                }
-//            });
-//            res.join();
-//        } catch (S3Exception ex) {
-//            logger.log(ex.getMessage());
-//        } finally {
-            latch.countDown();
+//                S3_CLIENT.deleteObject(request);
+//            } catch (SdkClientException ex) {
+//                logger.log(ex.getMessage());
+//            }
 //        }
-    }
+//        else {
+//            // Slack alert
+//        }
+//    }
+
+
 }
