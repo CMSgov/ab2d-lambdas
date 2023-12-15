@@ -30,7 +30,7 @@ jobs:
             ARTIFACTORY_PASSWORD=/artifactory/password
 
       - name: Build opt-out-import zip file
-        run: ./gradlew buildZip -b optout/build.gradle
+        run: ./gradlew buildZip -b optout/build.gradle --console=plain
 
       - name: Assume role in target account
         uses: aws-actions/configure-aws-credentials@v3
@@ -38,8 +38,7 @@ jobs:
           aws-region: ${{ vars.AWS_REGION }}
           role-to-assume: ${{ vars.ACCOUNT_ROLE }}
 
-      - name: Upload to s3
-        run: aws s3 cp optout.zip s3://${{ vars.OPT_OUT_IMPORT_BUCKET }}/function.zip
-
-      - name: Reload lambda code
-        run: aws lambda update-function-code --function-name ab2d-dev-opt-out-import --s3-bucket ${{ vars.OPT_OUT_IMPORT_BUCKET }} --s3-key function.zip
+      - name: Upload and reload
+        run: |
+          aws s3 cp --no-progress optout/build/distributions/optout.zip s3://${{ vars.OPT_OUT_IMPORT_BUCKET }}/function.zip
+          aws lambda update-function-code --function-name ab2d-dev-opt-out-import --s3-bucket ${{ vars.OPT_OUT_IMPORT_BUCKET }} --s3-key function.zip
