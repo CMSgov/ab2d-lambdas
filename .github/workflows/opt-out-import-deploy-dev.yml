@@ -40,5 +40,5 @@ jobs:
 
       - name: Upload and reload
         run: |
-          aws s3 cp --no-progress optout/build/distributions/optout.zip s3://${{ vars.OPT_OUT_IMPORT_BUCKET }}/function.zip
-          aws lambda update-function-code --function-name ab2d-dev-opt-out-import --s3-bucket ${{ vars.OPT_OUT_IMPORT_BUCKET }} --s3-key function.zip
+          aws s3 cp --no-progress optout/build/distributions/optout.zip s3://${{ vars.OPT_OUT_IMPORT_ZIP_BUCKET }}/function.zip
+          aws lambda update-function-code --function-name ab2d-dev-opt-out-import --s3-bucket ${{ vars.OPT_OUT_IMPORT_ZIP_BUCKET }} --s3-key function.zip
