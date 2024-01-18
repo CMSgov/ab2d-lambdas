@@ -1,0 +1,24 @@
+name: Deploy opt-out-import to prod
+
+on:
+  workflow_dispatch:
+
+env:
+  AWS_REGION: ${{ vars.AWS_REGION }}
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+    environment: prod
+
+    steps:
+      - name: Assume role in target account
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: ${{ vars.ACCOUNT_ROLE }}
+
+      - name: Promote lambda code from test to prod
+        run: |
+          aws s3 cp --no-progress s3://${{ vars.OPT_OUT_IMPORT_TEST_ZIP_BUCKET }}/function.zip s3://${{ vars.OPT_OUT_IMPORT_ZIP_BUCKET }}/function.zip
+          aws lambda update-function-code --function-name ab2d-prod-opt-out-import --s3-bucket ${{ vars.OPT_OUT_IMPORT_ZIP_BUCKET }} --s3-key function.zip
