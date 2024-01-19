@@ -3,12 +3,9 @@ name: Deploy opt-out-import to prod
 on:
   workflow_dispatch:
 
-env:
-  AWS_REGION: ${{ vars.AWS_REGION }}
-
 jobs:
   deploy:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     environment: prod
 
     steps:
