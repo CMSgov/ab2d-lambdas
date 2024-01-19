@@ -3,9 +3,6 @@ name: Build and deploy opt-out-import to dev
 on:
   workflow_dispatch:
 
-env:
-  AWS_REGION: ${{ vars.AWS_REGION }}
-
 jobs:
   deploy:
     runs-on: self-hosted
@@ -23,6 +20,8 @@ jobs:
 
       - name: Set env vars from AWS params
         uses: cmsgov/ab2d-bcda-dpc-platform/actions/aws-params-env-action@main
+        env:
+          AWS_REGION: ${{ vars.AWS_REGION }}
         with:
           params: |
             ARTIFACTORY_URL=/artifactory/url
