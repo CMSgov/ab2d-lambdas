@@ -1,10 +1,14 @@
 package gov.cms.ab2d.optout;
 
+import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.amazonaws.services.s3.model.AmazonS3Exception;
+import software.amazon.awssdk.core.exception.SdkClientException;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.model.HeadObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.model.S3Exception;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -14,36 +18,63 @@ import java.util.Date;
 import static gov.cms.ab2d.optout.OptOutConstants.*;
 
 public class OptOutS3 {
+    private final S3Client s3Client;
+    private final String fileName;
+    private final LambdaLogger logger;
 
-    private OptOutS3() {
+    public OptOutS3(S3Client s3Client, String fileName, LambdaLogger logger) {
+        this.s3Client = s3Client;
+        this.fileName = fileName;
+        this.logger = logger;
     }
 
-    public static final S3Client S3_CLIENT = S3Client.builder()
-            .region(S3_REGION)
-            .build();
-
-    public static BufferedReader openFileS3(String fileName) {
-        var getObjectRequest = GetObjectRequest.builder()
-                .bucket(BFD_S3_BUCKET_NAME)
-                .key(fileName)
-                .build();
-
-        var s3ObjectResponse = S3_CLIENT.getObject(getObjectRequest);
-        return new BufferedReader(new InputStreamReader(s3ObjectResponse));
-    }
-
-    public static void createResponseOptOutFile(String responseContent) {
+    public BufferedReader openFileS3() {
         try {
-            var objectRequest = PutObjectRequest.builder()
+            //Checking if object exists
+            HeadObjectRequest headObjectRequest = HeadObjectRequest.builder()
                     .bucket(BFD_S3_BUCKET_NAME)
-                    .key(RESPONSE_FILE_NAME + new SimpleDateFormat(RESPONSE_FILE_NAME_PATTERN).format(new Date()))
+                    .key(fileName)
                     .build();
 
-            S3_CLIENT.putObject(objectRequest, RequestBody.fromString(responseContent));
+            s3Client.headObject(headObjectRequest);
 
+            var getObjectRequest = GetObjectRequest.builder()
+                    .bucket(BFD_S3_BUCKET_NAME)
+                    .key(fileName)
+                    .build();
+
+            var s3ObjectResponse = s3Client.getObject(getObjectRequest);
+            return new BufferedReader(new InputStreamReader(s3ObjectResponse));
+        } catch (SdkClientException ex) {
+            var errorMessage = "Unable to load credentials to connect S3 bucket";
+            logger.log(errorMessage);
+            throw new OptOutException(errorMessage, ex);
+        } catch (S3Exception ex) {
+            if (ex.statusCode() == 404) {
+                var errorMessage = "Object " + fileName + " does not exist. " + ex.getMessage();
+                logger.log(errorMessage);
+                throw new OptOutException(errorMessage, ex);
+            } else {
+                logger.log(ex.getMessage());
+                throw ex;
+            }
+        }
+    }
+
+    public String createResponseOptOutFile(String responseContent) {
+        try {
+            var key = RESPONSE_FILE_NAME + new SimpleDateFormat(RESPONSE_FILE_NAME_PATTERN).format(new Date());
+            var objectRequest = PutObjectRequest.builder()
+                    .bucket(BFD_S3_BUCKET_NAME)
+                    .key(key)
+                    .build();
+
+            s3Client.putObject(objectRequest, RequestBody.fromString(responseContent));
+            return key;
         } catch (AmazonS3Exception ex) {
-            // handle exception
-            // Alert?
+            var errorMessage = "Response OptOut file cannot be created. ";
+            logger.log(errorMessage + ex.getMessage());
+            throw new OptOutException(errorMessage, ex);
         }
     }
 

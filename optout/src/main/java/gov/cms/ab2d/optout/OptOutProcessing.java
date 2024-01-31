@@ -3,50 +3,59 @@ package gov.cms.ab2d.optout;
 
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import gov.cms.ab2d.databasemanagement.DatabaseUtil;
+import software.amazon.awssdk.services.s3.S3Client;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Optional;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 import static gov.cms.ab2d.optout.OptOutConstants.*;
 
 public class OptOutProcessing {
-
-    private final String fileName;
     private final LambdaLogger logger;
     public SortedMap<Long, OptOutResult> optOutResultMap;
+    private final OptOutS3 optOutS3;
 
-    public OptOutProcessing(String fileName, LambdaLogger logger) {
-        this.fileName = fileName;
+    public OptOutProcessing(String fileName, String endpoint, LambdaLogger logger) throws URISyntaxException {
         this.logger = logger;
         this.optOutResultMap = new TreeMap<>();
+        var s3Client = S3Client.builder()
+                //    .credentialsProvider(credentials)
+                .region(S3_REGION)
+                .endpointOverride(new URI(endpoint))
+                .build();
+        optOutS3 = new OptOutS3(s3Client, fileName, logger);
     }
 
     public void process() {
-        try {
-            processFileFromS3(OptOutS3.openFileS3(fileName));
-            OptOutS3.createResponseOptOutFile(createResponseContent());
-            //    OptOutS3.deleteFileFromS3();
-        } catch (IOException ex) {
-            throw new OptOutException(ex);
-        }
+        processFileFromS3(optOutS3.openFileS3());
+        optOutS3.createResponseOptOutFile(createResponseContent());
     }
 
-    public void processFileFromS3(BufferedReader reader) throws IOException {
+    public void processFileFromS3(BufferedReader reader) {
         var dbConnection = DatabaseUtil.getConnection();
         String line;
         var lineNumber = 0L;
-        while ((line = reader.readLine()) != null) {
-            var optOutInformation = createOptOutInformation(line, lineNumber);
-            // If the file line was parsed successfully, update the optout values in the database
-            optOutInformation.ifPresent(information -> updateOptOut(information, dbConnection));
-            lineNumber++;
+        try {
+            while ((line = reader.readLine()) != null) {
+                var optOutInformation = createOptOutInformation(line, lineNumber);
+                // If the file line was parsed successfully, update the optout values in the database
+                optOutInformation.ifPresent(information -> updateOptOut(information, dbConnection));
+                lineNumber++;
+            }
+        } catch (IOException ex) {
+            logger.log("An error occurred during file processing. " + ex.getMessage());
+            throw new OptOutException("An error occurred during file processing.", ex);
         }
     }
 
@@ -64,6 +73,9 @@ public class OptOutProcessing {
             logger.log("Lambda can not parse the line: " + lineNumber);
             // The file line was parsed with an error
             optOutResultMap.put(lineNumber, new OptOutResult(new OptOutInformation(lineNumber, information), RecordStatus.REJECTED, ReasonCode.PARSE_ERROR));
+            if (!information.startsWith(FIRST_LINE) && !information.startsWith(LAST_LINE)) {
+                logger.log("There is a parsing error on the line " + lineNumber);
+            }
         }
         return Optional.empty();
     }
@@ -79,6 +91,7 @@ public class OptOutProcessing {
                             new OptOutInformation(optOutInformation.getLineNumber(), optOutInformation.getText()),
                             RecordStatus.REJECTED,
                             ReasonCode.INSERT_ERROR));
+            logger.log("There is an insertion error on the line " + optOutInformation.getLineNumber());
             logger.log(ex.getMessage());
         }
     }
@@ -107,7 +120,6 @@ public class OptOutProcessing {
         responseContent.delete(responseContent.lastIndexOf(LINE_SEPARATOR), responseContent.length());
         return responseContent.toString();
     }
-
 
     private static void prepareInsert(OptOutInformation optOut, PreparedStatement statement) throws SQLException {
         statement.setBoolean(1, optOut.isOptOut());
