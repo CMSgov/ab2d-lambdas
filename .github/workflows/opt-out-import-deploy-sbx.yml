@@ -1,4 +1,4 @@
-name: Deploy opt-out-import to sbx (sandbox)
+name: opt-out-import sbx (sandbox) deploy
 
 on:
   workflow_dispatch:
@@ -10,14 +10,11 @@ jobs:
       id-token: write
     runs-on: ubuntu-latest
     environment: sbx
-
     steps:
-      - name: Assume role in target account
-        uses: aws-actions/configure-aws-credentials@v3
+      - uses: aws-actions/configure-aws-credentials@v3
         with:
           aws-region: ${{ vars.AWS_REGION }}
           role-to-assume: ${{ vars.ACCOUNT_ROLE }}
-
       - name: Promote lambda code from test to sbx
         run: |
           aws s3 cp --no-progress s3://${{ vars.OPT_OUT_IMPORT_TEST_ZIP_BUCKET }}/function.zip s3://${{ vars.OPT_OUT_IMPORT_ZIP_BUCKET }}/function.zip
