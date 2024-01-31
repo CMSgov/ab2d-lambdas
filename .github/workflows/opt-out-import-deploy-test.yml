@@ -1,4 +1,4 @@
-name: Build and deploy opt-out-import to test (impl)
+name: opt-out-import test (impl) deploy
 
 on:
   push:
@@ -12,19 +12,16 @@ jobs:
   deploy:
     runs-on: self-hosted
     environment: test
-
+    defaults:
+      run:
+        working-directory: ./optout
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Set up JDK
-        uses: actions/setup-java@v3
+      - uses: actions/checkout@v3
+      - uses: actions/setup-java@v3
         with:
           java-version: '17'
           distribution: 'temurin'
-
-      - name: Set env vars from AWS params
-        uses: cmsgov/ab2d-bcda-dpc-platform/actions/aws-params-env-action@main
+      - uses: cmsgov/ab2d-bcda-dpc-platform/actions/aws-params-env-action@main
         env:
           AWS_REGION: ${{ vars.AWS_REGION }}
         with:
@@ -32,17 +29,13 @@ jobs:
             ARTIFACTORY_URL=/artifactory/url
             ARTIFACTORY_USER=/artifactory/user
             ARTIFACTORY_PASSWORD=/artifactory/password
-
       - name: Build opt-out-import zip file
-        run: ./gradlew buildZip -b optout/build.gradle --console=plain
-
-      - name: Assume role in target account
-        uses: aws-actions/configure-aws-credentials@v3
+        run: ../gradlew buildZip
+      - uses: aws-actions/configure-aws-credentials@v3
         with:
           aws-region: ${{ vars.AWS_REGION }}
           role-to-assume: ${{ vars.ACCOUNT_ROLE }}
-
       - name: Upload and reload
         run: |
-          aws s3 cp --no-progress optout/build/distributions/optout.zip s3://${{ vars.OPT_OUT_IMPORT_ZIP_BUCKET }}/function.zip
+          aws s3 cp --no-progress build/distributions/optout.zip s3://${{ vars.OPT_OUT_IMPORT_ZIP_BUCKET }}/function.zip
           aws lambda update-function-code --function-name ab2d-test-opt-out-import --s3-bucket ${{ vars.OPT_OUT_IMPORT_ZIP_BUCKET }} --s3-key function.zip
