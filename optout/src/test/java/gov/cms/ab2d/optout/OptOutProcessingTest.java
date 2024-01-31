@@ -6,12 +6,9 @@ import gov.cms.ab2d.databasemanagement.DatabaseUtil;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
+import org.junit.jupiter.api.extension.ExtendWith;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.StringReader;
+import java.net.URISyntaxException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -20,15 +17,12 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Optional;
 
-import static gov.cms.ab2d.optout.OptOutConstants.EFFECTIVE_DATE_PATTERN;
-import static gov.cms.ab2d.optout.OptOutConstants.LINE_SEPARATOR;
+import static gov.cms.ab2d.optout.OptOutConstants.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-
+@ExtendWith({S3MockAPIExtension.class})
 public class OptOutProcessingTest {
-
-    private static final MockedStatic<OptOutS3> optOutS3 = mockStatic(OptOutS3.class);
     private static final LambdaLogger logger = mock(LambdaLogger.class);
     private static final Connection dbConnection = mock(Connection.class);
     private static final PreparedStatement statement = mock(PreparedStatement.class);
@@ -40,42 +34,41 @@ public class OptOutProcessingTest {
     @BeforeAll
     static void beforeAll() throws SQLException {
         var dbUtil = mockStatic(DatabaseUtil.class);
-        optOutS3.when(() -> OptOutS3.openFileS3(anyString())).thenReturn(new BufferedReader(new StringReader(VALID_LINE)));
         dbUtil.when(DatabaseUtil::getConnection).thenReturn(dbConnection);
         when(dbConnection.prepareStatement(anyString())).thenReturn(statement);
     }
 
     @BeforeEach
-    void beforeEach() {
-        optOutProcessing = spy(new OptOutProcessing("", logger));
+    void beforeEach() throws URISyntaxException {
+        // var creds = StaticCredentialsProvider.create(AwsSessionCredentials.create("test", "test", ""));
+        optOutProcessing = spy(new OptOutProcessing(TEST_FILE_NAME, TEST_ENDPOINT, logger));
     }
 
     @Test
     void processTest() {
+        S3MockAPIExtension.createFile(VALID_LINE);
         optOutProcessing.process();
         assertEquals(1, optOutProcessing.optOutResultMap.size());
-        optOutS3.verify(() -> OptOutS3.openFileS3(anyString()), times(1));
         verify(optOutProcessing, times(1)).createOptOutInformation(anyString(), anyLong());
         verify(optOutProcessing, times(1)).updateOptOut(any(OptOutInformation.class), any(Connection.class));
         verify(optOutProcessing, times(1)).createResponseContent();
-
-        optOutS3.verify(() -> OptOutS3.createResponseOptOutFile(anyString()), times(1));
     }
 
     @Test
-    void processFileFromS3Test() throws IOException {
-        optOutProcessing.processFileFromS3(new BufferedReader(new StringReader(VALID_LINE)));
-        assertEquals(1, optOutProcessing.optOutResultMap.size());
-    }
-
-    @Test
-    void createOptOutInformationValidTest() {
+    void createOptOutInformationValidTest1() {
         Optional<OptOutInformation> optOutInformation = optOutProcessing.createOptOutInformation(VALID_LINE, 1L);
         assertTrue(optOutInformation.isPresent());
         assertEquals(1L, optOutInformation.get().getLineNumber());
         assertEquals(VALID_LINE, optOutInformation.get().getText());
         assertEquals("7GU6ME5FA64", optOutInformation.get().getMbi());
         assertTrue(optOutInformation.get().isOptOut());
+    }
+
+    @Test
+    void createOptOutInformationValidTest2() {
+        Optional<OptOutInformation> optOutInformation = optOutProcessing.createOptOutInformation(VALID_LINE.substring(0, VALID_LINE.length() - 1) + 'N', 1L);
+        assertTrue(optOutInformation.isPresent());
+        assertFalse(optOutInformation.get().isOptOut());
     }
 
     @Test
@@ -120,7 +113,7 @@ public class OptOutProcessingTest {
     }
 
     @Test
-    void updateOptOutTest() throws SQLException {
+    void updateOptOutTest() {
         Optional<OptOutInformation> optOutInformation = optOutProcessing.createOptOutInformation(VALID_LINE, 1L);
         assertTrue(optOutInformation.isPresent());
         optOutProcessing.updateOptOut(optOutInformation.get(), dbConnection);
@@ -133,7 +126,7 @@ public class OptOutProcessingTest {
     @Test
     void updateOptOutInvalidTest() throws SQLException {
         Optional<OptOutInformation> optOutInformation = optOutProcessing.createOptOutInformation(VALID_LINE, 1L);
-        when(dbConnection.prepareStatement(Mockito.anyString())).thenThrow(SQLException.class);
+        when(dbConnection.prepareStatement(anyString())).thenThrow(SQLException.class);
         assertTrue(optOutInformation.isPresent());
         optOutProcessing.updateOptOut(optOutInformation.get(), dbConnection);
         assertEquals(1, optOutProcessing.optOutResultMap.size());

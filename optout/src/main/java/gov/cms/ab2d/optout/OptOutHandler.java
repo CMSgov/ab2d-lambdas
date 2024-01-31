@@ -2,30 +2,46 @@ package gov.cms.ab2d.optout;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
-import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
+import com.amazonaws.services.lambda.runtime.RequestHandler;
+import com.amazonaws.services.lambda.runtime.events.SQSEvent;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
-import java.util.concurrent.CompletionException;
+import java.net.URISyntaxException;
 
-public class OptOutHandler implements RequestStreamHandler {
+import static gov.cms.ab2d.optout.OptOutConstants.ENDPOINT;
+
+public class OptOutHandler implements RequestHandler<SQSEvent, Void> {
 
     @Override
-    public void handleRequest(InputStream inputStream, OutputStream outputStream, Context context) throws IOException {
+    public Void handleRequest(SQSEvent sqsEvent, Context context) {
+        for (SQSEvent.SQSMessage msg : sqsEvent.getRecords()) {
+            processSQSMessage(msg, context);
+        }
+        context.getLogger().log("OptOut Lambda completed");
+        return null;
+    }
+
+    public void processSQSMessage(SQSEvent.SQSMessage msg, Context context) {
         var logger = context.getLogger();
-        logger.log("OptOut Lambda is started");
         try {
-            //ToDo: Get file name from SQS
-            new OptOutProcessing("optOutDummy.txt", logger).process();
-        } catch (NullPointerException | CompletionException ex) {
-            logger.log(ex.getMessage());
-            outputStream.write(ex.getMessage().getBytes(StandardCharsets.UTF_8));
-            throw new OptOutException(ex);
-        } finally {
-            outputStream.write("OptOut Lambda Completed".getBytes(StandardCharsets.UTF_8));
+            logger.log("OptOut Lambda started. Processing message from SQS " + msg.getBody());
+
+            var optOutProcessing = processingInit(msg.getBody(), logger);
+            optOutProcessing.process();
+        } catch (Exception ex) {
+            logger.log("An error occurred");
+            throw new OptOutException("An error occurred", ex);
         }
     }
 
+    public OptOutProcessing processingInit(String msg, LambdaLogger logger) throws URISyntaxException {
+        return new OptOutProcessing(msg, ENDPOINT, logger);
+        //ToDo: uncomment when permanent credentials will be available
+//        var creds = SecretManager.getS3Credentials(ACCESS_KEY_ID, SECRET_ACCESS_KEY, ACCESS_TOKEN, logger);
+//        if (creds.isPresent())
+//            return new OptOutProcessing(msg, ENDPOINT, creds.get(), logger);
+//        else {
+//            logger.log("Can't get Credentials from Secret manager");
+//            throw new OptOutException("Can't get Credentials from Secret manager");
+//        }
+    }
 }
