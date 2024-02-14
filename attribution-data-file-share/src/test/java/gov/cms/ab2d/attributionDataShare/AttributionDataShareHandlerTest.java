@@ -1,25 +1,18 @@
 package gov.cms.ab2d.attributionDataShare;
 
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
-import gov.cms.ab2d.lambdalibs.lib.FileUtil;
 import gov.cms.ab2d.testutils.AB2DPostgresqlContainer;
 import gov.cms.ab2d.testutils.TestContext;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.postgresql.copy.CopyManager;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.sql.SQLException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.net.URISyntaxException;
 
-import static gov.cms.ab2d.attributionDataShare.AttributionDataShareHandlerConstants.*;
+import static gov.cms.ab2d.attributionDataShare.AttributionDataShareHandlerConstants.TEST_ENDPOINT;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -30,33 +23,25 @@ class AttributionDataShareHandlerTest {
     @Container
     private static final PostgreSQLContainer POSTGRE_SQL_CONTAINER = new AB2DPostgresqlContainer();
     LambdaLogger LOGGER = mock(LambdaLogger.class);
+
+    AttributionDataShareHelper helper = mock(AttributionDataShareHelper.class);
+    AttributionDataShareHandler handler = spy(new AttributionDataShareHandler());
+
     @Test
     void attributionDataShareInvoke() {
-        AttributionDataShareHandler handler = new AttributionDataShareHandler();
+        when(handler.helperInit(anyString(), anyString(), any(LambdaLogger.class))).thenReturn(helper);
         assertDoesNotThrow(() -> handler.handleRequest(null, System.out, new TestContext()));
     }
 
     @Test
-    void copyDataToFileTest() throws SQLException, IOException {
-        CopyManager copyManager = mock(CopyManager.class);
-        BufferedWriter writer = mock(BufferedWriter.class);
-        String currentDate = new SimpleDateFormat(PATTERN).format(new Date());
-        String fileFullPath = FILE_PATH + FILE_PARTIAL_NAME + currentDate + FILE_FORMAT;
-        Path path = Paths.get(fileFullPath);
-        AttributionDataShareHandler handler = new AttributionDataShareHandler();
-
-        when(copyManager.copyOut(eq(COPY_STATEMENT), eq(writer))).thenReturn(anyLong());
-        assertDoesNotThrow(() -> handler.copyDataToFile(fileFullPath, LOGGER));
-
-        assertTrue(Files.exists(path));
-        FileUtil.deleteDirectoryRecursion(path);
-    }
-    @Test
     void attributionDataShareExceptionTest() {
         Exception ex = mock(Exception.class);
         when(ex.getMessage()).thenReturn("Exception");
-        AttributionDataShareHandler handler = new AttributionDataShareHandler();
         assertThrows(AttributionDataShareException.class, () -> handler.throwAttributionDataShareException(LOGGER, ex));
     }
 
+    @Test
+    void getS3ClientTest() throws URISyntaxException {
+        assertNotNull(handler.getS3Client(TEST_ENDPOINT));
+    }
 }

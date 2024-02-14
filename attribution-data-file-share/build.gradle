@@ -12,13 +12,16 @@ repositories {
 
 dependencies {
     implementation 'com.amazonaws:aws-lambda-java-core:1.2.2'
+    implementation 'com.amazonaws:aws-java-sdk-s3:1.12.406'
     implementation 'org.postgresql:postgresql:42.5.1'
+    implementation 'software.amazon.awssdk:s3:2.21.7'
     implementation project(path: ':database-management')
     implementation project(path: ':lambda-lib')
     testImplementation 'org.mockito:mockito-core:4.8.0'
     testImplementation 'org.testcontainers:junit-jupiter:1.17.6'
     testImplementation "org.testcontainers:postgresql:1.17.6"
     testImplementation project(':lambda-test-utils')
+    testImplementation 'io.findify:s3mock_2.13:0.2.6'
 }
 
 task buildZip(type: Zip) {

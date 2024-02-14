@@ -3,15 +3,15 @@ package gov.cms.ab2d.attributionDataShare;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
-import gov.cms.ab2d.databasemanagement.DatabaseUtil;
 import gov.cms.ab2d.lambdalibs.lib.FileUtil;
-import org.postgresql.copy.CopyManager;
-import org.postgresql.core.BaseConnection;
+import software.amazon.awssdk.services.s3.S3Client;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.Paths;
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -24,13 +24,14 @@ public class AttributionDataShareHandler implements RequestStreamHandler {
     public void handleRequest(InputStream inputStream, OutputStream outputStream, Context context) throws IOException {
         LambdaLogger logger = context.getLogger();
         logger.log("AttributionDataShare Lambda is started");
-
         String currentDate = new SimpleDateFormat(PATTERN).format(new Date());
-        String fileFullPath = FILE_PATH + FILE_PARTIAL_NAME + currentDate + FILE_FORMAT;
+        String fileName = FILE_PARTIAL_NAME + currentDate + FILE_FORMAT;
+        String fileFullPath = FILE_PATH + fileName;
+        AttributionDataShareHelper helper = helperInit(fileName, fileFullPath, logger);
         try {
-            copyDataToFile(fileFullPath, logger);
-            writeFileToFinalDestination();
-        } catch (NullPointerException ex) {
+            helper.copyDataToFile();
+            helper.writeFileToFinalDestination(getS3Client(ENDPOINT));
+        } catch (NullPointerException | URISyntaxException ex) {
             throwAttributionDataShareException(logger, ex);
         } finally {
             FileUtil.deleteDirectoryRecursion(Paths.get(fileFullPath));
@@ -38,28 +39,20 @@ public class AttributionDataShareHandler implements RequestStreamHandler {
         }
     }
 
-    void copyDataToFile(String filePath, LambdaLogger logger) {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath, true))) {
-            Connection dbConnection = DatabaseUtil.getConnection();
-            CopyManager copyManager = new CopyManager((BaseConnection) dbConnection);
-            copyManager.copyOut(COPY_STATEMENT, writer);
-        } catch (SQLException ex) {
-            logger.log(ex.getMessage());
-        } catch (IOException ex) {
-            throwAttributionDataShareException(logger, ex);
-        }
+    S3Client getS3Client(String endpoint) throws URISyntaxException {
+        return S3Client.builder()
+                .region(S3_REGION)
+                .endpointOverride(new URI(endpoint))
+                .build();
     }
 
-    // Handle writing to the target destination.
-    // This may not be necessary, but I am assuming we will want to store these files somewhere
-    // other than the disk the container is running on. Requirements still to be determined.
-    private void writeFileToFinalDestination() {
-        // TODO
+    AttributionDataShareHelper helperInit(String fileName, String fileFullPath, LambdaLogger logger) {
+        return new AttributionDataShareHelper(fileName, fileFullPath, logger);
     }
 
     void throwAttributionDataShareException(LambdaLogger logger, Exception ex) {
         logger.log(ex.getMessage());
-        throw new AttributionDataShareException(ex);
+        throw new AttributionDataShareException(ex.getMessage(), ex);
     }
 
 }
