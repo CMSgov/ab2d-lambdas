@@ -5,10 +5,7 @@ import com.amazonaws.services.s3.model.AmazonS3Exception;
 import software.amazon.awssdk.core.exception.SdkClientException;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.GetObjectRequest;
-import software.amazon.awssdk.services.s3.model.HeadObjectRequest;
-import software.amazon.awssdk.services.s3.model.PutObjectRequest;
-import software.amazon.awssdk.services.s3.model.S3Exception;
+import software.amazon.awssdk.services.s3.model.*;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -78,25 +75,18 @@ public class OptOutS3 {
         }
     }
 
-    //ToDo: AB2D-5796 Delete Opt-out file from S3 (inbound)
-//    public static void deleteFileFromS3() {
-//        // The map always contains 2 lines: the first and last from the optout file.
-//        if (optOutResultMap.size() == 2) {
-//            try {
-//                var request = DeleteObjectRequest.builder()
-//                        .bucket(BFD_S3_BUCKET_NAME)
-//                        .key(fileName)
-//                        .build();
-//
-//                S3_CLIENT.deleteObject(request);
-//            } catch (SdkClientException ex) {
-//                logger.log(ex.getMessage());
-//            }
-//        }
-//        else {
-//            // Slack alert
-//        }
-//    }
+    public void deleteFileFromS3() {
+        try {
+            var request = DeleteObjectRequest.builder()
+                    .bucket(BFD_S3_BUCKET_NAME)
+                    .key(fileName)
+                    .build();
+
+            s3Client.deleteObject(request);
+        } catch (SdkClientException ex) {
+            logger.log(ex.getMessage());
+        }
+    }
 
 
 }
