@@ -3,12 +3,17 @@ package gov.cms.ab2d.optout;
 
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import gov.cms.ab2d.databasemanagement.DatabaseUtil;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -45,13 +50,15 @@ public class OptOutProcessingTest {
     }
 
     @Test
-    void processTest() {
-        S3MockAPIExtension.createFile(VALID_LINE);
+    void processTest() throws IOException {
+        S3MockAPIExtension.createFile(Files.readString(Paths.get("src/test/resources/" + TEST_FILE_NAME), StandardCharsets.UTF_8));
         optOutProcessing.process();
-        assertEquals(1, optOutProcessing.optOutResultMap.size());
-        verify(optOutProcessing, times(1)).createOptOutInformation(anyString(), anyLong());
-        verify(optOutProcessing, times(1)).updateOptOut(any(OptOutInformation.class), any(Connection.class));
+        assertEquals(4, optOutProcessing.optOutResultMap.size());
+        verify(optOutProcessing, times(4)).createOptOutInformation(anyString(), anyLong());
+        verify(optOutProcessing, times(2)).updateOptOut(any(OptOutInformation.class), any(Connection.class));
         verify(optOutProcessing, times(1)).createResponseContent();
+        //Because map contains records with insertion error
+        Assertions.assertTrue(S3MockAPIExtension.isObjectExists(TEST_FILE_NAME));
     }
 
     @Test

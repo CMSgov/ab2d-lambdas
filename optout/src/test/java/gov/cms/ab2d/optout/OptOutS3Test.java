@@ -51,4 +51,10 @@ public class OptOutS3Test {
         assertTrue(S3MockAPIExtension.isObjectExists(key));
         S3MockAPIExtension.deleteFile(key);
     }
+
+    @Test
+    void deleteFileFromS3Test() {
+        OPT_OUT_S3.deleteFileFromS3();
+        Assertions.assertFalse(S3MockAPIExtension.isObjectExists(TEST_FILE_NAME));
+    }
 }
