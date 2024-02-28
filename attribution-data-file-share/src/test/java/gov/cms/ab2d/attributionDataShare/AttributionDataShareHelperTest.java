@@ -1,13 +1,12 @@
 package gov.cms.ab2d.attributionDataShare;
 
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
+import com.mockrunner.mock.jdbc.MockResultSet;
 import gov.cms.ab2d.lambdalibs.lib.FileUtil;
 import gov.cms.ab2d.testutils.AB2DPostgresqlContainer;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.postgresql.copy.CopyManager;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -17,11 +16,13 @@ import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.sql.SQLException;
+import java.sql.*;
 import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.Date;
 
-import static gov.cms.ab2d.attributionDataShare.AttributionDataShareHandlerConstants.*;
+import static gov.cms.ab2d.attributionDataShare.AttributionDataShareConstants.*;
+import static gov.cms.ab2d.attributionDataShare.AttributionDataShareHelper.getExecuteQuery;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -35,6 +36,8 @@ public class AttributionDataShareHelperTest {
 
     String FILE_NAME = FILE_PARTIAL_NAME + new SimpleDateFormat(PATTERN).format(new Date()) + FILE_FORMAT;
     String FILE_FULL_PATH = FILE_PATH + FILE_NAME;
+
+    String MBI = "1AA2BB3CC45";
     AttributionDataShareHelper helper;
 
     @BeforeEach
@@ -43,19 +46,29 @@ public class AttributionDataShareHelperTest {
     }
 
     @Test
-    void copyDataToFileTest() throws SQLException, IOException {
-        CopyManager copyManager = mock(CopyManager.class);
-        when(helper.getCopyManager()).thenReturn(copyManager);
-        assertDoesNotThrow(() -> helper.copyDataToFile());
+    void copyDataToFileTest() throws IOException, SQLException {
+        var connection = mock(Connection.class);
+        var stmt = mock(Statement.class);
+        var rs = new MockResultSet("");
+        rs.addColumn("mbi", Collections.singletonList(MBI));
+        rs.addColumn("effective_date", Collections.singletonList(null));
+        rs.addColumn("opt_out_flag", Collections.singletonList(true));
+        when(connection.createStatement()).thenReturn(stmt);
+
+        when(getExecuteQuery(stmt)).thenReturn(rs);
+        assertDoesNotThrow(() -> helper.copyDataToFile(connection));
 
         assertTrue(Files.exists(Paths.get(FILE_FULL_PATH)));
         FileUtil.deleteDirectoryRecursion(Paths.get(FILE_FULL_PATH));
     }
 
     @Test
-    void copyDataToFileExceptionTest() {
-        assertThrows(AttributionDataShareException.class, () -> helper.copyDataToFile());
+    void getResponseLineTest(){
+        assertEquals(MBI +"        Y", helper.getResponseLine(MBI, null, true));
+        assertEquals(MBI +"20240226N", helper.getResponseLine(MBI, Timestamp.valueOf("2024-02-26 00:00:00"), false));
+        assertEquals("A                  Y", helper.getResponseLine("A", null, true));
     }
+
 
     @Test
     void writeFileToFinalDestinationTest() throws IOException {
@@ -65,16 +78,9 @@ public class AttributionDataShareHelperTest {
         S3MockAPIExtension.deleteFile(FILE_NAME);
     }
 
-    @Test
-    void getCopyManagerTest() throws SQLException {
-        Assertions.assertNotNull(helper.getCopyManager());
-    }
-
     private void createTestFile() throws IOException {
         PrintWriter writer = new PrintWriter(FILE_FULL_PATH, StandardCharsets.UTF_8);
         writer.println("Test");
         writer.close();
     }
-
-
 }
