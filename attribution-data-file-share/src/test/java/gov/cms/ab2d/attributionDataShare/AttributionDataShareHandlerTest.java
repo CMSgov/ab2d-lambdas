@@ -3,16 +3,14 @@ package gov.cms.ab2d.attributionDataShare;
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import gov.cms.ab2d.testutils.AB2DPostgresqlContainer;
 import gov.cms.ab2d.testutils.TestContext;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.net.URISyntaxException;
 
-import static gov.cms.ab2d.attributionDataShare.AttributionDataShareHandlerConstants.TEST_ENDPOINT;
+import static gov.cms.ab2d.attributionDataShare.AttributionDataShareConstants.TEST_ENDPOINT;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 

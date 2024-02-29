@@ -8,7 +8,7 @@ import software.amazon.awssdk.services.s3.model.*;
 
 import java.net.URI;
 
-import static gov.cms.ab2d.attributionDataShare.AttributionDataShareHandlerConstants.*;
+import static gov.cms.ab2d.attributionDataShare.AttributionDataShareConstants.*;
 import static org.junit.jupiter.api.extension.ExtensionContext.Namespace.GLOBAL;
 
 public class S3MockAPIExtension implements BeforeAllCallback, ExtensionContext.Store.CloseableResource {
