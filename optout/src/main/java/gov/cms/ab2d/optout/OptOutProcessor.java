@@ -21,12 +21,12 @@ import java.util.TreeMap;
 
 import static gov.cms.ab2d.optout.OptOutConstants.*;
 
-public class OptOutProcessing {
+public class OptOutProcessor {
     private final LambdaLogger logger;
     public SortedMap<Long, OptOutResult> optOutResultMap;
     private final OptOutS3 optOutS3;
 
-    public OptOutProcessing(String fileName, String endpoint, LambdaLogger logger) throws URISyntaxException {
+    public OptOutProcessor(String fileName, String endpoint, LambdaLogger logger) throws URISyntaxException {
         this.logger = logger;
         this.optOutResultMap = new TreeMap<>();
         var s3Client = S3Client.builder()

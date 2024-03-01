@@ -25,7 +25,7 @@ public class OptOutHandler implements RequestHandler<SQSEvent, Void> {
         try {
             logger.log("OptOut Lambda started. Processing message from SQS " + msg.getBody());
 
-            var optOutProcessing = processingInit(msg.getBody(), logger);
+            var optOutProcessing = processorInit(msg.getBody(), logger);
             optOutProcessing.process();
         } catch (Exception ex) {
             logger.log("An error occurred");
@@ -33,8 +33,8 @@ public class OptOutHandler implements RequestHandler<SQSEvent, Void> {
         }
     }
 
-    public OptOutProcessing processingInit(String msg, LambdaLogger logger) throws URISyntaxException {
-        return new OptOutProcessing(msg, ENDPOINT, logger);
+    public OptOutProcessor processorInit(String msg, LambdaLogger logger) throws URISyntaxException {
+        return new OptOutProcessor(msg, ENDPOINT, logger);
         //ToDo: uncomment when permanent credentials will be available
 //        var creds = SecretManager.getS3Credentials(ACCESS_KEY_ID, SECRET_ACCESS_KEY, ACCESS_TOKEN, logger);
 //        if (creds.isPresent())

@@ -27,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith({S3MockAPIExtension.class})
-public class OptOutProcessingTest {
+public class OptOutProcessorTest {
     private static final LambdaLogger logger = mock(LambdaLogger.class);
     private static final Connection dbConnection = mock(Connection.class);
     private static final PreparedStatement statement = mock(PreparedStatement.class);
@@ -35,7 +35,7 @@ public class OptOutProcessingTest {
     private static final String VALID_LINE = MBI + "          NAME                                                        LASTNAME                                111 DUMMY ADDRESS                                                                                                                                                            TESTDATA                                DUMMY11DUMMY20230726202307261-800TY";
     private final String INVALID_LINE = "TRL_BENEDATARSP202307260000000009";
     private final String EXPECTED_ACCEPTED_LINE = VALID_LINE + "                                                                                          Accepted  00";
-    static OptOutProcessing optOutProcessing;
+    static OptOutProcessor optOutProcessor;
 
     @BeforeAll
     static void beforeAll() throws SQLException {
@@ -47,24 +47,24 @@ public class OptOutProcessingTest {
     @BeforeEach
     void beforeEach() throws URISyntaxException {
         // var creds = StaticCredentialsProvider.create(AwsSessionCredentials.create("test", "test", ""));
-        optOutProcessing = spy(new OptOutProcessing(TEST_FILE_NAME, TEST_ENDPOINT, logger));
+        optOutProcessor = spy(new OptOutProcessor(TEST_FILE_NAME, TEST_ENDPOINT, logger));
     }
 
     @Test
     void processTest() throws IOException {
         S3MockAPIExtension.createFile(Files.readString(Paths.get("src/test/resources/" + TEST_FILE_NAME), StandardCharsets.UTF_8));
-        optOutProcessing.process();
-        assertEquals(4, optOutProcessing.optOutResultMap.size());
-        verify(optOutProcessing, times(4)).createOptOutInformation(anyString(), anyLong());
-        verify(optOutProcessing, times(2)).updateOptOut(any(OptOutInformation.class), any(Connection.class));
-        verify(optOutProcessing, times(1)).createResponseContent();
+        optOutProcessor.process();
+        assertEquals(4, optOutProcessor.optOutResultMap.size());
+        verify(optOutProcessor, times(4)).createOptOutInformation(anyString(), anyLong());
+        verify(optOutProcessor, times(2)).updateOptOut(any(OptOutInformation.class), any(Connection.class));
+        verify(optOutProcessor, times(1)).createResponseContent();
         //Because map contains records with insertion error
         Assertions.assertTrue(S3MockAPIExtension.isObjectExists(TEST_FILE_NAME));
     }
 
     @Test
     void createOptOutInformationValidTest1() {
-        Optional<OptOutInformation> optOutInformation = optOutProcessing.createOptOutInformation(VALID_LINE, 1L);
+        Optional<OptOutInformation> optOutInformation = optOutProcessor.createOptOutInformation(VALID_LINE, 1L);
         assertTrue(optOutInformation.isPresent());
         assertEquals(1L, optOutInformation.get().getLineNumber());
         assertEquals(VALID_LINE, optOutInformation.get().getText());
@@ -74,71 +74,71 @@ public class OptOutProcessingTest {
 
     @Test
     void createOptOutInformationValidTest2() {
-        Optional<OptOutInformation> optOutInformation = optOutProcessing.createOptOutInformation(VALID_LINE.substring(0, VALID_LINE.length() - 1) + 'N', 1L);
+        Optional<OptOutInformation> optOutInformation = optOutProcessor.createOptOutInformation(VALID_LINE.substring(0, VALID_LINE.length() - 1) + 'N', 1L);
         assertTrue(optOutInformation.isPresent());
         assertFalse(optOutInformation.get().isOptOut());
     }
 
     @Test
     void optOutResultMapValidTest() {
-        optOutProcessing.createOptOutInformation(VALID_LINE, 1L);
-        assertEquals(1, optOutProcessing.optOutResultMap.size());
-        OptOutResult mapValue = optOutProcessing.optOutResultMap.get(1L);
+        optOutProcessor.createOptOutInformation(VALID_LINE, 1L);
+        assertEquals(1, optOutProcessor.optOutResultMap.size());
+        OptOutResult mapValue = optOutProcessor.optOutResultMap.get(1L);
         assertEquals(ReasonCode.ACCEPTED, mapValue.getReasonCode());
         assertEquals(RecordStatus.ACCEPTED, mapValue.getRecordStatus());
     }
 
     @Test
     void createOptOutInformationInvalidTest() {
-        var optOutInformation = optOutProcessing.createOptOutInformation(INVALID_LINE, 0L);
+        var optOutInformation = optOutProcessor.createOptOutInformation(INVALID_LINE, 0L);
         assertFalse(optOutInformation.isPresent());
     }
 
     @Test
     void optOutResultMapParseErrorTest() {
-        optOutProcessing.createOptOutInformation(INVALID_LINE, 0L);
-        assertEquals(1, optOutProcessing.optOutResultMap.size());
-        var mapValue = optOutProcessing.optOutResultMap.get(0L);
+        optOutProcessor.createOptOutInformation(INVALID_LINE, 0L);
+        assertEquals(1, optOutProcessor.optOutResultMap.size());
+        var mapValue = optOutProcessor.optOutResultMap.get(0L);
         assertEquals(ReasonCode.PARSE_ERROR, mapValue.getReasonCode());
         assertEquals(RecordStatus.REJECTED, mapValue.getRecordStatus());
     }
 
     @Test
     void createResponseOptOutContentTest() {
-        optOutProcessing.createOptOutInformation(VALID_LINE, 1L);
-        assertEquals(EXPECTED_ACCEPTED_LINE, optOutProcessing.createResponseContent());
+        optOutProcessor.createOptOutInformation(VALID_LINE, 1L);
+        assertEquals(EXPECTED_ACCEPTED_LINE, optOutProcessor.createResponseContent());
     }
 
     @Test
     void createMultipleResponseOptOutContentTest() throws ParseException {
-        optOutProcessing.optOutResultMap.put(0L, new OptOutResult(new OptOutInformation(0L, INVALID_LINE), RecordStatus.REJECTED, ReasonCode.PARSE_ERROR));
-        optOutProcessing.optOutResultMap.put(1L, new OptOutResult(new OptOutInformation(MBI, getTestTimestamp(), true, 1L, VALID_LINE), RecordStatus.ACCEPTED, ReasonCode.ACCEPTED));
-        optOutProcessing.optOutResultMap.put(2L, new OptOutResult(new OptOutInformation(2L, INVALID_LINE), RecordStatus.REJECTED, ReasonCode.PARSE_ERROR));
+        optOutProcessor.optOutResultMap.put(0L, new OptOutResult(new OptOutInformation(0L, INVALID_LINE), RecordStatus.REJECTED, ReasonCode.PARSE_ERROR));
+        optOutProcessor.optOutResultMap.put(1L, new OptOutResult(new OptOutInformation(MBI, getTestTimestamp(), true, 1L, VALID_LINE), RecordStatus.ACCEPTED, ReasonCode.ACCEPTED));
+        optOutProcessor.optOutResultMap.put(2L, new OptOutResult(new OptOutInformation(2L, INVALID_LINE), RecordStatus.REJECTED, ReasonCode.PARSE_ERROR));
         var expectedText = INVALID_LINE + LINE_SEPARATOR
                 + EXPECTED_ACCEPTED_LINE + LINE_SEPARATOR
                 + INVALID_LINE;
-        assertEquals(expectedText, optOutProcessing.createResponseContent());
+        assertEquals(expectedText, optOutProcessor.createResponseContent());
     }
 
     @Test
     void updateOptOutTest() {
-        Optional<OptOutInformation> optOutInformation = optOutProcessing.createOptOutInformation(VALID_LINE, 1L);
+        Optional<OptOutInformation> optOutInformation = optOutProcessor.createOptOutInformation(VALID_LINE, 1L);
         assertTrue(optOutInformation.isPresent());
-        optOutProcessing.updateOptOut(optOutInformation.get(), dbConnection);
-        assertEquals(1, optOutProcessing.optOutResultMap.size());
-        OptOutResult mapValue = optOutProcessing.optOutResultMap.get(1L);
+        optOutProcessor.updateOptOut(optOutInformation.get(), dbConnection);
+        assertEquals(1, optOutProcessor.optOutResultMap.size());
+        OptOutResult mapValue = optOutProcessor.optOutResultMap.get(1L);
         assertEquals(ReasonCode.ACCEPTED, mapValue.getReasonCode());
         assertEquals(RecordStatus.ACCEPTED, mapValue.getRecordStatus());
     }
 
     @Test
     void updateOptOutInvalidTest() throws SQLException {
-        Optional<OptOutInformation> optOutInformation = optOutProcessing.createOptOutInformation(VALID_LINE, 1L);
+        Optional<OptOutInformation> optOutInformation = optOutProcessor.createOptOutInformation(VALID_LINE, 1L);
         when(dbConnection.prepareStatement(anyString())).thenThrow(SQLException.class);
         assertTrue(optOutInformation.isPresent());
-        optOutProcessing.updateOptOut(optOutInformation.get(), dbConnection);
-        assertEquals(1, optOutProcessing.optOutResultMap.size());
-        OptOutResult mapValue = optOutProcessing.optOutResultMap.get(1L);
+        optOutProcessor.updateOptOut(optOutInformation.get(), dbConnection);
+        assertEquals(1, optOutProcessor.optOutResultMap.size());
+        OptOutResult mapValue = optOutProcessor.optOutResultMap.get(1L);
         assertEquals(ReasonCode.INSERT_ERROR, mapValue.getReasonCode());
         assertEquals(RecordStatus.REJECTED, mapValue.getRecordStatus());
     }

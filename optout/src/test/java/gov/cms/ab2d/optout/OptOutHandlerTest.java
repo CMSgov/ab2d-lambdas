@@ -26,7 +26,7 @@ public class OptOutHandlerTest {
     @Container
     private static final PostgreSQLContainer POSTGRE_SQL_CONTAINER = new AB2DPostgresqlContainer();
     private final static OptOutHandler handler = spy(new OptOutHandler());
-    private final static OptOutProcessing optOutProcessing = mock(OptOutProcessing.class);
+    private final static OptOutProcessor OPT_OUT_PROCESSOR = mock(OptOutProcessor.class);
     private final static SQSEvent sqsEvent = mock(SQSEvent.class);
     private final static SQSEvent.SQSMessage sqsMessage = mock(SQSEvent.SQSMessage.class);
 
@@ -34,7 +34,7 @@ public class OptOutHandlerTest {
     static void beforeAll() throws URISyntaxException {
         when(sqsEvent.getRecords()).thenReturn(Collections.singletonList(sqsMessage));
         when(sqsMessage.getBody()).thenReturn("optOutDummy.txt");
-        when(handler.processingInit(anyString(), any(LambdaLogger.class))).thenReturn(optOutProcessing);
+        when(handler.processorInit(anyString(), any(LambdaLogger.class))).thenReturn(OPT_OUT_PROCESSOR);
     }
 
     @Test
@@ -48,7 +48,7 @@ public class OptOutHandlerTest {
 
     @Test
     void optOutHandlerException() {
-        doThrow(new OptOutException("errorMessage", new AmazonS3Exception("errorMessage"))).when(optOutProcessing).process();
-        assertThrows(OptOutException.class, optOutProcessing::process);
+        doThrow(new OptOutException("errorMessage", new AmazonS3Exception("errorMessage"))).when(OPT_OUT_PROCESSOR).process();
+        assertThrows(OptOutException.class, OPT_OUT_PROCESSOR::process);
     }
 }
