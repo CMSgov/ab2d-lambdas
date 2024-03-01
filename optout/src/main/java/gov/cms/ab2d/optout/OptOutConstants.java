@@ -20,7 +20,7 @@ public class OptOutConstants {
     public static final int MBI_INDEX_END = 11;
     public static final int EFFECTIVE_DATE_INDEX_START = 354;
     public static final int EFFECTIVE_DATE_INDEX_END = 362;
-    public static final int OPTOUT_FLAG_INDEX = 368;
+    public static final int OPTOUT_FLAG_INDEX = 12;
     public static final String RECORD_STATUS_PATTERN = "%-10s";
     public static final String EFFECTIVE_DATE_PATTERN = "yyyyMMdd";
     public static final String LINE_SEPARATOR = System.getProperty("line.separator");
@@ -28,7 +28,7 @@ public class OptOutConstants {
     public static final String RESPONSE_FILE_NAME_PATTERN = "'D'yyMMdd.'T'hhmmssss";
 
     public static final String UPDATE_STATEMENT = "UPDATE public.coverage\n" +
-            "SET opt_out_flag = ?, effective_date = ?\n" +
+            "SET opt_out_flag = ?, effective_date = current_timestamp\n" +
             "WHERE current_mbi = ? OR historic_mbis LIKE CONCAT( '%',?,'%')";
 
 

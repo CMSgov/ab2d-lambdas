@@ -5,13 +5,11 @@ import java.sql.Timestamp;
 public class OptOutInformation {
     private final String text;
     private String mbi;
-    private Timestamp effectiveDate;
     private boolean optOutFlag;
     private final long lineNumber;
 
-    public OptOutInformation(String mbi, Timestamp effectiveDate, boolean optOutFlag, long lineNumber, String text) {
+    public OptOutInformation(String mbi, boolean optOutFlag, long lineNumber, String text) {
         this.mbi = mbi;
-        this.effectiveDate = effectiveDate;
         this.optOutFlag = optOutFlag;
         this.lineNumber = lineNumber;
         this.text = text;
@@ -24,10 +22,6 @@ public class OptOutInformation {
 
     public String getMbi() {
         return mbi;
-    }
-
-    public Timestamp getEffectiveDate() {
-        return effectiveDate;
     }
 
     public boolean isOptOut() {

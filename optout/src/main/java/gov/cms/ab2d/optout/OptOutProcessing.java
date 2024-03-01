@@ -62,10 +62,9 @@ public class OptOutProcessing {
     public Optional<OptOutInformation> createOptOutInformation(String information, long lineNumber) throws IllegalArgumentException {
         try {
             var mbi = information.substring(MBI_INDEX_START, MBI_INDEX_END).trim();
-            var effectiveDate = convertToDate(information.substring(EFFECTIVE_DATE_INDEX_START, EFFECTIVE_DATE_INDEX_END));
             var optOutFlag = (information.charAt(OPTOUT_FLAG_INDEX) == 'Y');
 
-            var optOutInformation = new OptOutInformation(mbi, effectiveDate, optOutFlag, lineNumber, information);
+            var optOutInformation = new OptOutInformation(mbi, optOutFlag, lineNumber, information);
             // The file line was parsed successfully
             optOutResultMap.put(lineNumber, new OptOutResult(optOutInformation, RecordStatus.ACCEPTED, ReasonCode.ACCEPTED));
             return Optional.of(optOutInformation);
@@ -123,16 +122,15 @@ public class OptOutProcessing {
 
     private static void prepareInsert(OptOutInformation optOut, PreparedStatement statement) throws SQLException {
         statement.setBoolean(1, optOut.isOptOut());
-        statement.setTimestamp(2, optOut.getEffectiveDate());
+        statement.setString(2, optOut.getMbi());
         statement.setString(3, optOut.getMbi());
-        statement.setString(4, optOut.getMbi());
         statement.addBatch();
     }
 
-    private Timestamp convertToDate(String date) throws ParseException {
-        var dateFormat = new SimpleDateFormat(EFFECTIVE_DATE_PATTERN);
-        var parsedDate = dateFormat.parse(date);
-        return new Timestamp(parsedDate.getTime());
-    }
+//    private Timestamp convertToDate(String date) throws ParseException {
+//        var dateFormat = new SimpleDateFormat(EFFECTIVE_DATE_PATTERN);
+//        var parsedDate = dateFormat.parse(date);
+//        return new Timestamp(parsedDate.getTime());
+//    }
 
 }
