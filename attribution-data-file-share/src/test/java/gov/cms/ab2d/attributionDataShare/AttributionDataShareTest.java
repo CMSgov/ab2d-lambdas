@@ -28,7 +28,7 @@ import static org.mockito.Mockito.*;
 
 @Testcontainers
 @ExtendWith({S3MockAPIExtension.class})
-public class AttributionDataShareHelperTest {
+public class AttributionDataShareTest {
     @SuppressWarnings({"rawtypes", "unused"})
     @Container
     private static final PostgreSQLContainer POSTGRE_SQL_CONTAINER = new AB2DPostgresqlContainer();
@@ -37,7 +37,7 @@ public class AttributionDataShareHelperTest {
     String FILE_NAME = FILE_PARTIAL_NAME + new SimpleDateFormat(PATTERN).format(new Date()) + FILE_FORMAT;
     String FILE_FULL_PATH = FILE_PATH + FILE_NAME;
 
-    String MBI = "1AA2BB3CC45";
+    String MBI = "DUMMY000001";
     AttributionDataShareHelper helper;
 
     @BeforeEach
