@@ -1,6 +1,9 @@
 name: opt-out-import test (impl) deploy
 
 on:
+  pull_request:
+    paths:
+      - optout/**
   push:
     branches:
       - main
@@ -34,8 +37,10 @@ jobs:
       - uses: aws-actions/configure-aws-credentials@v3
         with:
           aws-region: ${{ vars.AWS_REGION }}
-          role-to-assume: ${{ vars.ACCOUNT_ROLE }}
+          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/testeloper/ab2d-test-github-actions
       - name: Upload and reload
         run: |
-          aws s3 cp --no-progress build/distributions/optout.zip s3://${{ vars.OPT_OUT_IMPORT_ZIP_BUCKET }}/function.zip
-          aws lambda update-function-code --function-name ab2d-test-opt-out-import --s3-bucket ${{ vars.OPT_OUT_IMPORT_ZIP_BUCKET }} --s3-key function.zip
+          aws s3 cp --no-progress build/distributions/optout.zip \
+            s3://ab2d-test-opt-out-import-function/function-${{ github.sha }}.zip
+          aws lambda update-function-code --function-name ab2d-test-opt-out-import \
+            --s3-bucket ab2d-test-opt-out-import-function --s3-key function-${{ github.sha }}.zip
