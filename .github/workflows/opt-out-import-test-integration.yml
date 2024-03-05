@@ -1,0 +1,28 @@
+name: opt-out-import integration tests
+
+on:
+  pull_request:
+    paths:
+      - .github/workflows/opt-out-import-test-integration.yml
+      - optout/**
+  workflow_call:
+  workflow_dispatch:
+
+jobs:
+  # TODO Deploy first if triggered by push
+  upload:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./optout
+    steps:
+      - uses: aws-actions/configure-aws-credentials@v3
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          # Note that we use the lambda role with access to the bucket
+          role-to-assume: arn:aws:iam::${{ secrets.TEST_ACCOUNT_ID }}:role/delegatedadmin/developer/ab2d-test-opt-out-import-function
+      - name: Upload test file to the BFD bucket
+        run: |
+          aws s3 cp --no-progress src/test/resources/optOutDummy.txt \
+            s3://bfd-test-eft/bfdeft01/ab2d/in/testing.txt
+  # TODO Run another job to check database for update, then check bucket for response file
