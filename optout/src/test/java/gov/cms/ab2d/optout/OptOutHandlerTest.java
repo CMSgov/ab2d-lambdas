@@ -14,6 +14,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import java.net.URISyntaxException;
 import java.util.Collections;
 
+import static gov.cms.ab2d.optout.OptOutConstants.TEST_FILE_NAME;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -33,7 +34,7 @@ public class OptOutHandlerTest {
     @BeforeAll
     static void beforeAll() throws URISyntaxException {
         when(sqsEvent.getRecords()).thenReturn(Collections.singletonList(sqsMessage));
-        when(sqsMessage.getBody()).thenReturn("optOutDummy.txt");
+        when(sqsMessage.getBody()).thenReturn(TEST_FILE_NAME);
         when(handler.processingInit(anyString(), any(LambdaLogger.class))).thenReturn(optOutProcessing);
     }
 

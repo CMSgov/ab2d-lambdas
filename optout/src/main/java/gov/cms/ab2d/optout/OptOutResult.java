@@ -3,12 +3,10 @@ package gov.cms.ab2d.optout;
 public class OptOutResult {
 
     private final OptOutInformation optOutInformation;
-    private final String reasonCode;
-    private final String recordStatus;
+    private final RecordStatus recordStatus;
 
-    public OptOutResult(OptOutInformation optOutInformation, String recordStatus, String reasonCode) {
+    public OptOutResult(OptOutInformation optOutInformation, RecordStatus recordStatus) {
         this.optOutInformation = optOutInformation;
-        this.reasonCode = reasonCode;
         this.recordStatus = recordStatus;
     }
 
@@ -16,11 +14,8 @@ public class OptOutResult {
         return optOutInformation;
     }
 
-    public String getRecordStatus() {
+    public RecordStatus getRecordStatus() {
         return recordStatus;
     }
 
-    public String getReasonCode() {
-        return reasonCode;
-    }
 }
