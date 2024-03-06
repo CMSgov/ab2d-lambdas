@@ -15,7 +15,7 @@ jobs:
   # Deploy first if triggered by push
   deploy:
     if: ${{ github.event_name == 'push' }}
-    uses: ./.github/workflows/opt-out-export-deploy-test.yml
+    uses: ./.github/workflows/opt-out-export-test-deploy.yml
     secrets: inherit
 
   trigger:

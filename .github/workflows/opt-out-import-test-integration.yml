@@ -1,4 +1,4 @@
-name: opt-out-import integration tests
+name: opt-out-import test integration
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
       - optout/**
   workflow_dispatch:
 
-# Ensure we only have one integration test running at a time
+# Ensure we have only one integration test running at a time
 concurrency:
   group: opt-out-import-test-integration
 
@@ -15,7 +15,7 @@ jobs:
   # Deploy first if triggered by push
   deploy:
     if: ${{ github.event_name == 'push' }}
-    uses: ./.github/workflows/opt-out-import-deploy-test.yml
+    uses: ./.github/workflows/opt-out-import-test-deploy.yml
     secrets: inherit
 
   trigger:
