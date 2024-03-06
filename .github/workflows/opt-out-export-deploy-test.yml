@@ -1,9 +1,7 @@
 name: opt-out-export test (impl) deploy
 
 on:
-  push:
-    paths:
-      - attribution-data-file-share/**
+  workflow_call: # Allow for call from integration test
   workflow_dispatch:
 
 jobs:

@@ -1,16 +1,28 @@
 name: opt-out-export integration tests
 
 on:
-  pull_request:
+  push:
     paths:
       - .github/workflows/opt-out-export-test-integration.yml
-      - optout/**
-  workflow_call:
+      - attribution-data-file-share/**
   workflow_dispatch:
 
+# Ensure we only have one integration test running at a time
+concurrency:
+  group: opt-out-export-test-integration
+
 jobs:
-  # TODO Deploy first if triggered by push
+  # Deploy first if triggered by push
+  deploy:
+    if: ${{ github.event_name == 'push' }}
+    uses: ./.github/workflows/opt-out-export-deploy-test.yml
+
   trigger:
+    if: ${{ always() }}
+    needs: deploy
+    permissions:
+      contents: read
+      id-token: write
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -19,8 +31,9 @@ jobs:
       - uses: aws-actions/configure-aws-credentials@v3
         with:
           aws-region: ${{ vars.AWS_REGION }}
-          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/ab2d-test-github-actions
+          role-to-assume: arn:aws:iam::${{ secrets.TEST_ACCOUNT_ID }}:role/delegatedadmin/developer/ab2d-test-github-actions
       - name: Upload test file to the BFD bucket
         run: |
           aws events put-events --entries file://test/events.json # TODO Add events.json matching rule for lambda trigger
-  # TODO check bucket for export file
+
+  # TODO Check bucket for export file

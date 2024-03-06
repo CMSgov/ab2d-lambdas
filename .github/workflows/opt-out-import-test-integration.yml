@@ -1,16 +1,28 @@
 name: opt-out-import integration tests
 
 on:
-  pull_request:
+  push:
     paths:
       - .github/workflows/opt-out-import-test-integration.yml
       - optout/**
-  workflow_call:
   workflow_dispatch:
 
+# Ensure we only have one integration test running at a time
+concurrency:
+  group: opt-out-export-test-integration
+
 jobs:
-  # TODO Deploy first if triggered by push
+  # Deploy first if triggered by push
+  deploy:
+    if: ${{ github.event_name == 'push' }}
+    uses: ./.github/workflows/opt-out-import-deploy-test.yml
+
   upload:
+    if: ${{ always() }}
+    needs: deploy
+    permissions:
+      contents: read
+      id-token: write
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -25,4 +37,5 @@ jobs:
         run: |
           aws s3 cp --no-progress src/test/resources/optOutDummy.txt \
             s3://bfd-test-eft/bfdeft01/ab2d/in/testing.txt
+
   # TODO Run another job to check database for update, then check bucket for response file
