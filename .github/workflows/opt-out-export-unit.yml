@@ -3,7 +3,7 @@ name: opt-out-export unit tests
 on:
   pull_request:
     paths:
-      - .github/workflows/opt-out-export-test-unit.yml
+      - .github/workflows/opt-out-export-unit.yml
       - attribution-data-file-share/**
   workflow_dispatch:
 
