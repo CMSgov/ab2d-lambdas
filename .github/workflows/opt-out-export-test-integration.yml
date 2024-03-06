@@ -16,6 +16,7 @@ jobs:
   deploy:
     if: ${{ github.event_name == 'push' }}
     uses: ./.github/workflows/opt-out-export-deploy-test.yml
+    secrets: inherit
 
   trigger:
     if: ${{ always() }}
