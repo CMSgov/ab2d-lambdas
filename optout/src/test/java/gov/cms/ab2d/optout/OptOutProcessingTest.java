@@ -3,10 +3,7 @@ package gov.cms.ab2d.optout;
 
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import gov.cms.ab2d.databasemanagement.DatabaseUtil;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.io.IOException;
@@ -46,21 +43,26 @@ public class OptOutProcessingTest {
     }
 
     @BeforeEach
-    void beforeEach() throws URISyntaxException {
-        // var creds = StaticCredentialsProvider.create(AwsSessionCredentials.create("test", "test", ""));
+    void beforeEach() throws URISyntaxException, IOException {
+        S3MockAPIExtension.createFile(Files.readString(Paths.get("src/test/resources/" + TEST_FILE_NAME), StandardCharsets.UTF_8));
         optOutProcessing = spy(new OptOutProcessing(TEST_FILE_NAME, TEST_ENDPOINT, mock(LambdaLogger.class)));
+        optOutProcessing.isRejected = false;
+    }
+
+    @AfterEach
+    void afterEach()  {
+        S3MockAPIExtension.deleteFile(TEST_FILE_NAME);
     }
 
     @Test
-    void processTest() throws IOException {
-        S3MockAPIExtension.createFile(Files.readString(Paths.get("src/test/resources/" + TEST_FILE_NAME), StandardCharsets.UTF_8));
+    void processTest() {
+        optOutProcessing.isRejected = false;
         optOutProcessing.process();
-        assertEquals(7, optOutProcessing.optOutResultMap.size());
-        // Confirmation file was created
-        Assertions.assertTrue(S3MockAPIExtension.isObjectExists(CONF_FILE_NAME + new SimpleDateFormat(CONF_FILE_NAME_PATTERN).format(new Date())));
+        assertEquals(7, optOutProcessing.optOutInformationMap.size());
+        // No insertion errors
+        assertFalse(optOutProcessing.isRejected);
         // Response file was deleted after processing
-        Assertions.assertFalse(S3MockAPIExtension.isObjectExists(TEST_FILE_NAME));
-
+        assertFalse(S3MockAPIExtension.isObjectExists(TEST_FILE_NAME));
     }
 
     @Test
@@ -79,8 +81,8 @@ public class OptOutProcessingTest {
 
     @Test
     void createAcceptedResponseTest() {
-        optOutProcessing.optOutResultMap.put(1L, new OptOutResult(new OptOutInformation(MBI, true), RecordStatus.ACCEPTED));
-        var expectedLine = MBI + DATE + "Y" + RecordStatus.ACCEPTED.status + "  " + RecordStatus.ACCEPTED.code;
+        optOutProcessing.optOutInformationMap.put(1L, new OptOutInformation(MBI, true));
+        var expectedLine = MBI + DATE + "Y" + RecordStatus.ACCEPTED;
         var expectedText = AB2D_HEADER_CONF + DATE + LINE_SEPARATOR
                 + expectedLine + LINE_SEPARATOR
                 + AB2D_TRAILER_CONF + DATE + TRAILER_COUNT;
@@ -89,8 +91,9 @@ public class OptOutProcessingTest {
 
     @Test
     void createRejectedResponseTest() {
-        optOutProcessing.optOutResultMap.put(1L, new OptOutResult(new OptOutInformation(MBI, false), RecordStatus.REJECTED));
-        var expectedLine = MBI + "        " + "N" + RecordStatus.REJECTED.status + "  " + RecordStatus.REJECTED.code;
+        optOutProcessing.isRejected = true;
+        optOutProcessing.optOutInformationMap.put(1L, new OptOutInformation(MBI, false));
+        var expectedLine = MBI + "        " + "N" + RecordStatus.REJECTED;
         var expectedText = AB2D_HEADER_CONF + DATE + LINE_SEPARATOR
                 + expectedLine + LINE_SEPARATOR
                 + AB2D_TRAILER_CONF + DATE + TRAILER_COUNT;
@@ -101,9 +104,7 @@ public class OptOutProcessingTest {
     void updateOptOutTest() {
         var optOutInformation = optOutProcessing.createOptOutInformation(validLine('Y'));
         optOutProcessing.updateOptOut(1L, optOutInformation, dbConnection);
-        assertEquals(1, optOutProcessing.optOutResultMap.size());
-        OptOutResult mapValue = optOutProcessing.optOutResultMap.get(1L);
-        assertEquals(RecordStatus.ACCEPTED, mapValue.getRecordStatus());
+        assertFalse(optOutProcessing.isRejected);
     }
 
     @Test
@@ -111,9 +112,25 @@ public class OptOutProcessingTest {
         var optOutInformation = optOutProcessing.createOptOutInformation(validLine('Y'));
         when(dbConnection.prepareStatement(anyString())).thenThrow(SQLException.class);
         optOutProcessing.updateOptOut(1L, optOutInformation, dbConnection);
-        assertEquals(1, optOutProcessing.optOutResultMap.size());
-        OptOutResult mapValue = optOutProcessing.optOutResultMap.get(1L);
-        assertEquals(RecordStatus.REJECTED, mapValue.getRecordStatus());
+        // Insertion error exists
+        assertTrue(optOutProcessing.isRejected);
+        assertTrue(S3MockAPIExtension.isObjectExists(TEST_FILE_NAME));
+    }
+
+    @Test
+    void getEffectiveDateTest() {
+        optOutProcessing.isRejected = false;
+        assertEquals(DATE, optOutProcessing.getEffectiveDate(DATE));
+        optOutProcessing.isRejected = true;
+        assertEquals("        ", optOutProcessing.getEffectiveDate(DATE));
+    }
+
+    @Test
+    void getRecordStatusTest() {
+        optOutProcessing.isRejected = false;
+        assertEquals(RecordStatus.ACCEPTED.toString(), optOutProcessing.getRecordStatus());
+        optOutProcessing.isRejected = true;
+        assertEquals(RecordStatus.REJECTED.toString(), optOutProcessing.getRecordStatus());
     }
 
 }

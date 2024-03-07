@@ -34,10 +34,10 @@ public class AttributionDataShareHelperTest {
     private static final PostgreSQLContainer POSTGRE_SQL_CONTAINER = new AB2DPostgresqlContainer();
     LambdaLogger LOGGER = mock(LambdaLogger.class);
 
-    String FILE_NAME = FILE_PARTIAL_NAME + new SimpleDateFormat(PATTERN).format(new Date()) + FILE_FORMAT;
+    String FILE_NAME = REQ_FILE_NAME + new SimpleDateFormat(REQ_FILE_NAME_PATTERN).format(new Date()) + REQ_FILE_FORMAT;
     String FILE_FULL_PATH = FILE_PATH + FILE_NAME;
 
-    String MBI = "1AA2BB3CC45";
+    String MBI = "DUMMY000001";
     AttributionDataShareHelper helper;
 
     @BeforeEach

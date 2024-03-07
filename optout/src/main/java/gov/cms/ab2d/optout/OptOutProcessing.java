@@ -21,12 +21,13 @@ import static gov.cms.ab2d.optout.OptOutConstants.*;
 
 public class OptOutProcessing {
     private final LambdaLogger logger;
-    public SortedMap<Long, OptOutResult> optOutResultMap;
+    public SortedMap<Long, OptOutInformation> optOutInformationMap;
+    public boolean isRejected = false;
     private final OptOutS3 optOutS3;
 
     public OptOutProcessing(String fileName, String endpoint, LambdaLogger logger) throws URISyntaxException {
         this.logger = logger;
-        this.optOutResultMap = new TreeMap<>();
+        this.optOutInformationMap = new TreeMap<>();
         var s3Client = S3Client.builder()
                 //    .credentialsProvider(credentials)
                 .region(S3_REGION)
@@ -38,6 +39,8 @@ public class OptOutProcessing {
     public void process() {
         processFileFromS3(optOutS3.openFileS3());
         optOutS3.createResponseOptOutFile(createResponseContent());
+        if (!isRejected)
+            optOutS3.deleteFileFromS3();
     }
 
     public void processFileFromS3(BufferedReader reader) {
@@ -48,6 +51,7 @@ public class OptOutProcessing {
             while ((line = reader.readLine()) != null) {
                 if (!line.startsWith(HEADER_RESP) && !line.startsWith(TRAILER_RESP)) {
                     var optOutInformation = createOptOutInformation(line);
+                    optOutInformationMap.put(lineNumber, optOutInformation);
                     updateOptOut(lineNumber, optOutInformation, dbConnection);
                 }
                 lineNumber++;
@@ -68,39 +72,41 @@ public class OptOutProcessing {
         try (var statement = dbConnection.prepareStatement(UPDATE_STATEMENT)) {
             prepareInsert(optOutInformation, statement);
             statement.execute();
-            optOutResultMap.put(lineNumber, new OptOutResult(optOutInformation, RecordStatus.ACCEPTED));
         } catch (SQLException ex) {
             logger.log("There is an insertion error on the line " + lineNumber);
             logger.log(ex.getMessage());
-            optOutResultMap.put(lineNumber, new OptOutResult(optOutInformation, RecordStatus.REJECTED));
+            isRejected = true;
         }
     }
 
     public String createResponseContent() {
-        String date = new SimpleDateFormat(EFFECTIVE_DATE_PATTERN).format(new Date());
+        var date = new SimpleDateFormat(EFFECTIVE_DATE_PATTERN).format(new Date());
         var responseContent = new StringBuilder();
         responseContent.append(AB2D_HEADER_CONF).append(date);
         responseContent.append(LINE_SEPARATOR);
+        var recordStatus = getRecordStatus();
+        var effectiveDate = getEffectiveDate(date);
 
-        for (var optOutResult : optOutResultMap.entrySet()) {
-            var line = optOutResult.getValue();
-            var info = line.getOptOutInformation();
-            responseContent.append(info.getMbi());
+        for (var optOutResult : optOutInformationMap.entrySet()) {
+            var info = optOutResult.getValue();
 
-            if (line.getRecordStatus() == RecordStatus.ACCEPTED)
-                responseContent.append(date);
-            else
-                responseContent.append(" ".repeat(EFFECTIVE_DATE_LENGTH));
-
-            responseContent.append((info.getOptOutFlag()) ? 'Y' : 'N');
-
-            responseContent.append(String.format(RECORD_STATUS_PATTERN, line.getRecordStatus().status));
-            responseContent.append(line.getRecordStatus().code);
-            responseContent.append(LINE_SEPARATOR);
+            responseContent.append(info.getMbi())
+                    .append(effectiveDate)
+                    .append((info.getOptOutFlag()) ? 'Y' : 'N')
+                    .append(recordStatus)
+                    .append(LINE_SEPARATOR);
         }
-        responseContent.append(AB2D_TRAILER_CONF).append(date).append(String.format("%010d", optOutResultMap.size()));
+        responseContent.append(AB2D_TRAILER_CONF).append(date).append(String.format("%010d", optOutInformationMap.size()));
 
         return responseContent.toString();
+    }
+
+    public String getRecordStatus() {
+        return (isRejected) ? RecordStatus.REJECTED.toString() : RecordStatus.ACCEPTED.toString();
+    }
+
+    public String getEffectiveDate(String date){
+        return (isRejected) ? " ".repeat(EFFECTIVE_DATE_LENGTH) : date;
     }
 
     private static void prepareInsert(OptOutInformation optOut, PreparedStatement statement) throws SQLException {
