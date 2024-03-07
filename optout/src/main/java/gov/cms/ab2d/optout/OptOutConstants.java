@@ -3,15 +3,10 @@ package gov.cms.ab2d.optout;
 import software.amazon.awssdk.regions.Region;
 
 public class OptOutConstants {
-
-    //ToDo: Rename in future
-    public static final String ACCESS_KEY_ID = "dev/TestLambdaKey";
-    public static final String SECRET_ACCESS_KEY = "dev/TestLambdaSecret";
-    public static final String ACCESS_TOKEN = "dev/TestLambdaToken";
     public static final String ENDPOINT = "https://s3.amazonaws.com";
     public static final String TEST_ENDPOINT = "http://127.0.0.1:8001";
     public static final String TEST_FILE_NAME = "P#EFT.ON.NGD.AB2D.RSP.D240123.T1122001.txt";
-    public static final String BFD_S3_BUCKET_NAME = "ab2d-opt-out-temp-349849222861-us-east-1";
+    public static final String TEST_BFD_BUCKET_NAME = "ab2d-opt-out-temp-349849222861-us-east-1";
     public static final Region S3_REGION = Region.US_EAST_1;
     public static final String HEADER_RESP = "HDR_BENEDATARSP";
     public static final String TRAILER_RESP = "TLR_BENEDATARSP";

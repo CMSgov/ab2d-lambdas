@@ -1,0 +1,18 @@
+{
+  "Records": [
+    {
+      "EventName": "ObjectCreated:Put",
+      "s3": {
+        "bucket": {
+          "Name": "test"
+        },
+        "object": {
+          "key": "P#EFT.ON.NGD.AB2D.RSP.D240123.T1122001.txt",
+          "size": 1024,
+          "eTag": "0123456789abcdef0123456789abcdef",
+          "sequencer": "0A1B2C3D4E5F678901"
+        }
+      }
+    }
+  ]
+}

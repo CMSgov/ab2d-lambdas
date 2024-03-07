@@ -12,6 +12,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
+import static gov.cms.ab2d.optout.OptOutConstants.TEST_BFD_BUCKET_NAME;
 import static gov.cms.ab2d.optout.OptOutConstants.TEST_FILE_NAME;
 import static gov.cms.ab2d.optout.S3MockAPIExtension.S3_CLIENT;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -26,7 +27,7 @@ public class OptOutS3Test {
     @BeforeEach
     public void beforeEach() throws IOException {
         S3MockAPIExtension.createFile(Files.readString(Paths.get("src/test/resources/" + TEST_FILE_NAME), StandardCharsets.UTF_8));
-        OPT_OUT_S3 = new OptOutS3(S3_CLIENT, TEST_FILE_NAME, mock(LambdaLogger.class));
+        OPT_OUT_S3 = new OptOutS3(S3_CLIENT, TEST_FILE_NAME, TEST_BFD_BUCKET_NAME, mock(LambdaLogger.class));
     }
 
     @AfterEach

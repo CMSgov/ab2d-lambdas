@@ -2,7 +2,8 @@ package gov.cms.ab2d.optout;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
-import com.amazonaws.services.lambda.runtime.events.SQSEvent;
+import com.amazonaws.services.lambda.runtime.events.S3Event;
+import com.amazonaws.services.s3.event.S3EventNotification;
 import com.amazonaws.services.s3.model.AmazonS3Exception;
 import gov.cms.ab2d.testutils.AB2DPostgresqlContainer;
 import org.junit.jupiter.api.BeforeAll;
@@ -11,8 +12,10 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.Collections;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -27,14 +30,22 @@ public class OptOutHandlerTest {
     private static final PostgreSQLContainer POSTGRE_SQL_CONTAINER = new AB2DPostgresqlContainer();
     private final static OptOutHandler handler = spy(new OptOutHandler());
     private final static OptOutProcessor OPT_OUT_PROCESSOR = mock(OptOutProcessor.class);
-    private final static SQSEvent sqsEvent = mock(SQSEvent.class);
-    private final static SQSEvent.SQSMessage sqsMessage = mock(SQSEvent.SQSMessage.class);
+
+    private final static S3Event s3event = mock(S3Event.class);
+    //   private final static S3EventNotification.S3EventNotificationRecord record = mock(S3EventNotification.S3EventNotificationRecord.class);
 
     @BeforeAll
     static void beforeAll() throws URISyntaxException {
-        when(sqsEvent.getRecords()).thenReturn(Collections.singletonList(sqsMessage));
-        when(sqsMessage.getBody()).thenReturn("P#EFT.ON.NGD.AB2D.RSP.D240123.T1122001.txt");
-        when(handler.processorInit(anyString(), any(LambdaLogger.class))).thenReturn(OPT_OUT_PROCESSOR);
+
+        try {
+            var payload = Files.readString(Paths.get("src/test/resources/s3event.json"));
+            S3EventNotification record = S3EventNotification.parseJson(payload);
+            when(s3event.getRecords()).thenReturn(record.getRecords());
+
+            when(handler.processorInit(anyString(), anyString(), any(LambdaLogger.class))).thenReturn(OPT_OUT_PROCESSOR);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Test
@@ -43,7 +54,7 @@ public class OptOutHandlerTest {
         LambdaLogger logger = mock(LambdaLogger.class);
         when(context.getLogger()).thenReturn(logger);
 
-        assertDoesNotThrow(() -> handler.handleRequest(sqsEvent, context));
+        assertDoesNotThrow(() -> handler.handleRequest(s3event, context));
     }
 
     @Test

@@ -43,7 +43,7 @@ public class S3MockAPIExtension implements BeforeAllCallback, ExtensionContext.S
 
     private static void createBucket() {
         var bucketRequest = CreateBucketRequest.builder()
-                .bucket(BFD_S3_BUCKET_NAME)
+                .bucket(TEST_BFD_BUCKET_NAME)
                 .build();
 
         S3_CLIENT.createBucket(bucketRequest);
@@ -51,7 +51,7 @@ public class S3MockAPIExtension implements BeforeAllCallback, ExtensionContext.S
 
     public static void createFile(String content) {
         var objectRequest = PutObjectRequest.builder()
-                .bucket(BFD_S3_BUCKET_NAME)
+                .bucket(TEST_BFD_BUCKET_NAME)
                 .key(TEST_FILE_NAME)
                 .build();
 
@@ -61,7 +61,7 @@ public class S3MockAPIExtension implements BeforeAllCallback, ExtensionContext.S
     public static boolean isObjectExists(String fileName) {
         try {
             HeadObjectRequest headObjectRequest = HeadObjectRequest.builder()
-                    .bucket(BFD_S3_BUCKET_NAME)
+                    .bucket(TEST_BFD_BUCKET_NAME)
                     .key(fileName)
                     .build();
 
@@ -79,7 +79,7 @@ public class S3MockAPIExtension implements BeforeAllCallback, ExtensionContext.S
     public static void deleteFile(String fileName) {
         if (isObjectExists(fileName)) {
             DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
-                    .bucket(BFD_S3_BUCKET_NAME)
+                    .bucket(TEST_BFD_BUCKET_NAME)
                     .key(fileName)
                     .build();
             S3_CLIENT.deleteObject(deleteObjectRequest);
@@ -88,7 +88,7 @@ public class S3MockAPIExtension implements BeforeAllCallback, ExtensionContext.S
 
     private static void deleteBucket() {
         DeleteBucketRequest deleteBucketRequest = DeleteBucketRequest.builder()
-                .bucket(BFD_S3_BUCKET_NAME)
+                .bucket(TEST_BFD_BUCKET_NAME)
                 .build();
 
         S3_CLIENT.deleteBucket(deleteBucketRequest);
