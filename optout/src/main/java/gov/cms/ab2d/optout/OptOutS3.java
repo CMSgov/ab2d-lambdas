@@ -62,9 +62,7 @@ public class OptOutS3 {
 
     public String createResponseOptOutFile(String responseContent) {
         try {
-            var key = CONF_FILE_NAME
-                    + new SimpleDateFormat(CONF_FILE_NAME_PATTERN).format(new Date())
-                    + CONF_FILE_FORMAT;
+            var key = getOutFileName();
 
             var objectRequest = PutObjectRequest.builder()
                     .bucket(bfdBucket)
@@ -91,6 +89,17 @@ public class OptOutS3 {
         } catch (SdkClientException ex) {
             logger.log(ex.getMessage());
         }
+    }
+
+    public String getOutFileName() {
+        //bfdeft01/ab2d/in/testing.txt
+        var name = CONF_FILE_NAME
+                + new SimpleDateFormat(CONF_FILE_NAME_PATTERN).format(new Date())
+                + CONF_FILE_FORMAT;
+
+        String[] path = fileName.split("in");
+
+      return path[0] + "out/" + name;
     }
 
 

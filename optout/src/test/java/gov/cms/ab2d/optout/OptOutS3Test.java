@@ -12,8 +12,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-import static gov.cms.ab2d.optout.OptOutConstants.TEST_BFD_BUCKET_NAME;
-import static gov.cms.ab2d.optout.OptOutConstants.TEST_FILE_NAME;
+import static gov.cms.ab2d.optout.OptOutConstants.*;
 import static gov.cms.ab2d.optout.S3MockAPIExtension.S3_CLIENT;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -57,5 +56,14 @@ public class OptOutS3Test {
     void deleteFileFromS3Test() {
         OPT_OUT_S3.deleteFileFromS3();
         Assertions.assertFalse(S3MockAPIExtension.isObjectExists(TEST_FILE_NAME));
+    }
+
+    @Test
+    void getOutFileName() {
+        var subFolders = "bfdeft01/ab2d";
+        OPT_OUT_S3 = new OptOutS3(S3_CLIENT, subFolders + "/in/" + TEST_FILE_NAME, TEST_BFD_BUCKET_NAME, mock(LambdaLogger.class));
+        var outFileName = OPT_OUT_S3.getOutFileName();
+        Assertions.assertTrue(outFileName.startsWith(subFolders + "/out/" + CONF_FILE_NAME));
+        Assertions.assertTrue(outFileName.endsWith(CONF_FILE_FORMAT));
     }
 }
