@@ -21,6 +21,8 @@ public class OptOutHandler implements RequestHandler<S3Event, Void> {
         String srcKey = record.getS3().getObject().getUrlDecodedKey();
 
         logger.log("OptOut Lambda started");
+        logger.log("bucket: " + srcBucket);
+        logger.log("key: " + srcKey);
         try {
             var optOutProcessing = processorInit(srcKey, srcBucket, logger);
             optOutProcessing.process();
