@@ -1,4 +1,0 @@
-HDR_BENEDATARSP20230726
-DUMMY000001          NAME                                                        LASTNAME                                111 DUMMY ADDRESS                                                                                                                                                            TESTDATA                                DUMMY11DUMMY20230726202307261-800TY
-DUMMY000002          NAME                       A                                LASTNAME                                222 DUMMY ADDRESS                                                                                                                                                            TESTDATA                                DUMMY22DUMMY20230726202307261-800TN
-TRL_BENEDATARSP202307260000000002

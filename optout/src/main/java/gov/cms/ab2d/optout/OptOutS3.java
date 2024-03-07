@@ -60,7 +60,10 @@ public class OptOutS3 {
 
     public String createResponseOptOutFile(String responseContent) {
         try {
-            var key = RESPONSE_FILE_NAME + new SimpleDateFormat(RESPONSE_FILE_NAME_PATTERN).format(new Date());
+            var key = CONF_FILE_NAME
+                    + new SimpleDateFormat(CONF_FILE_NAME_PATTERN).format(new Date())
+                    + CONF_FILE_FORMAT;
+
             var objectRequest = PutObjectRequest.builder()
                     .bucket(BFD_S3_BUCKET_NAME)
                     .key(key)

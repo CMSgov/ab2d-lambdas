@@ -33,7 +33,7 @@ public class OptOutHandlerTest {
     @BeforeAll
     static void beforeAll() throws URISyntaxException {
         when(sqsEvent.getRecords()).thenReturn(Collections.singletonList(sqsMessage));
-        when(sqsMessage.getBody()).thenReturn("optOutDummy.txt");
+        when(sqsMessage.getBody()).thenReturn("P#EFT.ON.NGD.AB2D.RSP.D240123.T1122001.txt");
         when(handler.processorInit(anyString(), any(LambdaLogger.class))).thenReturn(OPT_OUT_PROCESSOR);
     }
 
