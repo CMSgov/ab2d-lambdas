@@ -4,7 +4,6 @@ import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.S3Event;
-import com.amazonaws.services.s3.event.S3EventNotification;
 
 import java.net.URISyntaxException;
 
@@ -15,12 +14,12 @@ public class OptOutHandler implements RequestHandler<S3Event, Void> {
     @Override
     public Void handleRequest(S3Event s3event, Context context) {
         var logger = context.getLogger();
-
-        S3EventNotification.S3EventNotificationRecord record = s3event.getRecords().get(0);
-        String srcBucket = record.getS3().getBucket().getName();
-        String srcKey = record.getS3().getObject().getUrlDecodedKey();
-
         logger.log("OptOut Lambda started");
+
+        var record = s3event.getRecords().get(0);
+        var srcBucket = record.getS3().getBucket().getName();
+        var srcKey = record.getS3().getObject().getUrlDecodedKey();
+
         logger.log("bucket: " + srcBucket);
         logger.log("key: " + srcKey);
         try {
