@@ -20,7 +20,6 @@ public class OptOutConstants {
     public static final int MBI_INDEX_START = 0;
     public static final int MBI_INDEX_END = 11;
     public static final int OPTOUT_FLAG_INDEX = 11;
-    public static final String RECORD_STATUS_PATTERN = "%-10s";
     public static final String EFFECTIVE_DATE_PATTERN = "yyyyMMdd";
     public static final int EFFECTIVE_DATE_LENGTH = 8;
     public static final String LINE_SEPARATOR = System.getProperty("line.separator");
