@@ -39,6 +39,7 @@ jobs:
           aws-region: ${{ vars.AWS_REGION }}
           # Now assume the BFD bucket role
           role-to-assume: arn:aws:iam::${{ secrets.BFD_ACCOUNT_ID }}:role/bfd-test-eft-ab2d-bucket-role
+          role-chaining: true
       - name: Upload test file to the BFD bucket to trigger lambda function via SNS message
         run: |
           aws s3 cp --no-progress src/test/resources/optOutDummy.txt \
