@@ -12,7 +12,10 @@ import static gov.cms.ab2d.attributionDataShare.AttributionDataShareConstants.*;
 import static org.junit.jupiter.api.extension.ExtensionContext.Namespace.GLOBAL;
 
 public class S3MockAPIExtension implements BeforeAllCallback, ExtensionContext.Store.CloseableResource {
+
     private static final S3Mock API = S3Mock.create(8001, "/tmp/s3");
+    public static String BUCKET_NAME = "bfd-test-eft";
+    public static String UPLOAD_PATH = "bfdeft01/test/out";
     public static S3Client S3_CLIENT;
     private static boolean STARTED = false;
 
@@ -29,6 +32,9 @@ public class S3MockAPIExtension implements BeforeAllCallback, ExtensionContext.S
                     .endpointOverride(new URI(TEST_ENDPOINT))
                     .build();
 
+            System.setProperty("S3_UPLOAD_BUCKET", BUCKET_NAME);
+            System.setProperty("S3_UPLOAD_PATH", UPLOAD_PATH);
+
             createBucket();
         }
     }
@@ -42,7 +48,7 @@ public class S3MockAPIExtension implements BeforeAllCallback, ExtensionContext.S
 
     private static void createBucket() {
         var bucketRequest = CreateBucketRequest.builder()
-                .bucket(BFD_S3_BUCKET_NAME)
+                .bucket(BUCKET_NAME)
                 .build();
 
         S3_CLIENT.createBucket(bucketRequest);
@@ -51,8 +57,8 @@ public class S3MockAPIExtension implements BeforeAllCallback, ExtensionContext.S
     public static boolean isObjectExists(String fileName) {
         try {
             HeadObjectRequest headObjectRequest = HeadObjectRequest.builder()
-                    .bucket(BFD_S3_BUCKET_NAME)
-                    .key(fileName)
+                    .bucket(BUCKET_NAME)
+                    .key(UPLOAD_PATH + "/" + fileName)
                     .build();
 
             S3_CLIENT.headObject(headObjectRequest);
@@ -69,8 +75,8 @@ public class S3MockAPIExtension implements BeforeAllCallback, ExtensionContext.S
     public static void deleteFile(String fileName) {
         if (isObjectExists(fileName)) {
             DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
-                    .bucket(BFD_S3_BUCKET_NAME)
-                    .key(fileName)
+                    .bucket(BUCKET_NAME)
+                    .key(UPLOAD_PATH + "/" + fileName)
                     .build();
             S3_CLIENT.deleteObject(deleteObjectRequest);
         }
@@ -78,7 +84,7 @@ public class S3MockAPIExtension implements BeforeAllCallback, ExtensionContext.S
 
     private static void deleteBucket() {
         DeleteBucketRequest deleteBucketRequest = DeleteBucketRequest.builder()
-                .bucket(BFD_S3_BUCKET_NAME)
+                .bucket(BUCKET_NAME)
                 .build();
 
         S3_CLIENT.deleteBucket(deleteBucketRequest);

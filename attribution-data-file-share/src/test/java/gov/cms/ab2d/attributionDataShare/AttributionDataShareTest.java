@@ -23,6 +23,8 @@ import java.util.Date;
 
 import static gov.cms.ab2d.attributionDataShare.AttributionDataShareConstants.*;
 import static gov.cms.ab2d.attributionDataShare.AttributionDataShareHelper.getExecuteQuery;
+import static gov.cms.ab2d.attributionDataShare.S3MockAPIExtension.BUCKET_NAME;
+import static gov.cms.ab2d.attributionDataShare.S3MockAPIExtension.UPLOAD_PATH;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -77,6 +79,18 @@ public class AttributionDataShareTest {
         assertTrue(S3MockAPIExtension.isObjectExists(FILE_NAME));
         S3MockAPIExtension.deleteFile(FILE_NAME);
     }
+
+    @Test
+    void getBucketNameTest(){
+        assertEquals(BUCKET_NAME, helper.getBucketName());
+    }
+
+    @Test
+    void getUploadPathTest(){
+        assertEquals(UPLOAD_PATH, helper.getUploadPath());
+    }
+
+
 
     private void createTestFile() throws IOException {
         PrintWriter writer = new PrintWriter(FILE_FULL_PATH, StandardCharsets.UTF_8);

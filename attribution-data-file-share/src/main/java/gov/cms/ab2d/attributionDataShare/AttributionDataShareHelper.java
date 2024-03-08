@@ -68,8 +68,8 @@ public class AttributionDataShareHelper {
     void writeFileToFinalDestination(S3Client s3Client) {
         try {
             var objectRequest = PutObjectRequest.builder()
-                    .bucket(BFD_S3_BUCKET_NAME)
-                    .key(fileName)
+                    .bucket(getBucketName())
+                    .key(getUploadPath() + fileName)
                     .build();
 
             s3Client.putObject(objectRequest, RequestBody.fromFile(new File(fileFullPath)));
@@ -79,6 +79,15 @@ public class AttributionDataShareHelper {
             throw new AttributionDataShareException(errorMessage, ex);
         }
     }
+
+    public String getBucketName(){
+        return System.getenv("S3_UPLOAD_BUCKET");
+    }
+
+    public String getUploadPath(){
+        return System.getenv("S3_UPLOAD_PATH") + "/";
+    }
+
 
     static ResultSet getExecuteQuery(Statement statement) throws SQLException {
         return statement.executeQuery(SELECT_STATEMENT);

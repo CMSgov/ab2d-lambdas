@@ -106,7 +106,7 @@ public class OptOutProcessor {
         return (isRejected) ? RecordStatus.REJECTED.toString() : RecordStatus.ACCEPTED.toString();
     }
 
-    public String getEffectiveDate(String date){
+    public String getEffectiveDate(String date) {
         return (isRejected) ? " ".repeat(EFFECTIVE_DATE_LENGTH) : date;
     }
 

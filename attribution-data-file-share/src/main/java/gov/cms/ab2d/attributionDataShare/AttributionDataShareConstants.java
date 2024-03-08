@@ -7,7 +7,7 @@ public class AttributionDataShareConstants {
     private AttributionDataShareConstants() {
     }
 
-    public static final String BFD_S3_BUCKET_NAME = "ab2d-opt-out-temp-349849222861-us-east-1";
+  //  public static final String BFD_S3_BUCKET_NAME = "ab2d-opt-out-temp-349849222861-us-east-1";
     public static final String ENDPOINT = "https://s3.amazonaws.com";
     public static final String TEST_ENDPOINT = "http://127.0.0.1:8001";
     public static final Region S3_REGION = Region.US_EAST_1;
