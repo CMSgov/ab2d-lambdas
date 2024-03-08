@@ -4,10 +4,10 @@
       "EventName": "ObjectCreated:Put",
       "s3": {
         "bucket": {
-          "Name": "test"
+          "Name": "ab2d-opt-out-temp-349849222861-us-east-1"
         },
         "object": {
-          "key": "P#EFT.ON.NGD.AB2D.RSP.D240123.T1122001.txt",
+          "key": "optOutDummy.txt",
           "size": 1024,
           "eTag": "0123456789abcdef0123456789abcdef",
           "sequencer": "0A1B2C3D4E5F678901"

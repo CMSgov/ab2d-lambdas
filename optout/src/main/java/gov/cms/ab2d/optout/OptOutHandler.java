@@ -4,6 +4,7 @@ import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.S3Event;
+import com.amazonaws.services.s3.event.S3EventNotification;
 
 import java.net.URISyntaxException;
 
@@ -14,11 +15,13 @@ public class OptOutHandler implements RequestHandler<S3Event, Void> {
     @Override
     public Void handleRequest(S3Event s3event, Context context) {
         var logger = context.getLogger();
+
+        logger.log(s3event.toString());
         logger.log("OptOut Lambda started");
 
-        var record = s3event.getRecords().get(0);
-        var srcBucket = record.getS3().getBucket().getName();
-        var srcKey = record.getS3().getObject().getUrlDecodedKey();
+        var records = s3event.getRecords();//.get(0);
+        var srcBucket = getBucketName(s3event);
+        var srcKey = getFileName(s3event);
 
         logger.log("bucket: " + srcBucket);
         logger.log("key: " + srcKey);
@@ -43,5 +46,13 @@ public class OptOutHandler implements RequestHandler<S3Event, Void> {
 //            logger.log("Can't get Credentials from Secret manager");
 //            throw new OptOutException("Can't get Credentials from Secret manager");
 //        }
+    }
+
+    public String getBucketName(S3Event s3event){
+        return s3event.getRecords().get(0).getS3().getBucket().getName();
+    }
+
+    public String getFileName(S3Event s3event){
+        return s3event.getRecords().get(0).getS3().getObject().getUrlDecodedKey();
     }
 }
