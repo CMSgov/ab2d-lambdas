@@ -30,6 +30,8 @@ public class OptOutS3 {
     public BufferedReader openFileS3() {
         try {
             //Checking if object exists
+            logger.log("Buket name: " + bfdBucket);
+            logger.log("File name: " + fileName);
             HeadObjectRequest headObjectRequest = HeadObjectRequest.builder()
                     .bucket(bfdBucket)
                     .key(fileName)
