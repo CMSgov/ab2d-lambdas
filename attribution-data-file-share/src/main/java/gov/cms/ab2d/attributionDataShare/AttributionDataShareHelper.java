@@ -80,14 +80,13 @@ public class AttributionDataShareHelper {
         }
     }
 
-    public String getBucketName(){
-        return System.getenv("S3_UPLOAD_BUCKET");
+    public String getBucketName() {
+        return System.getenv(BUCKET_NAME_PROP);
     }
 
-    public String getUploadPath(){
-        return System.getenv("S3_UPLOAD_PATH") + "/";
+    public String getUploadPath() {
+        return System.getenv(UPLOAD_PATH_PROP) + "/";
     }
-
 
     static ResultSet getExecuteQuery(Statement statement) throws SQLException {
         return statement.executeQuery(SELECT_STATEMENT);

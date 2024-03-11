@@ -7,6 +7,7 @@ import gov.cms.ab2d.testutils.AB2DPostgresqlContainer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mockito;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -23,8 +24,7 @@ import java.util.Date;
 
 import static gov.cms.ab2d.attributionDataShare.AttributionDataShareConstants.*;
 import static gov.cms.ab2d.attributionDataShare.AttributionDataShareHelper.getExecuteQuery;
-import static gov.cms.ab2d.attributionDataShare.S3MockAPIExtension.BUCKET_NAME;
-import static gov.cms.ab2d.attributionDataShare.S3MockAPIExtension.UPLOAD_PATH;
+import static gov.cms.ab2d.attributionDataShare.S3MockAPIExtension.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -44,6 +44,11 @@ public class AttributionDataShareTest {
 
     @BeforeEach
     public void beforeEach() {
+      //  var sysMock = Mockito.mockStatic(System.class);
+   //     System.setProperty("S3_UPLOAD_BUCKET", BUCKET_NAME);
+  //      System.setProperty("S3_UPLOAD_PATH", UPLOAD_PATH);
+//        sysMock.when(() -> System.getProperty(BUCKET_NAME_PROP)).thenReturn(BUCKET_NAME);
+//        sysMock.when(() -> System.getProperty(UPLOAD_PATH_PROP)).thenReturn(UPLOAD_PATH);
         helper = spy(new AttributionDataShareHelper(FILE_NAME, FILE_FULL_PATH, LOGGER));
     }
 
@@ -82,15 +87,13 @@ public class AttributionDataShareTest {
 
     @Test
     void getBucketNameTest(){
-        assertEquals(BUCKET_NAME, helper.getBucketName());
+        assertEquals(getBucketName(), helper.getBucketName());
     }
 
     @Test
     void getUploadPathTest(){
-        assertEquals(UPLOAD_PATH, helper.getUploadPath());
+        assertEquals(getUploadPath(), helper.getUploadPath());
     }
-
-
 
     private void createTestFile() throws IOException {
         PrintWriter writer = new PrintWriter(FILE_FULL_PATH, StandardCharsets.UTF_8);
