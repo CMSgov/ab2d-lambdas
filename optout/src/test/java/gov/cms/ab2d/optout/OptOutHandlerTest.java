@@ -44,7 +44,7 @@ public class OptOutHandlerTest {
     }
 
     @Test
-    void getTest() throws IOException, ParseException {
+    void getBucketAndFileNamesTest() throws IOException, ParseException {
         JSONParser parser = new JSONParser();
         JSONObject json = (JSONObject) parser.parse(getPayload());
         var s3EventMessage = json.get("Message");

@@ -1,12 +1,12 @@
 {
   "Type" : "Notification",
   "MessageId" : "5da6e965-ca05-5123-8347-b72ad7893428",
-  "TopicArn" : "arn:aws:sns:us-east-1:577373831711:bfd-test-eft-inbound-received-s3-dpc",
+  "TopicArn" : "arn:aws:sns:test",
   "Subject" : "Amazon S3 Notification",
-  "Message" : "{\"Records\":[{\"eventVersion\":\"2.1\",\"eventSource\":\"aws:s3\",\"awsRegion\":\"us-east-1\",\"eventTime\":\"2024-02-20T21:36:11.419Z\",\"eventName\":\"ObjectCreated:Put\",\"userIdentity\":{\"principalId\":\"AWS:AIDAYM3RJQIPTYMO35QPN\"},\"requestParameters\":{\"sourceIPAddress\":\"66.61.78.110\"},\"responseElements\":{\"x-amz-request-id\":\"JM2GMJJNSSEH9PKY\",\"x-amz-id-2\":\"gO4Fl4AxgEJ8LYteQ6LW4gHNtmB9+CcRDOnE20HW9ZumAQTsP+HG1DKDYLxQa67VCG6XIyIfSsZOW8cOfPuOQAD3+7HfBs/3\"},\"s3\":{\"s3SchemaVersion\":\"1.0\",\"configurationId\":\"bfd-test-eft-inbound-received-s3-dpc\",\"bucket\":{\"name\":\"bfd-test-eft\",\"ownerIdentity\":{\"principalId\":\"A5VBSMJFI0FCE\"},\"arn\":\"arn:aws:s3:::bfd-test-eft\"},\"object\":{\"key\":\"bfdeft01/ab2d/in/optOutDummy.txt\",\"size\":12,\"eTag\":\"fdad692379d13b4c029804195d0a4aa5\",\"sequencer\":\"0065D51B4B4098E68C\"}}}]}",
+  "Message" : "{\"Records\":[{\"eventVersion\":\"2.1\",\"eventSource\":\"aws:s3\",\"awsRegion\":\"us-east-1\",\"eventTime\":\"2024-02-20T21:36:11.419Z\",\"eventName\":\"ObjectCreated:Put\",\"s3\":{\"s3SchemaVersion\":\"1.0\",\"configurationId\":\"bfd-test-eft-inbound-received-s3-dpc\",\"bucket\":{\"name\":\"bfd-test-eft\",\"arn\":\"arn:aws:s3:::bfd-test-eft\"},\"object\":{\"key\":\"bfdeft01/ab2d/in/optOutDummy.txt\",\"size\":12}}}]}",
   "Timestamp" : "2024-02-20T21:36:12.405Z",
   "SignatureVersion" : "1",
-  "Signature" : "geHsbUYOSZ6HZLDo0cVnMsmbrsncnGNubwLHZfcSmAtIpm4ciCeR3tkoZeZhWySXFW8N1a9URlgo1WIy0Cf08yspRG0HCtdYJCVv0hJtxiHpS2M3qyDJY0o3hsX4Uk29PcczjUAu89/j7niPRID/zh0LQcUWkA9UPaHDrxAJR69WDV5EvPLOBl4B2gNA/zUGgIlQL7jXhYiGnvRhldNUD2ZibY+wSrlYEs/b+U/dJsid1bvzT30Dw6nwpEB6Xqpw8KH6DX32E2/XDvKOqELd5aAv1P/+uLMhohzD/DSmRd31pZUECF99/GLdT2b41/M1L1KQm31r7uF9Lvy4DrG8CQ==",
-  "SigningCertURL" : "https://sns.us-east-1.amazonaws.com/SimpleNotificationService-60eadc530605d63b8e62a523676ef735.pem",
-  "UnsubscribeURL" : "https://sns.us-east-1.amazonaws.com/?Action=Unsubscribe&SubscriptionArn=arn:aws:sns:us-east-1:577373831711:bfd-test-eft-inbound-received-s3-dpc:f14e07ab-36d0-48ec-bdcd-41b0be370fc8"
+  "Signature" : "TestSignature",
+  "SigningCertURL" : "TestSigningCertURL",
+  "UnsubscribeURL" : "TestUnsubscribeURL"
 }

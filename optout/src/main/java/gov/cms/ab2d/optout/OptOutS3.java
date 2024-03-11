@@ -27,11 +27,41 @@ public class OptOutS3 {
         this.logger = logger;
     }
 
+    public void doesBucketExist(){
+        try {
+        logger.log("Bucket name: " + bfdBucket);
+        logger.log("File name: " + fileName);
+
+        HeadBucketRequest headBucketRequest = HeadBucketRequest.builder()
+                .bucket(bfdBucket).build();
+
+        s3Client.headBucket(headBucketRequest);
+        logger.log("Bucket exists");
+
+        } catch (SdkClientException ex) {
+            var errorMessage = "Unable to load credentials to connect S3 bucket";
+            logger.log(errorMessage);
+            throw new OptOutException(errorMessage, ex);
+        } catch (S3Exception ex) {
+            if (ex.statusCode() == 404) {
+
+                var errorMessage = "Object " + fileName + " does not exist. " + ex.getMessage();
+                logger.log(errorMessage);
+                throw new OptOutException(errorMessage, ex);
+            } else {
+                logger.log(ex.getMessage());
+                throw ex;
+            }
+        }
+
+    }
+
     public BufferedReader openFileS3() {
         try {
             //Checking if object exists
             logger.log("Buket name: " + bfdBucket);
             logger.log("File name: " + fileName);
+
             HeadObjectRequest headObjectRequest = HeadObjectRequest.builder()
                     .bucket(bfdBucket)
                     .key(fileName)

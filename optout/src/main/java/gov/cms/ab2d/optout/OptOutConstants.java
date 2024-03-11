@@ -6,7 +6,7 @@ public class OptOutConstants {
     public static final String ENDPOINT = "https://s3.amazonaws.com";
     public static final String TEST_ENDPOINT = "http://127.0.0.1:8001";
     public static final String TEST_FILE_NAME = "optOutDummy.txt";
-    public static final String TEST_BFD_BUCKET_NAME = "ab2d-opt-out-temp-349849222861-us-east-1";
+    public static final String TEST_BFD_BUCKET_NAME = "bfd-test-eft";
     public static final Region S3_REGION = Region.US_EAST_1;
     public static final String HEADER_RESP = "HDR_BENEDATARSP";
     public static final String TRAILER_RESP = "TLR_BENEDATARSP";
