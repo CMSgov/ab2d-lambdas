@@ -17,26 +17,31 @@ import static gov.cms.ab2d.optout.OptOutConstants.*;
 public class OptOutS3 {
     private final S3Client s3Client;
     private final String fileName;
+    private final String bfdBucket;
     private final LambdaLogger logger;
 
-    public OptOutS3(S3Client s3Client, String fileName, LambdaLogger logger) {
+    public OptOutS3(S3Client s3Client, String fileName, String bfdBucket, LambdaLogger logger) {
         this.s3Client = s3Client;
         this.fileName = fileName;
+        this.bfdBucket = bfdBucket;
         this.logger = logger;
     }
 
     public BufferedReader openFileS3() {
         try {
             //Checking if object exists
+            logger.log("Buket name: " + bfdBucket);
+            logger.log("File name: " + fileName);
+
             HeadObjectRequest headObjectRequest = HeadObjectRequest.builder()
-                    .bucket(BFD_S3_BUCKET_NAME)
+                    .bucket(bfdBucket)
                     .key(fileName)
                     .build();
 
             s3Client.headObject(headObjectRequest);
 
             var getObjectRequest = GetObjectRequest.builder()
-                    .bucket(BFD_S3_BUCKET_NAME)
+                    .bucket(bfdBucket)
                     .key(fileName)
                     .build();
 
@@ -60,12 +65,10 @@ public class OptOutS3 {
 
     public String createResponseOptOutFile(String responseContent) {
         try {
-            var key = CONF_FILE_NAME
-                    + new SimpleDateFormat(CONF_FILE_NAME_PATTERN).format(new Date())
-                    + CONF_FILE_FORMAT;
+            var key = getOutFileName();
 
             var objectRequest = PutObjectRequest.builder()
-                    .bucket(BFD_S3_BUCKET_NAME)
+                    .bucket(bfdBucket)
                     .key(key)
                     .build();
 
@@ -81,7 +84,7 @@ public class OptOutS3 {
     public void deleteFileFromS3() {
         try {
             var request = DeleteObjectRequest.builder()
-                    .bucket(BFD_S3_BUCKET_NAME)
+                    .bucket(bfdBucket)
                     .key(fileName)
                     .build();
 
@@ -89,6 +92,17 @@ public class OptOutS3 {
         } catch (SdkClientException ex) {
             logger.log(ex.getMessage());
         }
+    }
+
+    public String getOutFileName() {
+        //bfdeft01/ab2d/in/testing.txt
+        var name = CONF_FILE_NAME
+                + new SimpleDateFormat(CONF_FILE_NAME_PATTERN).format(new Date())
+                + CONF_FILE_FORMAT;
+
+        String[] path = fileName.split("in");
+
+        return path[0] + "out/" + name;
     }
 
 

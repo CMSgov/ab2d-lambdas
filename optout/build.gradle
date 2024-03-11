@@ -17,6 +17,7 @@ dependencies {
     implementation 'org.postgresql:postgresql:42.5.1'
     implementation 'software.amazon.awssdk:s3:2.21.7'
     implementation 'software.amazon.awssdk:secretsmanager:2.23.12'
+    implementation 'com.googlecode.json-simple:json-simple:1.1.1'
     implementation project(':database-management')
     implementation(project(":lambda-lib"))
     testImplementation 'com.amazonaws:aws-java-sdk-sqs:1.11.792'

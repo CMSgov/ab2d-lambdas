@@ -3,19 +3,26 @@ package gov.cms.ab2d.optout;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.amazonaws.services.lambda.runtime.events.SQSEvent;
+import com.amazonaws.services.s3.event.S3EventNotification;
 import com.amazonaws.services.s3.model.AmazonS3Exception;
 import gov.cms.ab2d.testutils.AB2DPostgresqlContainer;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Collections;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static gov.cms.ab2d.optout.OptOutConstantsTest.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -31,10 +38,22 @@ public class OptOutHandlerTest {
     private final static SQSEvent.SQSMessage sqsMessage = mock(SQSEvent.SQSMessage.class);
 
     @BeforeAll
-    static void beforeAll() throws URISyntaxException {
+    static void beforeAll() throws URISyntaxException, IOException {
         when(sqsEvent.getRecords()).thenReturn(Collections.singletonList(sqsMessage));
-        when(sqsMessage.getBody()).thenReturn("optOutDummy.txt");
-        when(handler.processorInit(anyString(), any(LambdaLogger.class))).thenReturn(OPT_OUT_PROCESSOR);
+        when(sqsMessage.getBody()).thenReturn(getPayload());
+        when(handler.processorInit(anyString(), anyString(), any(LambdaLogger.class))).thenReturn(OPT_OUT_PROCESSOR);
+    }
+
+    @Test
+    void getBucketAndFileNamesTest() throws IOException, ParseException {
+        JSONParser parser = new JSONParser();
+        JSONObject json = (JSONObject) parser.parse(getPayload());
+        var s3EventMessage = json.get("Message");
+
+        var notification = S3EventNotification.parseJson(s3EventMessage.toString()).getRecords().get(0);
+
+        assertEquals(TEST_BUCKET_PATH + "/in/" + TEST_FILE_NAME, handler.getFileName(notification));
+        assertEquals(TEST_BFD_BUCKET_NAME, handler.getBucketName(notification));
     }
 
     @Test
@@ -50,5 +69,9 @@ public class OptOutHandlerTest {
     void optOutHandlerException() {
         doThrow(new OptOutException("errorMessage", new AmazonS3Exception("errorMessage"))).when(OPT_OUT_PROCESSOR).process();
         assertThrows(OptOutException.class, OPT_OUT_PROCESSOR::process);
+    }
+
+    static private String getPayload() throws IOException {
+        return Files.readString(Paths.get("src/test/resources/sqsEvent.json"));
     }
 }

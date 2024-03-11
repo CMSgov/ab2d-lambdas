@@ -7,6 +7,7 @@ import gov.cms.ab2d.testutils.AB2DPostgresqlContainer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mockito;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -23,6 +24,7 @@ import java.util.Date;
 
 import static gov.cms.ab2d.attributionDataShare.AttributionDataShareConstants.*;
 import static gov.cms.ab2d.attributionDataShare.AttributionDataShareHelper.getExecuteQuery;
+import static gov.cms.ab2d.attributionDataShare.S3MockAPIExtension.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -76,6 +78,16 @@ public class AttributionDataShareTest {
         helper.writeFileToFinalDestination(S3MockAPIExtension.S3_CLIENT);
         assertTrue(S3MockAPIExtension.isObjectExists(FILE_NAME));
         S3MockAPIExtension.deleteFile(FILE_NAME);
+    }
+
+    @Test
+    void getBucketNameTest(){
+        assertEquals(getBucketName(), helper.getBucketName());
+    }
+
+    @Test
+    void getUploadPathTest(){
+        assertEquals(getUploadPath(), helper.getUploadPath());
     }
 
     private void createTestFile() throws IOException {

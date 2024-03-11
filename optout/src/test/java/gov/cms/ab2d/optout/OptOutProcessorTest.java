@@ -3,7 +3,10 @@ package gov.cms.ab2d.optout;
 
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import gov.cms.ab2d.databasemanagement.DatabaseUtil;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.io.IOException;
@@ -18,6 +21,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import static gov.cms.ab2d.optout.OptOutConstants.*;
+import static gov.cms.ab2d.optout.OptOutConstantsTest.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -45,17 +49,17 @@ public class OptOutProcessorTest {
     @BeforeEach
     void beforeEach() throws URISyntaxException, IOException {
         S3MockAPIExtension.createFile(Files.readString(Paths.get("src/test/resources/" + TEST_FILE_NAME), StandardCharsets.UTF_8));
-        optOutProcessing = spy(new OptOutProcessor(TEST_FILE_NAME, TEST_ENDPOINT, mock(LambdaLogger.class)));
+        optOutProcessing = spy(new OptOutProcessor(TEST_FILE_NAME, TEST_BFD_BUCKET_NAME, TEST_ENDPOINT, mock(LambdaLogger.class)));
         optOutProcessing.isRejected = false;
     }
 
     @AfterEach
-    void afterEach()  {
+    void afterEach() {
         S3MockAPIExtension.deleteFile(TEST_FILE_NAME);
     }
 
     @Test
-    void processTest(){
+    void processTest() {
         optOutProcessing.isRejected = false;
         optOutProcessing.process();
         assertEquals(7, optOutProcessing.optOutInformationMap.size());

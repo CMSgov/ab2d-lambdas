@@ -25,7 +25,7 @@ public class OptOutProcessor {
     public boolean isRejected;
     private final OptOutS3 optOutS3;
 
-    public OptOutProcessor(String fileName, String endpoint, LambdaLogger logger) throws URISyntaxException {
+    public OptOutProcessor(String fileName, String bfdBucket, String endpoint, LambdaLogger logger) throws URISyntaxException {
         this.logger = logger;
         this.optOutInformationMap = new TreeMap<>();
         var s3Client = S3Client.builder()
@@ -34,7 +34,7 @@ public class OptOutProcessor {
                 .endpointOverride(new URI(endpoint))
                 .build();
         isRejected = false;
-        optOutS3 = new OptOutS3(s3Client, fileName, logger);
+        optOutS3 = new OptOutS3(s3Client, fileName, bfdBucket, logger);
     }
 
     public void process() {
@@ -106,7 +106,7 @@ public class OptOutProcessor {
         return (isRejected) ? RecordStatus.REJECTED.toString() : RecordStatus.ACCEPTED.toString();
     }
 
-    public String getEffectiveDate(String date){
+    public String getEffectiveDate(String date) {
         return (isRejected) ? " ".repeat(EFFECTIVE_DATE_LENGTH) : date;
     }
 
