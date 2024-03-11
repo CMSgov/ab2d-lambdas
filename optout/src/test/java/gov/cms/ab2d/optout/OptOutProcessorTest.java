@@ -55,7 +55,6 @@ public class OptOutProcessorTest {
     }
 
     @Test
-
     void processTest(){
         optOutProcessing.isRejected = false;
         optOutProcessing.process();
