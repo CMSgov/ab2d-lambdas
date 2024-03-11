@@ -4,6 +4,9 @@ package gov.cms.ab2d.optout;
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import gov.cms.ab2d.databasemanagement.DatabaseUtil;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.sts.StsClient;
+import software.amazon.awssdk.services.sts.auth.StsAssumeRoleCredentialsProvider;
+import software.amazon.awssdk.services.sts.model.AssumeRoleRequest;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -28,13 +31,34 @@ public class OptOutProcessor {
     public OptOutProcessor(String fileName, String bfdBucket, String endpoint, LambdaLogger logger) throws URISyntaxException {
         this.logger = logger;
         this.optOutInformationMap = new TreeMap<>();
-        var s3Client = S3Client.builder()
-                //    .credentialsProvider(credentials)
-                .region(S3_REGION)
-                .endpointOverride(new URI(endpoint))
-                .build();
+        var s3Client = getS3Client(endpoint);
         isRejected = false;
         optOutS3 = new OptOutS3(s3Client, fileName, bfdBucket, logger);
+    }
+
+    private static S3Client getS3Client(String endpoint) throws URISyntaxException {
+        var stsClient = StsClient.builder().region(S3_REGION).build();
+
+        var assumeRoleRequest = AssumeRoleRequest
+                .builder()
+                .roleArn(ROLE)
+                .roleSessionName("roleSessionName")
+                .build();
+
+        var credentials = StsAssumeRoleCredentialsProvider
+                .builder()
+                .stsClient(stsClient)
+                .refreshRequest(assumeRoleRequest)
+                .build();
+
+        var client = S3Client.builder()
+                .region(S3_REGION)
+                .endpointOverride(new URI(endpoint));
+
+        if (endpoint.equals(ENDPOINT))
+            client.credentialsProvider(credentials);
+
+        return client.build();
     }
 
     public void process() {
