@@ -21,14 +21,14 @@ import static gov.cms.ab2d.attributionDataShare.AttributionDataShareConstants.*;
 public class AttributionDataShareHandler implements RequestStreamHandler {
 
     // Writes out a file to the FILE_PATH.
-    // I.E: "ab2d-beneids_2023-08-16T12:08:56.235-0700.txt"
+    // I.E: "P.AB2D.NGD.REQ.D240209.T1122001.OUT"
 
     public void handleRequest(InputStream inputStream, OutputStream outputStream, Context context) throws IOException {
         LambdaLogger logger = context.getLogger();
         logger.log("AttributionDataShare Lambda is started");
 
-        String currentDate = new SimpleDateFormat(PATTERN).format(new Date());
-        String fileName = FILE_PARTIAL_NAME + currentDate + FILE_FORMAT;
+        String currentDate = new SimpleDateFormat(REQ_FILE_NAME_PATTERN).format(new Date());
+        String fileName = REQ_FILE_NAME + currentDate + REQ_FILE_FORMAT;
         String fileFullPath = FILE_PATH + fileName;
         AttributionDataShareHelper helper = helperInit(fileName, fileFullPath, logger);
         try {

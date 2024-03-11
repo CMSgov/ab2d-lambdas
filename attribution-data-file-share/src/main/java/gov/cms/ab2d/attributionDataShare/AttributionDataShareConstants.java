@@ -12,9 +12,9 @@ public class AttributionDataShareConstants {
     public static final String TEST_ENDPOINT = "http://127.0.0.1:8001";
     public static final Region S3_REGION = Region.US_EAST_1;
     public static final String FILE_PATH = "/tmp/";
-    public static final String FILE_PARTIAL_NAME = "ab2d-beneids_";
-    public static final String FILE_FORMAT = ".txt";
-    public static final String PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
+    public static final String REQ_FILE_NAME = "P.AB2D.NGD.REQ.";
+    public static final String REQ_FILE_NAME_PATTERN = "'D'yyMMdd.'T'hhmmsss";
+    public static final String REQ_FILE_FORMAT = ".OUT";
 
     public static final String FIRST_LINE = "HDR_BENEDATAREQ_";
     public static final String LAST_LINE = "TLR_BENEDATAREQ_";

@@ -1,11 +1,17 @@
 package gov.cms.ab2d.optout;
 
-public final class RecordStatus {
 
-    public static final String ACCEPTED = "Accepted";
-    public static final String REJECTED = "Rejected";
+public enum RecordStatus {
 
-    private RecordStatus() {
+    ACCEPTED("Accepted  00"),
+    REJECTED("Rejected  02");
+    private final String status;
+    RecordStatus(final String status) {
+        this.status = status;
+    }
+    @Override
+    public String toString() {
+        return status;
     }
 
 }
