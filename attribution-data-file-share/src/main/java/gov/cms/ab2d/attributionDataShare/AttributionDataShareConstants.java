@@ -14,7 +14,7 @@ public class AttributionDataShareConstants {
     public static final String FILE_PATH = "/tmp/";
     public static final String REQ_FILE_NAME = "P.AB2D.NGD.REQ.";
     public static final String REQ_FILE_NAME_PATTERN = "'D'yyMMdd.'T'hhmmsss";
-    public static final String REQ_FILE_FORMAT = ".OUT.txt";
+    public static final String REQ_FILE_FORMAT = ".OUT";
 
     public static final String FIRST_LINE = "HDR_BENEDATAREQ_";
     public static final String LAST_LINE = "TLR_BENEDATAREQ_";

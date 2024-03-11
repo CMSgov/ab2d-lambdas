@@ -21,7 +21,7 @@ import static gov.cms.ab2d.attributionDataShare.AttributionDataShareConstants.*;
 public class AttributionDataShareHandler implements RequestStreamHandler {
 
     // Writes out a file to the FILE_PATH.
-    // I.E: "P.AB2D.NGD.REQ.D240209.T1122001.OUT.txt"
+    // I.E: "P.AB2D.NGD.REQ.D240209.T1122001.OUT"
 
     public void handleRequest(InputStream inputStream, OutputStream outputStream, Context context) throws IOException {
         LambdaLogger logger = context.getLogger();
