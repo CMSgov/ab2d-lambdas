@@ -44,11 +44,6 @@ public class AttributionDataShareTest {
 
     @BeforeEach
     public void beforeEach() {
-      //  var sysMock = Mockito.mockStatic(System.class);
-   //     System.setProperty("S3_UPLOAD_BUCKET", BUCKET_NAME);
-  //      System.setProperty("S3_UPLOAD_PATH", UPLOAD_PATH);
-//        sysMock.when(() -> System.getProperty(BUCKET_NAME_PROP)).thenReturn(BUCKET_NAME);
-//        sysMock.when(() -> System.getProperty(UPLOAD_PATH_PROP)).thenReturn(UPLOAD_PATH);
         helper = spy(new AttributionDataShareHelper(FILE_NAME, FILE_FULL_PATH, LOGGER));
     }
 
