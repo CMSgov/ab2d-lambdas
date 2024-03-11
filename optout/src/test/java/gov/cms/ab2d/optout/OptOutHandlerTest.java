@@ -21,6 +21,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Collections;
 
+import static gov.cms.ab2d.optout.OptOutConstantsTest.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -51,8 +52,8 @@ public class OptOutHandlerTest {
 
         var notification = S3EventNotification.parseJson(s3EventMessage.toString()).getRecords().get(0);
 
-        assertEquals("bfdeft01/ab2d/in/optOutDummy.txt", handler.getFileName(notification));
-        assertEquals("bfd-test-eft", handler.getBucketName(notification));
+        assertEquals(TEST_BUCKET_PATH + "/in/" + TEST_FILE_NAME, handler.getFileName(notification));
+        assertEquals(TEST_BFD_BUCKET_NAME, handler.getBucketName(notification));
     }
 
     @Test

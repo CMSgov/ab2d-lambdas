@@ -5,11 +5,13 @@ import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.S3ClientBuilder;
 import software.amazon.awssdk.services.s3.model.*;
 
 import java.net.URI;
 
-import static gov.cms.ab2d.optout.OptOutConstants.*;
+import static gov.cms.ab2d.optout.OptOutConstants.S3_REGION;
+import static gov.cms.ab2d.optout.OptOutConstantsTest.*;
 import static org.junit.jupiter.api.extension.ExtensionContext.Namespace.GLOBAL;
 
 public class S3MockAPIExtension implements BeforeAllCallback, ExtensionContext.Store.CloseableResource {
@@ -25,9 +27,10 @@ public class S3MockAPIExtension implements BeforeAllCallback, ExtensionContext.S
 
             API.start();
 
-            S3_CLIENT = S3Client.builder()
-                    .region(S3_REGION)
-                    .endpointOverride(new URI(TEST_ENDPOINT))
+            S3ClientBuilder builder = S3Client.builder();
+            builder.region(S3_REGION);
+            builder.endpointOverride(new URI(TEST_ENDPOINT));
+            S3_CLIENT = builder
                     .build();
 
             createBucket();
