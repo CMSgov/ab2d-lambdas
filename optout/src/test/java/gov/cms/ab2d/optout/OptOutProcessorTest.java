@@ -47,9 +47,9 @@ public class OptOutProcessorTest {
     }
 
     @BeforeEach
-    void beforeEach() throws URISyntaxException, IOException {
+    void beforeEach() throws IOException {
         S3MockAPIExtension.createFile(Files.readString(Paths.get("src/test/resources/" + TEST_FILE_NAME), StandardCharsets.UTF_8));
-        optOutProcessing = spy(new OptOutProcessor(TEST_FILE_NAME, TEST_BFD_BUCKET_NAME, TEST_ENDPOINT, mock(LambdaLogger.class)));
+        optOutProcessing = spy(new OptOutProcessor(mock(LambdaLogger.class)));
         optOutProcessing.isRejected = false;
     }
 
@@ -59,9 +59,9 @@ public class OptOutProcessorTest {
     }
 
     @Test
-    void processTest() {
+    void processTest() throws URISyntaxException {
         optOutProcessing.isRejected = false;
-        optOutProcessing.process();
+        optOutProcessing.process(TEST_FILE_NAME, TEST_BFD_BUCKET_NAME, TEST_ENDPOINT);
         assertEquals(7, optOutProcessing.optOutInformationMap.size());
     }
 

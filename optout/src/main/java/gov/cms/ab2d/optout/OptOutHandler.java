@@ -33,16 +33,16 @@ public class OptOutHandler implements RequestHandler<SQSEvent, Void> {
             var s3EventMessage = json.get("Message");
             var notification = S3EventNotification.parseJson(s3EventMessage.toString()).getRecords().get(0);
 
-            var optOutProcessing = processorInit(getFileName(notification), getBucketName(notification), logger);
-            optOutProcessing.process();
+            var optOutProcessing = processorInit(logger);
+            optOutProcessing.process(getFileName(notification), getBucketName(notification), ENDPOINT);
         } catch (Exception ex) {
             logger.log("An error occurred");
             throw new OptOutException("An error occurred", ex);
         }
     }
 
-    public OptOutProcessor processorInit(String fileName, String bfdBucket, LambdaLogger logger) throws URISyntaxException {
-        return new OptOutProcessor(fileName, bfdBucket, ENDPOINT, logger);
+    public OptOutProcessor processorInit(LambdaLogger logger) throws URISyntaxException {
+        return new OptOutProcessor(logger);
     }
 
     public String getBucketName(S3EventNotification.S3EventNotificationRecord record) {

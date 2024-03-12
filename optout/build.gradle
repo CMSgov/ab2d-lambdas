@@ -13,11 +13,12 @@ repositories {
 dependencies {
     implementation 'com.amazonaws:aws-lambda-java-core:1.2.2'
     implementation 'com.amazonaws:aws-lambda-java-events:2.2.2'
-    implementation 'com.amazonaws:aws-java-sdk-s3:1.12.406'
-    implementation 'org.postgresql:postgresql:42.5.1'
+    implementation 'com.amazonaws:aws-java-sdk-s3:1.12.529'
+    implementation 'org.postgresql:postgresql:42.7.2'
     implementation 'software.amazon.awssdk:s3:2.25.6'
-    implementation 'software.amazon.awssdk:sts:2.25.6'
     implementation 'software.amazon.awssdk:secretsmanager:2.23.12'
+    implementation 'software.amazon.awssdk:ssm:2.25.7'
+    implementation 'software.amazon.awssdk:sts:2.25.6'
     implementation 'com.googlecode.json-simple:json-simple:1.1.1'
     implementation project(':database-management')
     implementation(project(":lambda-lib"))
@@ -25,7 +26,7 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.1'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.1'
     testImplementation 'org.mockito:mockito-core:4.8.0'
-    testImplementation 'org.testcontainers:junit-jupiter:1.19.3'
+    testImplementation 'org.testcontainers:junit-jupiter:1.19.7'
     testImplementation 'org.testcontainers:postgresql:1.19.1'
     testImplementation project(':lambda-test-utils')
     testImplementation 'org.liquibase:liquibase-core:4.23.0'
