@@ -3,8 +3,6 @@ package gov.cms.ab2d.optout;
 
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.ssm.SsmClient;
-import software.amazon.awssdk.services.ssm.model.GetParameterRequest;
 import software.amazon.awssdk.services.sts.StsClient;
 import software.amazon.awssdk.services.sts.auth.StsAssumeRoleCredentialsProvider;
 import software.amazon.awssdk.services.sts.model.AssumeRoleRequest;
@@ -25,6 +23,8 @@ import java.util.TreeMap;
 import static gov.cms.ab2d.optout.OptOutConstants.*;
 
 public class OptOutProcessor {
+
+    private final OptOutParameterStore parameterStore;
     private final LambdaLogger logger;
     public SortedMap<Long, OptOutInformation> optOutInformationMap;
     public boolean isRejected;
@@ -33,6 +33,7 @@ public class OptOutProcessor {
         this.logger = logger;
         this.optOutInformationMap = new TreeMap<>();
         isRejected = false;
+        parameterStore = new OptOutParameterStore();
     }
 
     public void process(String fileName, String bfdBucket, String endpoint) throws URISyntaxException {
@@ -60,7 +61,7 @@ public class OptOutProcessor {
                             .build())
                     .refreshRequest(AssumeRoleRequest
                             .builder()
-                            .roleArn(getValueFromParameterStore(ROLE_PARAM))
+                            .roleArn(parameterStore.getRole())
                             .roleSessionName("roleSessionName")
                             .build())
                     .build();
@@ -70,25 +71,10 @@ public class OptOutProcessor {
         return client.build();
     }
 
-    public String getValueFromParameterStore(String key) {
-        var ssmClient = SsmClient.builder()
-                .region(S3_REGION)
-                .build();
-        var parameterRequest = GetParameterRequest.builder()
-                .name(key)
-                .withDecryption(true)
-                .build();
-
-        var parameterResponse = ssmClient.getParameter(parameterRequest);
-
-        logger.log("PARAMETER: " + parameterResponse.parameter().value());
-
-        return parameterResponse.parameter().value();
-    }
-
     public Connection getConnection() {
         try {
-            return DriverManager.getConnection(getValueFromParameterStore(DB_HOST_PARAM), getValueFromParameterStore(DB_USER_PARAM), getValueFromParameterStore(DB_PASS_PARAM));
+            logger.log("host: " + parameterStore.getDbHost());
+            return DriverManager.getConnection(parameterStore.getDbHost(), parameterStore.getDbUser(), parameterStore.getDbPassword());
         } catch (SQLException ex) {
             logger.log("Unable to get connection to ab2d database" + ex.getMessage());
             throw new OptOutException("Unable to get connection to ab2d database", ex);
