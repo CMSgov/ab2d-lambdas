@@ -2,7 +2,6 @@ package gov.cms.ab2d.optout;
 
 
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
-import gov.cms.ab2d.lambdalibs.lib.PropertiesUtil;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.ssm.SsmClient;
 import software.amazon.awssdk.services.ssm.model.GetParameterRequest;
@@ -20,7 +19,6 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Properties;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -41,7 +39,6 @@ public class OptOutProcessor {
         var optOutS3 = new OptOutS3(getS3Client(endpoint), fileName, bfdBucket, logger);
 
 
-
         logger.log("S3Client was created");
         processFileFromS3(optOutS3.openFileS3());
         optOutS3.createResponseOptOutFile(createResponseContent());
@@ -55,12 +52,6 @@ public class OptOutProcessor {
                 .endpointOverride(new URI(endpoint));
 
         if (endpoint.equals(ENDPOINT)) {
-
-            var role = getValueFromParameterStore(ROLE_PARAM);
-            var dbHost = getValueFromParameterStore(DB_HOST_PARAM);
-            logger.log("ROLE: " + role);
-            logger.log("DB_HOST: " + dbHost);
-
             var credentials = StsAssumeRoleCredentialsProvider
                     .builder()
                     .stsClient(StsClient
@@ -69,7 +60,7 @@ public class OptOutProcessor {
                             .build())
                     .refreshRequest(AssumeRoleRequest
                             .builder()
-                            .roleArn("arn:aws:iam::577373831711:role/bfd-test-eft-ab2d-bucket-role")
+                            .roleArn(getValueFromParameterStore(ROLE_PARAM))
                             .roleSessionName("roleSessionName")
                             .build())
                     .build();
@@ -96,13 +87,9 @@ public class OptOutProcessor {
     }
 
     public Connection getConnection() {
-        logger.log("DB_ U--------:" + System.getenv("AB2D_DB_USER"));
-        logger.log("DB_ P--------:" + System.getenv("AB2D_DB_PASSWORD"));
-        Properties properties = PropertiesUtil.loadProps();
         try {
-            return DriverManager.getConnection(properties.get("DB_URL") + "", properties.get("DB_USERNAME") + "", properties.get("DB_PASSWORD") + "");
-        }
-        catch (SQLException ex){
+            return DriverManager.getConnection(getValueFromParameterStore(DB_HOST_PARAM), getValueFromParameterStore(DB_USER_PARAM), getValueFromParameterStore(DB_PASS_PARAM));
+        } catch (SQLException ex) {
             logger.log("Unable to get connection to ab2d database" + ex.getMessage());
             throw new OptOutException("Unable to get connection to ab2d database", ex);
         }
@@ -110,10 +97,12 @@ public class OptOutProcessor {
 
     public void processFileFromS3(BufferedReader reader) {
         var dbConnection = getConnection();
+        logger.log("Created Connection");
         String line;
         var lineNumber = 0L;
         try {
             while ((line = reader.readLine()) != null) {
+                logger.log("------ " + line);
                 if (!line.startsWith(HEADER_RESP) && !line.startsWith(TRAILER_RESP)) {
                     var optOutInformation = createOptOutInformation(line);
                     optOutInformationMap.put(lineNumber, optOutInformation);
