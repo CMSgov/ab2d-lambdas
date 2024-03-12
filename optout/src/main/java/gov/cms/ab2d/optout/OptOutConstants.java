@@ -4,6 +4,7 @@ import software.amazon.awssdk.regions.Region;
 
 public class OptOutConstants {
     public static final String ROLE_PARAM = "/ab2d/test/opt-out/bfd-bucket-role-arn";
+    public static final String DB_HOST_PARAM = "/ab2d/test/opt-out/db-host";
     public static final String ENDPOINT = "https://s3.amazonaws.com";
     public static final Region S3_REGION = Region.US_EAST_1;
     public static final String HEADER_RESP = "HDR_BENEDATARSP";

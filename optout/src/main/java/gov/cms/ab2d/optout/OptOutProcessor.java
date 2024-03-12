@@ -2,7 +2,7 @@ package gov.cms.ab2d.optout;
 
 
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
-import gov.cms.ab2d.databasemanagement.DatabaseUtil;
+import gov.cms.ab2d.lambdalibs.lib.PropertiesUtil;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.ssm.SsmClient;
 import software.amazon.awssdk.services.ssm.model.GetParameterRequest;
@@ -15,10 +15,12 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Properties;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -37,6 +39,9 @@ public class OptOutProcessor {
 
     public void process(String fileName, String bfdBucket, String endpoint) throws URISyntaxException {
         var optOutS3 = new OptOutS3(getS3Client(endpoint), fileName, bfdBucket, logger);
+
+
+
         logger.log("S3Client was created");
         processFileFromS3(optOutS3.openFileS3());
         optOutS3.createResponseOptOutFile(createResponseContent());
@@ -50,6 +55,12 @@ public class OptOutProcessor {
                 .endpointOverride(new URI(endpoint));
 
         if (endpoint.equals(ENDPOINT)) {
+
+            var role = getValueFromParameterStore(ROLE_PARAM);
+            var dbHost = getValueFromParameterStore(DB_HOST_PARAM);
+            logger.log("ROLE: " + role);
+            logger.log("DB_HOST: " + dbHost);
+
             var credentials = StsAssumeRoleCredentialsProvider
                     .builder()
                     .stsClient(StsClient
@@ -68,12 +79,13 @@ public class OptOutProcessor {
         return client.build();
     }
 
-    public String getRole() {
+    public String getValueFromParameterStore(String key) {
         var ssmClient = SsmClient.builder()
                 .region(S3_REGION)
                 .build();
         var parameterRequest = GetParameterRequest.builder()
-                .name(ROLE_PARAM)
+                .name(key)
+                .withDecryption(true)
                 .build();
 
         var parameterResponse = ssmClient.getParameter(parameterRequest);
@@ -83,8 +95,21 @@ public class OptOutProcessor {
         return parameterResponse.parameter().value();
     }
 
+    public Connection getConnection() {
+        logger.log("DB_ U--------:" + System.getenv("AB2D_DB_USER"));
+        logger.log("DB_ P--------:" + System.getenv("AB2D_DB_PASSWORD"));
+        Properties properties = PropertiesUtil.loadProps();
+        try {
+            return DriverManager.getConnection(properties.get("DB_URL") + "", properties.get("DB_USERNAME") + "", properties.get("DB_PASSWORD") + "");
+        }
+        catch (SQLException ex){
+            logger.log("Unable to get connection to ab2d database" + ex.getMessage());
+            throw new OptOutException("Unable to get connection to ab2d database", ex);
+        }
+    }
+
     public void processFileFromS3(BufferedReader reader) {
-        var dbConnection = DatabaseUtil.getConnection();
+        var dbConnection = getConnection();
         String line;
         var lineNumber = 0L;
         try {
@@ -97,7 +122,7 @@ public class OptOutProcessor {
                 lineNumber++;
             }
         } catch (IOException ex) {
-            throwOptOutException("An error occurred during file processing. ", ex);
+            logger.log("An error occurred during file processing. " + ex.getMessage());
         }
     }
 
@@ -153,11 +178,6 @@ public class OptOutProcessor {
         statement.setString(2, optOut.getMbi());
         statement.setString(3, optOut.getMbi());
         statement.addBatch();
-    }
-
-    private void throwOptOutException(String errorMessage, Exception ex) {
-        logger.log(errorMessage + ex.getMessage());
-        throw new OptOutException(errorMessage, ex);
     }
 
 }

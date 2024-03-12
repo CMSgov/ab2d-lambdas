@@ -2,7 +2,6 @@ package gov.cms.ab2d.optout;
 
 
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
-import gov.cms.ab2d.databasemanagement.DatabaseUtil;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,8 +40,8 @@ public class OptOutProcessorTest {
 
     @BeforeAll
     static void beforeAll() throws SQLException {
-        var dbUtil = mockStatic(DatabaseUtil.class);
-        dbUtil.when(DatabaseUtil::getConnection).thenReturn(dbConnection);
+    //    var dbUtil = mockStatic(DatabaseUtil.class);
+   //     dbUtil.when(DatabaseUtil::getConnection).thenReturn(dbConnection);
         when(dbConnection.prepareStatement(anyString())).thenReturn(statement);
     }
 
