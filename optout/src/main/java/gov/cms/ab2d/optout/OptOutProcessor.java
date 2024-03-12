@@ -58,7 +58,7 @@ public class OptOutProcessor {
                             .build())
                     .refreshRequest(AssumeRoleRequest
                             .builder()
-                            .roleArn(getRole())
+                            .roleArn("arn:aws:iam::577373831711:role/bfd-test-eft-ab2d-bucket-role")
                             .roleSessionName("roleSessionName")
                             .build())
                     .build();
