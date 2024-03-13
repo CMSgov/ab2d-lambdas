@@ -30,7 +30,7 @@ public class AttributionDataShareHelper {
     void copyDataToFile(Connection connection) {
         String date = new SimpleDateFormat(EFFECTIVE_DATE_PATTERN).format(new Date());
         try (var stmt = connection.createStatement();
-             var writer = new BufferedWriter(new FileWriter(fileFullPath, true))) {
+             var writer = new BufferedWriter(new FileWriter(fileFullPath, true), 32768)) {
             var rs = getExecuteQuery(stmt);
             writer.write(FIRST_LINE + date);
             writer.newLine();
