@@ -14,8 +14,8 @@ public class AttributionDataShareConstants {
     public static final String FILE_PATH = "/tmp/";
     public static final String REQ_FILE_NAME = "P#EFT.ON.AB2D.NGD.REQ.";
     public static final String REQ_FILE_NAME_PATTERN = "'D'yyMMdd.'T'hhmmsss";
-    public static final String FIRST_LINE = "HDR_BENEDATAREQ_";
-    public static final String LAST_LINE = "TLR_BENEDATAREQ_";
+    public static final String FIRST_LINE = "HDR_BENEDATAREQ";
+    public static final String LAST_LINE = "TLR_BENEDATAREQ";
     public static final String SELECT_STATEMENT = "SELECT * FROM public.current_mbi";
     public static final int CURRENT_MBI_LENGTH = 11;
     public static final String EFFECTIVE_DATE_PATTERN = "yyyyMMdd";
