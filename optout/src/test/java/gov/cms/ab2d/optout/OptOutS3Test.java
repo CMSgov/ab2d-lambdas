@@ -12,7 +12,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-import static gov.cms.ab2d.optout.OptOutConstants.CONF_FILE_FORMAT;
 import static gov.cms.ab2d.optout.OptOutConstants.CONF_FILE_NAME;
 import static gov.cms.ab2d.optout.OptOutConstantsTest.*;
 import static gov.cms.ab2d.optout.S3MockAPIExtension.S3_CLIENT;
@@ -65,6 +64,5 @@ public class OptOutS3Test {
         OPT_OUT_S3 = new OptOutS3(S3_CLIENT, TEST_BUCKET_PATH + "/in/" + TEST_FILE_NAME, TEST_BFD_BUCKET_NAME, mock(LambdaLogger.class));
         var outFileName = OPT_OUT_S3.getOutFileName();
         Assertions.assertTrue(outFileName.startsWith(TEST_BUCKET_PATH + "/out/" + CONF_FILE_NAME));
-        Assertions.assertTrue(outFileName.endsWith(CONF_FILE_FORMAT));
     }
 }

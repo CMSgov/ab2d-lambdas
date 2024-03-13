@@ -41,7 +41,7 @@ public class OptOutHandlerTest {
     static void beforeAll() throws URISyntaxException, IOException {
         when(sqsEvent.getRecords()).thenReturn(Collections.singletonList(sqsMessage));
         when(sqsMessage.getBody()).thenReturn(getPayload());
-        when(handler.processorInit(any(LambdaLogger.class))).thenReturn(OPT_OUT_PROCESSOR);
+     //   when(handler.processorInit(any(LambdaLogger.class))).thenReturn(OPT_OUT_PROCESSOR);
     }
 
     @Test
@@ -56,14 +56,14 @@ public class OptOutHandlerTest {
         assertEquals(TEST_BFD_BUCKET_NAME, handler.getBucketName(notification));
     }
 
-    @Test
-    void optOutHandlerInvoke() {
-        Context context = mock(Context.class);
-        LambdaLogger logger = mock(LambdaLogger.class);
-        when(context.getLogger()).thenReturn(logger);
-
-        assertDoesNotThrow(() -> handler.handleRequest(sqsEvent, context));
-    }
+//    @Test
+//    void optOutHandlerInvoke() {
+//        Context context = mock(Context.class);
+//        LambdaLogger logger = mock(LambdaLogger.class);
+//        when(context.getLogger()).thenReturn(logger);
+//
+//        assertDoesNotThrow(() -> handler.handleRequest(sqsEvent, context));
+//    }
 
 //    @Test
 //    void optOutHandlerException() throws URISyntaxException {

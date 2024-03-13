@@ -23,24 +23,22 @@ import java.util.TreeMap;
 import static gov.cms.ab2d.optout.OptOutConstants.*;
 
 public class OptOutProcessor {
-
-    private final OptOutParameterStore parameterStore;
     private final LambdaLogger logger;
     public SortedMap<Long, OptOutInformation> optOutInformationMap;
     public boolean isRejected;
+
+    OptOutParameterStore parameterStore;
 
     public OptOutProcessor(LambdaLogger logger) {
         this.logger = logger;
         this.optOutInformationMap = new TreeMap<>();
         isRejected = false;
-        parameterStore = new OptOutParameterStore();
+        parameterStore = OptOutParameterStore.getOptOutParameterStore();
     }
 
     public void process(String fileName, String bfdBucket, String endpoint) throws URISyntaxException {
         var optOutS3 = new OptOutS3(getS3Client(endpoint), fileName, bfdBucket, logger);
 
-
-        logger.log("S3Client was created");
         processFileFromS3(optOutS3.openFileS3());
         optOutS3.createResponseOptOutFile(createResponseContent());
         if (!isRejected)
@@ -53,7 +51,7 @@ public class OptOutProcessor {
                 .endpointOverride(new URI(endpoint));
 
         if (endpoint.equals(ENDPOINT)) {
-            var credentials = StsAssumeRoleCredentialsProvider
+            client.credentialsProvider(StsAssumeRoleCredentialsProvider
                     .builder()
                     .stsClient(StsClient
                             .builder()
@@ -64,31 +62,17 @@ public class OptOutProcessor {
                             .roleArn(parameterStore.getRole())
                             .roleSessionName("roleSessionName")
                             .build())
-                    .build();
-            client.credentialsProvider(credentials);
+                    .build());
         }
-
         return client.build();
     }
 
-    public Connection getConnection() {
-        try {
-            logger.log("host: " + parameterStore.getDbHost());
-            return DriverManager.getConnection(parameterStore.getDbHost(), parameterStore.getDbUser(), parameterStore.getDbPassword());
-        } catch (SQLException ex) {
-            logger.log("Unable to get connection to ab2d database" + ex.getMessage());
-            throw new OptOutException("Unable to get connection to ab2d database", ex);
-        }
-    }
-
     public void processFileFromS3(BufferedReader reader) {
-        var dbConnection = getConnection();
-        logger.log("Created Connection");
         String line;
         var lineNumber = 0L;
         try {
+            var dbConnection = DriverManager.getConnection(parameterStore.getDbHost(), parameterStore.getDbUser(), parameterStore.getDbPassword());
             while ((line = reader.readLine()) != null) {
-                logger.log("------ " + line);
                 if (!line.startsWith(HEADER_RESP) && !line.startsWith(TRAILER_RESP)) {
                     var optOutInformation = createOptOutInformation(line);
                     optOutInformationMap.put(lineNumber, optOutInformation);
@@ -96,11 +80,10 @@ public class OptOutProcessor {
                 }
                 lineNumber++;
             }
-        } catch (IOException ex) {
+        } catch (IOException | SQLException ex) {
             logger.log("An error occurred during file processing. " + ex.getMessage());
         }
     }
-
 
     public OptOutInformation createOptOutInformation(String information) {
         var mbi = information.substring(MBI_INDEX_START, MBI_INDEX_END).trim();
@@ -117,7 +100,6 @@ public class OptOutProcessor {
             isRejected = true;
         }
     }
-
     public String createResponseContent() {
         var date = new SimpleDateFormat(EFFECTIVE_DATE_PATTERN).format(new Date());
         var responseContent = new StringBuilder();
