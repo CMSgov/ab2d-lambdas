@@ -1,6 +1,5 @@
 package gov.cms.ab2d.optout;
 
-import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.amazonaws.services.lambda.runtime.events.SQSEvent;
 import com.amazonaws.services.s3.event.S3EventNotification;
@@ -21,7 +20,6 @@ import java.nio.file.Paths;
 import java.util.Collections;
 
 import static gov.cms.ab2d.optout.OptOutConstantsTest.*;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
