@@ -7,10 +7,10 @@ import static gov.cms.ab2d.optout.OptOutConstants.*;
 
 public class OptOutParameterStore {
 
-    private String role;
-    private String dbHost;
-    private String dbUser;
-    private String dbPassword;
+    private final String role;
+    private final String dbHost;
+    private final String dbUser;
+    private final String dbPassword;
     public OptOutParameterStore(String role,  String dbHost, String dbUser, String dbPassword) {
         this.role = role;
         this.dbHost = dbHost;
@@ -18,7 +18,7 @@ public class OptOutParameterStore {
         this.dbPassword = dbPassword;
     }
 
-    public static OptOutParameterStore getOptOutParameterStore() {
+    public static OptOutParameterStore getParameterStore() {
         var ssmClient = SsmClient.builder()
                 .region(S3_REGION)
                 .build();

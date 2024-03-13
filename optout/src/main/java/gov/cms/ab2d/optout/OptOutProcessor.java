@@ -33,7 +33,7 @@ public class OptOutProcessor {
         this.logger = logger;
         this.optOutInformationMap = new TreeMap<>();
         isRejected = false;
-        parameterStore = OptOutParameterStore.getOptOutParameterStore();
+        parameterStore = OptOutParameterStore.getParameterStore();
     }
 
     public void process(String fileName, String bfdBucket, String endpoint) throws URISyntaxException {
@@ -51,18 +51,24 @@ public class OptOutProcessor {
                 .endpointOverride(new URI(endpoint));
 
         if (endpoint.equals(ENDPOINT)) {
-            client.credentialsProvider(StsAssumeRoleCredentialsProvider
+            var stsClient = StsClient
                     .builder()
-                    .stsClient(StsClient
-                            .builder()
-                            .region(S3_REGION)
-                            .build())
-                    .refreshRequest(AssumeRoleRequest
-                            .builder()
-                            .roleArn(parameterStore.getRole())
-                            .roleSessionName("roleSessionName")
-                            .build())
-                    .build());
+                    .region(S3_REGION)
+                    .build();
+
+            var request = AssumeRoleRequest
+                    .builder()
+                    .roleArn(parameterStore.getRole())
+                    .roleSessionName("roleSessionName")
+                    .build();
+
+            var credentials = StsAssumeRoleCredentialsProvider
+                    .builder()
+                    .stsClient(stsClient)
+                    .refreshRequest(request)
+                    .build();
+
+            client.credentialsProvider(credentials);
         }
         return client.build();
     }
@@ -70,8 +76,7 @@ public class OptOutProcessor {
     public void processFileFromS3(BufferedReader reader) {
         String line;
         var lineNumber = 0L;
-        try {
-            var dbConnection = DriverManager.getConnection(parameterStore.getDbHost(), parameterStore.getDbUser(), parameterStore.getDbPassword());
+        try (var dbConnection = DriverManager.getConnection(parameterStore.getDbHost(), parameterStore.getDbUser(), parameterStore.getDbPassword())){
             while ((line = reader.readLine()) != null) {
                 if (!line.startsWith(HEADER_RESP) && !line.startsWith(TRAILER_RESP)) {
                     var optOutInformation = createOptOutInformation(line);

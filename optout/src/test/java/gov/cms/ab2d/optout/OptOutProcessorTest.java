@@ -33,15 +33,15 @@ public class OptOutProcessorTest {
     private static final String DATE = new SimpleDateFormat(EFFECTIVE_DATE_PATTERN).format(new Date());
     private static final String MBI = "DUMMY000001";
     private static final String TRAILER_COUNT = "0000000001";
-
     private static String validLine(char isOptOut) {
         return MBI + isOptOut;
     }
-
     static OptOutProcessor optOutProcessing;
 
     @BeforeAll
     static void beforeAll() throws SQLException {
+        parameterStore.when(OptOutParameterStore::getParameterStore).thenReturn(new OptOutParameterStore("", "", "", ""));
+
         mockStatic(DriverManager.class)
                 .when(() ->  DriverManager.getConnection(anyString(), anyString(), anyString())).thenReturn(dbConnection);
         when(dbConnection.prepareStatement(anyString())).thenReturn(mock(PreparedStatement.class));
@@ -50,7 +50,7 @@ public class OptOutProcessorTest {
     @BeforeEach
     void beforeEach() throws IOException {
         S3MockAPIExtension.createFile(Files.readString(Paths.get("src/test/resources/" + TEST_FILE_NAME), StandardCharsets.UTF_8));
-        parameterStore.when(OptOutParameterStore::getOptOutParameterStore).thenReturn(new OptOutParameterStore("", "", "", ""));
+        parameterStore.when(OptOutParameterStore::getParameterStore).thenReturn(new OptOutParameterStore("", "", "", ""));
         optOutProcessing = spy(new OptOutProcessor(mock(LambdaLogger.class)));
         optOutProcessing.isRejected = false;
     }

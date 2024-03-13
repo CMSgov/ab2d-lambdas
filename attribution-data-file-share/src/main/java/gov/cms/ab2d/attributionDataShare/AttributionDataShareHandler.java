@@ -15,7 +15,6 @@ import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
-import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
@@ -35,10 +34,9 @@ public class AttributionDataShareHandler implements RequestStreamHandler {
         String currentDate = new SimpleDateFormat(REQ_FILE_NAME_PATTERN).format(new Date());
         String fileName = REQ_FILE_NAME + currentDate;
         String fileFullPath = FILE_PATH + fileName;
-        AttributionParameterStore parameterStore = new AttributionParameterStore();
+        var parameterStore = AttributionParameterStore.getParameterStore();
         AttributionDataShareHelper helper = helperInit(fileName, fileFullPath, logger);
-        try {
-            var dbConnection = DriverManager.getConnection(parameterStore.getDbHost(), parameterStore.getDbUser(), parameterStore.getDbPassword());
+        try (var dbConnection = DriverManager.getConnection(parameterStore.getDbHost(), parameterStore.getDbUser(), parameterStore.getDbPassword())){
 
             helper.copyDataToFile(dbConnection);
             helper.writeFileToFinalDestination(getS3Client(ENDPOINT, parameterStore));
@@ -57,22 +55,27 @@ public class AttributionDataShareHandler implements RequestStreamHandler {
                 .endpointOverride(new URI(endpoint));
 
         if (endpoint.equals(ENDPOINT)) {
-            client.credentialsProvider(StsAssumeRoleCredentialsProvider
+            var stsClient = StsClient
                     .builder()
-                    .stsClient(StsClient
-                            .builder()
-                            .region(S3_REGION)
-                            .build())
-                    .refreshRequest(AssumeRoleRequest
-                            .builder()
-                            .roleArn(parameterStore.getRole())
-                            .roleSessionName("roleSessionName")
-                            .build())
-                    .build());
+                    .region(S3_REGION)
+                    .build();
+
+            var request = AssumeRoleRequest
+                    .builder()
+                    .roleArn(parameterStore.getRole())
+                    .roleSessionName("roleSessionName")
+                    .build();
+
+            var credentials = StsAssumeRoleCredentialsProvider
+                    .builder()
+                    .stsClient(stsClient)
+                    .refreshRequest(request)
+                    .build();
+
+            client.credentialsProvider(credentials);
         }
         return client.build();
     }
-
     AttributionDataShareHelper helperInit(String fileName, String fileFullPath, LambdaLogger logger) {
         return new AttributionDataShareHelper(fileName, fileFullPath, logger);
     }
