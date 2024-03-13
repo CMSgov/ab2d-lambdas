@@ -37,13 +37,8 @@ public class AttributionDataShareHandler implements RequestStreamHandler {
         var parameterStore = AttributionParameterStore.getParameterStore();
         AttributionDataShareHelper helper = helperInit(fileName, fileFullPath, logger);
         try (var dbConnection = DriverManager.getConnection(parameterStore.getDbHost(), parameterStore.getDbUser(), parameterStore.getDbPassword())){
-            long start = System.currentTimeMillis();
             helper.copyDataToFile(dbConnection);
-            long finish = System.currentTimeMillis();
-
-            logger.log("TIME ms: ---------- " + (finish - start));
             helper.writeFileToFinalDestination(getS3Client(ENDPOINT, parameterStore));
-
         } catch (NullPointerException | URISyntaxException | SQLException ex) {
             throwAttributionDataShareException(logger, ex);
         } finally {
