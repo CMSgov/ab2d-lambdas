@@ -19,7 +19,6 @@ public class AttributionDataShareConstants {
     public static final String SELECT_STATEMENT = "SELECT * FROM public.current_mbi";
     public static final int CURRENT_MBI_LENGTH = 11;
     public static final String EFFECTIVE_DATE_PATTERN = "yyyyMMdd";
-    public static final int EFFECTIVE_DATE_LENGTH = 8;
     public static final String BUCKET_NAME_PROP = "S3_UPLOAD_BUCKET";
     public static final String UPLOAD_PATH_PROP = "S3_UPLOAD_PATH";
 

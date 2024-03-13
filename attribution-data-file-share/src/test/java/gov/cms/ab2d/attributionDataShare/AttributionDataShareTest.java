@@ -21,7 +21,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.Date;
 
 import static gov.cms.ab2d.attributionDataShare.AttributionDataShareConstants.*;
@@ -38,11 +38,11 @@ public class AttributionDataShareTest {
     @Container
     private static final PostgreSQLContainer POSTGRE_SQL_CONTAINER = new AB2DPostgresqlContainer();
     LambdaLogger LOGGER = mock(LambdaLogger.class);
-
     String FILE_NAME = REQ_FILE_NAME + new SimpleDateFormat(REQ_FILE_NAME_PATTERN).format(new Date());
     String FILE_FULL_PATH = FILE_PATH + FILE_NAME;
-
-    String MBI = "DUMMY000001";
+    String MBI_1 = "DUMMY000001";
+    String MBI_2 = "DUMMY000002";
+    Timestamp DATE = Timestamp.valueOf("2024-02-26 00:00:00");
     AttributionDataShareHelper helper;
 
     @BeforeEach
@@ -55,9 +55,9 @@ public class AttributionDataShareTest {
         var connection = mock(Connection.class);
         var stmt = mock(Statement.class);
         var rs = new MockResultSet("");
-        rs.addColumn("mbi", Collections.singletonList(MBI));
-        rs.addColumn("effective_date", Collections.singletonList(null));
-        rs.addColumn("opt_out_flag", Collections.singletonList(true));
+        rs.addColumn("mbi", Arrays.asList(MBI_1, MBI_2));
+        rs.addColumn("effective_date", Arrays.asList(DATE, null));
+        rs.addColumn("opt_out_flag", Arrays.asList(true, null));
         when(connection.createStatement()).thenReturn(stmt);
 
         when(getExecuteQuery(stmt)).thenReturn(rs);
@@ -69,9 +69,9 @@ public class AttributionDataShareTest {
 
     @Test
     void getResponseLineTest() {
-        assertEquals(MBI + "        Y", helper.getResponseLine(MBI, null, true));
-        assertEquals(MBI + "20240226N", helper.getResponseLine(MBI, Timestamp.valueOf("2024-02-26 00:00:00"), false));
-        assertEquals("A                  Y", helper.getResponseLine("A", null, true));
+        assertEquals(MBI_1, helper.getResponseLine(MBI_1, null, null));
+        assertEquals(MBI_2 + "20240226N", helper.getResponseLine(MBI_2, DATE, false));
+        assertEquals("A          20240226Y", helper.getResponseLine("A", DATE, true));
     }
 
 
@@ -95,7 +95,7 @@ public class AttributionDataShareTest {
 
     private void createTestFile() throws IOException {
         PrintWriter writer = new PrintWriter(FILE_FULL_PATH, StandardCharsets.UTF_8);
-        writer.println("Test");
+        writer.println(MBI_1);
         writer.close();
     }
 }

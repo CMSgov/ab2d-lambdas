@@ -56,12 +56,10 @@ public class AttributionDataShareHelper {
         if (currentMbi.length() < CURRENT_MBI_LENGTH)
             result.append(" ".repeat(Math.max(0, CURRENT_MBI_LENGTH - currentMbi.length())));
 
-        if (effectiveDate == null)
-            result.append(" ".repeat(EFFECTIVE_DATE_LENGTH));
-        else
+        if (effectiveDate != null) {
             result.append(new SimpleDateFormat(EFFECTIVE_DATE_PATTERN).format(effectiveDate));
-
-        result.append((optOutFlag) ? 'Y' : 'N');
+            result.append((optOutFlag) ? 'Y' : 'N');
+        }
         return result.toString();
     }
 
