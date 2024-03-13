@@ -41,7 +41,7 @@ public class OptOutHandlerTest {
     static void beforeAll() throws URISyntaxException, IOException {
         when(sqsEvent.getRecords()).thenReturn(Collections.singletonList(sqsMessage));
         when(sqsMessage.getBody()).thenReturn(getPayload());
-     //   when(handler.processorInit(any(LambdaLogger.class))).thenReturn(OPT_OUT_PROCESSOR);
+        when(handler.processorInit(any(LambdaLogger.class))).thenReturn(OPT_OUT_PROCESSOR);
     }
 
     @Test
