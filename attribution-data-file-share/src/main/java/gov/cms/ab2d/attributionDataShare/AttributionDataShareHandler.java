@@ -3,9 +3,11 @@ package gov.cms.ab2d.attributionDataShare;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
-import gov.cms.ab2d.databasemanagement.DatabaseUtil;
 import gov.cms.ab2d.lambdalibs.lib.FileUtil;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.sts.StsClient;
+import software.amazon.awssdk.services.sts.auth.StsAssumeRoleCredentialsProvider;
+import software.amazon.awssdk.services.sts.model.AssumeRoleRequest;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -13,6 +15,8 @@ import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -21,20 +25,23 @@ import static gov.cms.ab2d.attributionDataShare.AttributionDataShareConstants.*;
 public class AttributionDataShareHandler implements RequestStreamHandler {
 
     // Writes out a file to the FILE_PATH.
-    // I.E: "P.AB2D.NGD.REQ.D240209.T1122001.OUT"
+    // I.E: "P.AB2D.NGD.REQ.D240209.T1122001"
 
     public void handleRequest(InputStream inputStream, OutputStream outputStream, Context context) throws IOException {
         LambdaLogger logger = context.getLogger();
         logger.log("AttributionDataShare Lambda is started");
 
         String currentDate = new SimpleDateFormat(REQ_FILE_NAME_PATTERN).format(new Date());
-        String fileName = REQ_FILE_NAME + currentDate + REQ_FILE_FORMAT;
+        String fileName = REQ_FILE_NAME + currentDate;
         String fileFullPath = FILE_PATH + fileName;
+        var parameterStore = AttributionParameterStore.getParameterStore();
         AttributionDataShareHelper helper = helperInit(fileName, fileFullPath, logger);
-        try {
-            helper.copyDataToFile(DatabaseUtil.getConnection());
-            helper.writeFileToFinalDestination(getS3Client(ENDPOINT));
-        } catch (NullPointerException | URISyntaxException ex) {
+        try (var dbConnection = DriverManager.getConnection(parameterStore.getDbHost(), parameterStore.getDbUser(), parameterStore.getDbPassword())){
+
+            helper.copyDataToFile(dbConnection);
+            helper.writeFileToFinalDestination(getS3Client(ENDPOINT, parameterStore));
+
+        } catch (NullPointerException | URISyntaxException | SQLException ex) {
             throwAttributionDataShareException(logger, ex);
         } finally {
             FileUtil.deleteDirectoryRecursion(Paths.get(fileFullPath));
@@ -42,13 +49,33 @@ public class AttributionDataShareHandler implements RequestStreamHandler {
         }
     }
 
-    S3Client getS3Client(String endpoint) throws URISyntaxException {
-        return S3Client.builder()
+    public S3Client getS3Client(String endpoint, AttributionParameterStore parameterStore) throws URISyntaxException {
+        var client = S3Client.builder()
                 .region(S3_REGION)
-                .endpointOverride(new URI(endpoint))
-                .build();
-    }
+                .endpointOverride(new URI(endpoint));
 
+        if (endpoint.equals(ENDPOINT)) {
+            var stsClient = StsClient
+                    .builder()
+                    .region(S3_REGION)
+                    .build();
+
+            var request = AssumeRoleRequest
+                    .builder()
+                    .roleArn(parameterStore.getRole())
+                    .roleSessionName("roleSessionName")
+                    .build();
+
+            var credentials = StsAssumeRoleCredentialsProvider
+                    .builder()
+                    .stsClient(stsClient)
+                    .refreshRequest(request)
+                    .build();
+
+            client.credentialsProvider(credentials);
+        }
+        return client.build();
+    }
     AttributionDataShareHelper helperInit(String fileName, String fileFullPath, LambdaLogger logger) {
         return new AttributionDataShareHelper(fileName, fileFullPath, logger);
     }

@@ -2,14 +2,17 @@ package gov.cms.ab2d.optout;
 
 
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
-import gov.cms.ab2d.databasemanagement.DatabaseUtil;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.sts.StsClient;
+import software.amazon.awssdk.services.sts.auth.StsAssumeRoleCredentialsProvider;
+import software.amazon.awssdk.services.sts.model.AssumeRoleRequest;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
@@ -23,32 +26,57 @@ public class OptOutProcessor {
     private final LambdaLogger logger;
     public SortedMap<Long, OptOutInformation> optOutInformationMap;
     public boolean isRejected;
-    private final OptOutS3 optOutS3;
 
-    public OptOutProcessor(String fileName, String bfdBucket, String endpoint, LambdaLogger logger) throws URISyntaxException {
+    OptOutParameterStore parameterStore;
+
+    public OptOutProcessor(LambdaLogger logger) {
         this.logger = logger;
         this.optOutInformationMap = new TreeMap<>();
-        var s3Client = S3Client.builder()
-                //    .credentialsProvider(credentials)
-                .region(S3_REGION)
-                .endpointOverride(new URI(endpoint))
-                .build();
         isRejected = false;
-        optOutS3 = new OptOutS3(s3Client, fileName, bfdBucket, logger);
+        parameterStore = OptOutParameterStore.getParameterStore();
     }
 
-    public void process() {
+    public void process(String fileName, String bfdBucket, String endpoint) throws URISyntaxException {
+        var optOutS3 = new OptOutS3(getS3Client(endpoint), fileName, bfdBucket, logger);
+
         processFileFromS3(optOutS3.openFileS3());
         optOutS3.createResponseOptOutFile(createResponseContent());
         if (!isRejected)
             optOutS3.deleteFileFromS3();
     }
 
+    public S3Client getS3Client(String endpoint) throws URISyntaxException {
+        var client = S3Client.builder()
+                .region(S3_REGION)
+                .endpointOverride(new URI(endpoint));
+
+        if (endpoint.equals(ENDPOINT)) {
+            var stsClient = StsClient
+                    .builder()
+                    .region(S3_REGION)
+                    .build();
+
+            var request = AssumeRoleRequest
+                    .builder()
+                    .roleArn(parameterStore.getRole())
+                    .roleSessionName("roleSessionName")
+                    .build();
+
+            var credentials = StsAssumeRoleCredentialsProvider
+                    .builder()
+                    .stsClient(stsClient)
+                    .refreshRequest(request)
+                    .build();
+
+            client.credentialsProvider(credentials);
+        }
+        return client.build();
+    }
+
     public void processFileFromS3(BufferedReader reader) {
-        var dbConnection = DatabaseUtil.getConnection();
         String line;
         var lineNumber = 0L;
-        try {
+        try (var dbConnection = DriverManager.getConnection(parameterStore.getDbHost(), parameterStore.getDbUser(), parameterStore.getDbPassword())){
             while ((line = reader.readLine()) != null) {
                 if (!line.startsWith(HEADER_RESP) && !line.startsWith(TRAILER_RESP)) {
                     var optOutInformation = createOptOutInformation(line);
@@ -57,9 +85,8 @@ public class OptOutProcessor {
                 }
                 lineNumber++;
             }
-        } catch (IOException ex) {
+        } catch (IOException | SQLException ex) {
             logger.log("An error occurred during file processing. " + ex.getMessage());
-            throw new OptOutException("An error occurred during file processing.", ex);
         }
     }
 
@@ -75,11 +102,9 @@ public class OptOutProcessor {
             statement.execute();
         } catch (SQLException ex) {
             logger.log("There is an insertion error on the line " + lineNumber);
-            logger.log(ex.getMessage());
             isRejected = true;
         }
     }
-
     public String createResponseContent() {
         var date = new SimpleDateFormat(EFFECTIVE_DATE_PATTERN).format(new Date());
         var responseContent = new StringBuilder();

@@ -49,7 +49,7 @@ public class AttributionDataShareHelper {
         }
     }
 
-    String getResponseLine(String currentMbi, Timestamp effectiveDate, boolean optOutFlag) {
+    String getResponseLine(String currentMbi, Timestamp effectiveDate, Boolean optOutFlag) {
         var result = new StringBuilder();
         result.append(currentMbi);
         // Adding spaces to the end of a string to achieve the required position index

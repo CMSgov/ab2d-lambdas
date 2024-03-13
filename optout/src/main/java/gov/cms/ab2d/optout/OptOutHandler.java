@@ -33,24 +33,16 @@ public class OptOutHandler implements RequestHandler<SQSEvent, Void> {
             var s3EventMessage = json.get("Message");
             var notification = S3EventNotification.parseJson(s3EventMessage.toString()).getRecords().get(0);
 
-            var optOutProcessing = processorInit(getFileName(notification), getBucketName(notification), logger);
-            optOutProcessing.process();
+            var optOutProcessing = processorInit(logger);
+            optOutProcessing.process(getFileName(notification), getBucketName(notification), ENDPOINT);
         } catch (Exception ex) {
             logger.log("An error occurred");
             throw new OptOutException("An error occurred", ex);
         }
     }
 
-    public OptOutProcessor processorInit(String fileName, String bfdBucket, LambdaLogger logger) throws URISyntaxException {
-        return new OptOutProcessor(fileName, bfdBucket, ENDPOINT, logger);
-        //ToDo: uncomment when permanent credentials will be available
-//        var creds = SecretManager.getS3Credentials(ACCESS_KEY_ID, SECRET_ACCESS_KEY, ACCESS_TOKEN, logger);
-//        if (creds.isPresent())
-//            return new OptOutProcessing(msg, ENDPOINT, creds.get(), logger);
-//        else {
-//            logger.log("Can't get Credentials from Secret manager");
-//            throw new OptOutException("Can't get Credentials from Secret manager");
-//        }
+    public OptOutProcessor processorInit(LambdaLogger logger) throws URISyntaxException {
+        return new OptOutProcessor(logger);
     }
 
     public String getBucketName(S3EventNotification.S3EventNotificationRecord record) {

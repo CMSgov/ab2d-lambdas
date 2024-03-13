@@ -2,12 +2,12 @@ package gov.cms.ab2d.optout;
 
 
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
-import gov.cms.ab2d.databasemanagement.DatabaseUtil;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.MockedStatic;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -15,6 +15,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
@@ -28,28 +29,29 @@ import static org.mockito.Mockito.*;
 @ExtendWith({S3MockAPIExtension.class})
 public class OptOutProcessorTest {
     private static final Connection dbConnection = mock(Connection.class);
-    private static final PreparedStatement statement = mock(PreparedStatement.class);
+    private static final MockedStatic<OptOutParameterStore> parameterStore = mockStatic(OptOutParameterStore.class);
     private static final String DATE = new SimpleDateFormat(EFFECTIVE_DATE_PATTERN).format(new Date());
     private static final String MBI = "DUMMY000001";
     private static final String TRAILER_COUNT = "0000000001";
-
     private static String validLine(char isOptOut) {
         return MBI + isOptOut;
     }
-
     static OptOutProcessor optOutProcessing;
 
     @BeforeAll
     static void beforeAll() throws SQLException {
-        var dbUtil = mockStatic(DatabaseUtil.class);
-        dbUtil.when(DatabaseUtil::getConnection).thenReturn(dbConnection);
-        when(dbConnection.prepareStatement(anyString())).thenReturn(statement);
+        parameterStore.when(OptOutParameterStore::getParameterStore).thenReturn(new OptOutParameterStore("", "", "", ""));
+
+        mockStatic(DriverManager.class)
+                .when(() ->  DriverManager.getConnection(anyString(), anyString(), anyString())).thenReturn(dbConnection);
+        when(dbConnection.prepareStatement(anyString())).thenReturn(mock(PreparedStatement.class));
     }
 
     @BeforeEach
-    void beforeEach() throws URISyntaxException, IOException {
+    void beforeEach() throws IOException {
         S3MockAPIExtension.createFile(Files.readString(Paths.get("src/test/resources/" + TEST_FILE_NAME), StandardCharsets.UTF_8));
-        optOutProcessing = spy(new OptOutProcessor(TEST_FILE_NAME, TEST_BFD_BUCKET_NAME, TEST_ENDPOINT, mock(LambdaLogger.class)));
+        parameterStore.when(OptOutParameterStore::getParameterStore).thenReturn(new OptOutParameterStore("", "", "", ""));
+        optOutProcessing = spy(new OptOutProcessor(mock(LambdaLogger.class)));
         optOutProcessing.isRejected = false;
     }
 
@@ -59,9 +61,9 @@ public class OptOutProcessorTest {
     }
 
     @Test
-    void processTest() {
+    void processTest() throws URISyntaxException {
         optOutProcessing.isRejected = false;
-        optOutProcessing.process();
+        optOutProcessing.process(TEST_FILE_NAME, TEST_BFD_BUCKET_NAME, TEST_ENDPOINT);
         assertEquals(7, optOutProcessing.optOutInformationMap.size());
     }
 

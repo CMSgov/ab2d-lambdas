@@ -7,7 +7,6 @@ import gov.cms.ab2d.testutils.AB2DPostgresqlContainer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mockito;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -17,14 +16,18 @@ import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Date;
 
 import static gov.cms.ab2d.attributionDataShare.AttributionDataShareConstants.*;
 import static gov.cms.ab2d.attributionDataShare.AttributionDataShareHelper.getExecuteQuery;
-import static gov.cms.ab2d.attributionDataShare.S3MockAPIExtension.*;
+import static gov.cms.ab2d.attributionDataShare.S3MockAPIExtension.getBucketName;
+import static gov.cms.ab2d.attributionDataShare.S3MockAPIExtension.getUploadPath;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -36,7 +39,7 @@ public class AttributionDataShareTest {
     private static final PostgreSQLContainer POSTGRE_SQL_CONTAINER = new AB2DPostgresqlContainer();
     LambdaLogger LOGGER = mock(LambdaLogger.class);
 
-    String FILE_NAME = REQ_FILE_NAME + new SimpleDateFormat(REQ_FILE_NAME_PATTERN).format(new Date()) + REQ_FILE_FORMAT;
+    String FILE_NAME = REQ_FILE_NAME + new SimpleDateFormat(REQ_FILE_NAME_PATTERN).format(new Date());
     String FILE_FULL_PATH = FILE_PATH + FILE_NAME;
 
     String MBI = "DUMMY000001";
@@ -65,9 +68,9 @@ public class AttributionDataShareTest {
     }
 
     @Test
-    void getResponseLineTest(){
-        assertEquals(MBI +"        Y", helper.getResponseLine(MBI, null, true));
-        assertEquals(MBI +"20240226N", helper.getResponseLine(MBI, Timestamp.valueOf("2024-02-26 00:00:00"), false));
+    void getResponseLineTest() {
+        assertEquals(MBI + "        Y", helper.getResponseLine(MBI, null, true));
+        assertEquals(MBI + "20240226N", helper.getResponseLine(MBI, Timestamp.valueOf("2024-02-26 00:00:00"), false));
         assertEquals("A                  Y", helper.getResponseLine("A", null, true));
     }
 
@@ -81,12 +84,12 @@ public class AttributionDataShareTest {
     }
 
     @Test
-    void getBucketNameTest(){
+    void getBucketNameTest() {
         assertEquals(getBucketName(), helper.getBucketName());
     }
 
     @Test
-    void getUploadPathTest(){
+    void getUploadPathTest() {
         assertEquals(getUploadPath(), helper.getUploadPath());
     }
 

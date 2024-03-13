@@ -29,10 +29,6 @@ public class OptOutS3 {
 
     public BufferedReader openFileS3() {
         try {
-            //Checking if object exists
-            logger.log("Buket name: " + bfdBucket);
-            logger.log("File name: " + fileName);
-
             HeadObjectRequest headObjectRequest = HeadObjectRequest.builder()
                     .bucket(bfdBucket)
                     .key(fileName)
@@ -97,8 +93,7 @@ public class OptOutS3 {
     public String getOutFileName() {
         //bfdeft01/ab2d/in/testing.txt
         var name = CONF_FILE_NAME
-                + new SimpleDateFormat(CONF_FILE_NAME_PATTERN).format(new Date())
-                + CONF_FILE_FORMAT;
+                + new SimpleDateFormat(CONF_FILE_NAME_PATTERN).format(new Date());
 
         String[] path = fileName.split("in");
 

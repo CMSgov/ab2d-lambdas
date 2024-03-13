@@ -12,10 +12,11 @@ repositories {
 
 dependencies {
     implementation 'com.amazonaws:aws-lambda-java-core:1.2.2'
-    implementation 'com.amazonaws:aws-java-sdk-s3:1.12.406'
-    implementation 'org.postgresql:postgresql:42.5.1'
+    implementation 'com.amazonaws:aws-java-sdk-s3:1.12.529'
+    implementation 'org.postgresql:postgresql:42.7.2'
     implementation 'software.amazon.awssdk:s3:2.21.7'
-    implementation project(path: ':database-management')
+    implementation 'software.amazon.awssdk:ssm:2.25.7'
+    implementation 'software.amazon.awssdk:sts:2.25.6'
     implementation project(path: ':lambda-lib')
     testImplementation 'org.mockito:mockito-core:4.8.0'
     testImplementation 'com.mockrunner:mockrunner-jdbc:2.0.7'
@@ -41,6 +42,12 @@ test {
     useJUnitPlatform()
     environment "S3_UPLOAD_BUCKET", "bfd-test-eft"
     environment "S3_UPLOAD_PATH", "bfdeft01/test/out"
+}
+
+sonarqube {
+    properties {
+        property 'sonar.coverage.exclusions', "**/AttributionParameterStore.java"
+    }
 }
 
 task wrapper(type: Wrapper) {
