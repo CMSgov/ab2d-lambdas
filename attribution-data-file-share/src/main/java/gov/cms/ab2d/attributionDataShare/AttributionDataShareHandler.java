@@ -4,6 +4,7 @@ import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
 import gov.cms.ab2d.lambdalibs.lib.FileUtil;
+import software.amazon.awssdk.services.s3.S3AsyncClient;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.sts.StsClient;
 import software.amazon.awssdk.services.sts.auth.StsAssumeRoleCredentialsProvider;
@@ -40,6 +41,7 @@ public class AttributionDataShareHandler implements RequestStreamHandler {
 
             helper.copyDataToFile(dbConnection);
             helper.writeFileToFinalDestination(getS3Client(ENDPOINT, parameterStore));
+            helper.mtpUpload(getAsyncS3Client(ENDPOINT, parameterStore));
 
         } catch (NullPointerException | URISyntaxException | SQLException ex) {
             throwAttributionDataShareException(logger, ex);
@@ -76,6 +78,40 @@ public class AttributionDataShareHandler implements RequestStreamHandler {
         }
         return client.build();
     }
+
+    public S3AsyncClient getAsyncS3Client(String endpoint, AttributionParameterStore parameterStore) throws URISyntaxException {
+        var client = S3AsyncClient.crtCreate();
+
+
+        if (endpoint.equals(ENDPOINT)) {
+            var stsClient = StsClient
+                    .builder()
+                    .region(S3_REGION)
+                    .build();
+
+            var request = AssumeRoleRequest
+                    .builder()
+                    .roleArn(parameterStore.getRole())
+                    .roleSessionName("roleSessionName")
+                    .build();
+
+            var credentials = StsAssumeRoleCredentialsProvider
+                    .builder()
+                    .stsClient(stsClient)
+                    .refreshRequest(request)
+                    .build();
+
+            client =
+                    S3AsyncClient.crtBuilder()
+                            .credentialsProvider(credentials)
+                            .region(S3_REGION)
+                            .targetThroughputInGbps(20.0)
+                            .minimumPartSizeInBytes(8 * 1025 * 1024L)
+                            .build();
+        }
+        return client;
+    }
+
     AttributionDataShareHelper helperInit(String fileName, String fileFullPath, LambdaLogger logger) {
         return new AttributionDataShareHelper(fileName, fileFullPath, logger);
     }
