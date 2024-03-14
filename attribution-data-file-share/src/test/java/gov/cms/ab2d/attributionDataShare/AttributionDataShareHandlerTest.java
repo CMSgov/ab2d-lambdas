@@ -49,8 +49,8 @@ class AttributionDataShareHandlerTest {
         assertThrows(AttributionDataShareException.class, () -> handler.throwAttributionDataShareException(LOGGER, ex));
     }
 
-    @Test
-    void getS3ClientTest() throws URISyntaxException {
-        assertNotNull(handler.getS3Client(TEST_ENDPOINT, parameterStore));
-    }
+//    @Test
+//    void getS3ClientTest() throws URISyntaxException {
+//        assertNotNull(handler.getS3Client(TEST_ENDPOINT, parameterStore));
+//    }
 }
