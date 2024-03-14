@@ -9,6 +9,7 @@ import software.amazon.awssdk.services.s3.model.*;
 import java.net.URI;
 
 import static gov.cms.ab2d.attributionDataShare.AttributionDataShareConstants.*;
+import static gov.cms.ab2d.attributionDataShare.AttributionDataShareConstantsTest.TEST_ENDPOINT;
 import static org.junit.jupiter.api.extension.ExtensionContext.Namespace.GLOBAL;
 
 public class S3MockAPIExtension implements BeforeAllCallback, ExtensionContext.Store.CloseableResource {
@@ -31,6 +32,7 @@ public class S3MockAPIExtension implements BeforeAllCallback, ExtensionContext.S
                     .build();
 
             createBucket();
+
         }
     }
 

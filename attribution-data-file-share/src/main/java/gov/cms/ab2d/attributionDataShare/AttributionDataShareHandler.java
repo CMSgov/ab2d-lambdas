@@ -3,18 +3,15 @@ package gov.cms.ab2d.attributionDataShare;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
-import gov.cms.ab2d.lambdalibs.lib.FileUtil;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.sts.StsClient;
 import software.amazon.awssdk.services.sts.auth.StsAssumeRoleCredentialsProvider;
 import software.amazon.awssdk.services.sts.model.AssumeRoleRequest;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.file.Paths;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
@@ -24,27 +21,24 @@ import static gov.cms.ab2d.attributionDataShare.AttributionDataShareConstants.*;
 
 public class AttributionDataShareHandler implements RequestStreamHandler {
 
-    // Writes out a file to the FILE_PATH.
-    // I.E: "P.AB2D.NGD.REQ.D240209.T1122001"
-
-    public void handleRequest(InputStream inputStream, OutputStream outputStream, Context context) throws IOException {
+    public void handleRequest(InputStream inputStream, OutputStream outputStream, Context context) {
         LambdaLogger logger = context.getLogger();
         logger.log("AttributionDataShare Lambda is started");
 
         String currentDate = new SimpleDateFormat(REQ_FILE_NAME_PATTERN).format(new Date());
         String fileName = REQ_FILE_NAME + currentDate;
-        String fileFullPath = FILE_PATH + fileName;
         var parameterStore = AttributionParameterStore.getParameterStore();
-        AttributionDataShareHelper helper = helperInit(fileName, fileFullPath, logger);
-        try (var dbConnection = DriverManager.getConnection(parameterStore.getDbHost(), parameterStore.getDbUser(), parameterStore.getDbPassword())){
+        try (var dbConnection = DriverManager.getConnection(parameterStore.getDbHost(), parameterStore.getDbUser(), parameterStore.getDbPassword())) {
+            long start = System.currentTimeMillis();
 
-            helper.copyDataToFile(dbConnection);
-            helper.writeFileToFinalDestination(getS3Client(ENDPOINT, parameterStore));
+            var content = AttributionDataShareHelper.getFileContent(dbConnection, logger);
+            AttributionDataShareHelper.writeFileToS3Bucket(content, fileName, getS3Client(ENDPOINT, parameterStore), logger);
 
+            long finish = System.currentTimeMillis();
+            logger.log("TIME ms: ---------- " + (finish - start));
         } catch (NullPointerException | URISyntaxException | SQLException ex) {
             throwAttributionDataShareException(logger, ex);
         } finally {
-            FileUtil.deleteDirectoryRecursion(Paths.get(fileFullPath));
             logger.log("AttributionDataShare Lambda is completed");
         }
     }
@@ -75,9 +69,6 @@ public class AttributionDataShareHandler implements RequestStreamHandler {
             client.credentialsProvider(credentials);
         }
         return client.build();
-    }
-    AttributionDataShareHelper helperInit(String fileName, String fileFullPath, LambdaLogger logger) {
-        return new AttributionDataShareHelper(fileName, fileFullPath, logger);
     }
 
     void throwAttributionDataShareException(LambdaLogger logger, Exception ex) {

@@ -9,9 +9,7 @@ public class AttributionDataShareConstants {
     public static final String DB_USER_PARAM = "/ab2d/opt-out/db-user";
     public static final String DB_PASS_PARAM = "/ab2d/opt-out/db-password";
     public static final String ENDPOINT = "https://s3.amazonaws.com";
-    public static final String TEST_ENDPOINT = "http://127.0.0.1:8001";
     public static final Region S3_REGION = Region.US_EAST_1;
-    public static final String FILE_PATH = "/tmp/";
     public static final String REQ_FILE_NAME = "P#EFT.ON.AB2D.NGD.REQ.";
     public static final String REQ_FILE_NAME_PATTERN = "'D'yyMMdd.'T'hhmmsss";
     public static final String FIRST_LINE = "HDR_BENEDATAREQ";
@@ -21,6 +19,7 @@ public class AttributionDataShareConstants {
     public static final String EFFECTIVE_DATE_PATTERN = "yyyyMMdd";
     public static final String BUCKET_NAME_PROP = "S3_UPLOAD_BUCKET";
     public static final String UPLOAD_PATH_PROP = "S3_UPLOAD_PATH";
+    public static final String LINE_SEPARATOR = System.getProperty("line.separator");
 
     private AttributionDataShareConstants() {
     }
