@@ -5,22 +5,19 @@ import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
 import gov.cms.ab2d.lambdalibs.lib.FileUtil;
 import software.amazon.awssdk.services.s3.S3AsyncClient;
-import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.sts.StsClient;
 import software.amazon.awssdk.services.sts.auth.StsAssumeRoleCredentialsProvider;
 import software.amazon.awssdk.services.sts.model.AssumeRoleRequest;
 
-import java.io.*;
-import java.net.URI;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import static gov.cms.ab2d.attributionDataShare.AttributionDataShareConstants.*;
 
@@ -28,32 +25,6 @@ public class AttributionDataShareHandler implements RequestStreamHandler {
 
     // Writes out a file to the FILE_PATH.
     // I.E: "P.AB2D.NGD.REQ.D240209.T1122001"
-
-    String select1 = "SELECT mbi,effective_date,opt_out_flag FROM (\n" +
-            "  SELECT *, ROW_NUMBER() OVER (ORDER BY mbi DESC) AS row_num\n" +
-            "  FROM current_mbi\n" +
-            ") subquery\n" +
-            "WHERE row_num <= 5000";
-
-    String select2 = "SELECT mbi,effective_date,opt_out_flag FROM (\n" +
-            "  SELECT *, ROW_NUMBER() OVER (ORDER BY mbi DESC) AS row_num\n" +
-            "  FROM current_mbi\n" +
-            ") subquery\n" +
-            "WHERE row_num > 5000 And row_num <= 10000";
-
-    String select3 = "SELECT mbi,effective_date,opt_out_flag FROM (\n" +
-            "  SELECT *, ROW_NUMBER() OVER (ORDER BY mbi DESC) AS row_num\n" +
-            "  FROM current_mbi\n" +
-            ") subquery\n" +
-            "WHERE row_num > 10000 And row_num <= 20000";
-
-    String select4 = "SELECT mbi,effective_date,opt_out_flag FROM (\n" +
-            "  SELECT *, ROW_NUMBER() OVER (ORDER BY mbi DESC) AS row_num\n" +
-            "  FROM current_mbi\n" +
-            ") subquery\n" +
-            "WHERE row_num > 20000";
-
-    private static BufferedWriter bufferedWriter;
 
     public void handleRequest(InputStream inputStream, OutputStream outputStream, Context context) throws IOException {
         LambdaLogger logger = context.getLogger();
@@ -64,37 +35,12 @@ public class AttributionDataShareHandler implements RequestStreamHandler {
         String fileFullPath = FILE_PATH + fileName;
         var parameterStore = AttributionParameterStore.getParameterStore();
         AttributionDataShareHelper helper = helperInit(fileName, fileFullPath, logger);
-
-        int threadCount = 4;
-        ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
-        CountDownLatch latch = new CountDownLatch(threadCount);
-
         try (var dbConnection = DriverManager.getConnection(parameterStore.getDbHost(), parameterStore.getDbUser(), parameterStore.getDbPassword())) {
-            long startSelect = System.currentTimeMillis();
 
-            executorService.execute(new Utils(fileFullPath, select1, dbConnection, getWriter(fileFullPath), latch, logger));
-            executorService.execute(new Utils(fileFullPath, select2, dbConnection, getWriter(fileFullPath), latch, logger));
-            executorService.execute(new Utils(fileFullPath, select3, dbConnection, getWriter(fileFullPath), latch, logger));
-            executorService.execute(new Utils(fileFullPath, select4, dbConnection, getWriter(fileFullPath), latch, logger));
-
-            latch.await();
-
-            long finishSelect = System.currentTimeMillis();
-
-            logger.log("Total Select TIME ms: ---------- " + (finishSelect - startSelect));
-            //   helper.mtpUpload(getAsyncS3Client(ENDPOINT, parameterStore));
-
-
+            helper.copyDataToFile(dbConnection);
             helper.mtpUpload(getAsyncS3Client(ENDPOINT, parameterStore));
-            //show me the file
-            BufferedReader br = new BufferedReader(new FileReader(fileFullPath));
-            String line;
-            while ((line = br.readLine()) != null) {
-                logger.log(line);
-            }
 
-
-        } catch (NullPointerException | URISyntaxException | SQLException | InterruptedException ex) {
+        } catch (NullPointerException | URISyntaxException | SQLException ex) {
             throwAttributionDataShareException(logger, ex);
         } finally {
             FileUtil.deleteDirectoryRecursion(Paths.get(fileFullPath));
@@ -102,22 +48,8 @@ public class AttributionDataShareHandler implements RequestStreamHandler {
         }
     }
 
-    private static synchronized BufferedWriter getWriter(String fileFullPath) {
-        try {
-            if (bufferedWriter == null) {
-                bufferedWriter = new BufferedWriter(new FileWriter(fileFullPath, true));
-            }
-
-            return bufferedWriter;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-
     public S3AsyncClient getAsyncS3Client(String endpoint, AttributionParameterStore parameterStore) throws URISyntaxException {
         var client = S3AsyncClient.crtCreate();
-
 
         if (endpoint.equals(ENDPOINT)) {
             var stsClient = StsClient

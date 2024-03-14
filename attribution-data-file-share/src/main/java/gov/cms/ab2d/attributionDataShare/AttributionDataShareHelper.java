@@ -1,11 +1,7 @@
 package gov.cms.ab2d.attributionDataShare;
 
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
-import com.amazonaws.services.s3.model.AmazonS3Exception;
-import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3AsyncClient;
-import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.transfer.s3.S3TransferManager;
 import software.amazon.awssdk.transfer.s3.model.CompletedFileUpload;
 import software.amazon.awssdk.transfer.s3.model.FileUpload;
@@ -13,7 +9,6 @@ import software.amazon.awssdk.transfer.s3.model.UploadFileRequest;
 import software.amazon.awssdk.transfer.s3.progress.LoggingTransferListener;
 
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Paths;
@@ -79,27 +74,7 @@ public class AttributionDataShareHelper {
         return result.toString();
     }
 
-    void writeFileToFinalDestination(S3Client s3Client) {
-        logger.log("filename " + fileName);
-        long startUpload = System.currentTimeMillis();
-        try {
-            var objectRequest = PutObjectRequest.builder()
-                    .bucket(getBucketName())
-                    .key(getUploadPath() + fileName)
-                    .build();
-
-            s3Client.putObject(objectRequest, RequestBody.fromFile(new File(fileFullPath)));
-        } catch (AmazonS3Exception ex) {
-            var errorMessage = "Response AttributionDataShare file cannot be created. ";
-            logger.log(errorMessage + ex.getMessage());
-            throw new AttributionDataShareException(errorMessage, ex);
-        }
-
-        long finishUpload = System.currentTimeMillis();
-        logger.log("Upload TIME ms: ---------- " + (finishUpload - startUpload));
-    }
-
-    String mtpUpload(S3AsyncClient s3AsyncClient) {
+    public String mtpUpload(S3AsyncClient s3AsyncClient) {
         String currentDate = new SimpleDateFormat(REQ_FILE_NAME_PATTERN).format(new Date());
         var key = REQ_FILE_NAME + currentDate;
         logger.log("MTPU KEY " + key);
