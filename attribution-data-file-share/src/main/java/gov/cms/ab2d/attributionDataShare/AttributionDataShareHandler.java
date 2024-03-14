@@ -33,13 +33,25 @@ public class AttributionDataShareHandler implements RequestStreamHandler {
             "  SELECT *, ROW_NUMBER() OVER (ORDER BY mbi DESC) AS row_num\n" +
             "  FROM current_mbi\n" +
             ") subquery\n" +
-            "WHERE row_num <= 10000";
+            "WHERE row_num <= 5000";
 
     String select2 = "SELECT mbi,effective_date,opt_out_flag FROM (\n" +
             "  SELECT *, ROW_NUMBER() OVER (ORDER BY mbi DESC) AS row_num\n" +
             "  FROM current_mbi\n" +
             ") subquery\n" +
-            "WHERE row_num > 10000";
+            "WHERE row_num > 5000 And row_num <= 10000";
+
+    String select3 = "SELECT mbi,effective_date,opt_out_flag FROM (\n" +
+            "  SELECT *, ROW_NUMBER() OVER (ORDER BY mbi DESC) AS row_num\n" +
+            "  FROM current_mbi\n" +
+            ") subquery\n" +
+            "WHERE row_num > 10000 And row_num <= 20000";
+
+    String select4 = "SELECT mbi,effective_date,opt_out_flag FROM (\n" +
+            "  SELECT *, ROW_NUMBER() OVER (ORDER BY mbi DESC) AS row_num\n" +
+            "  FROM current_mbi\n" +
+            ") subquery\n" +
+            "WHERE row_num > 20000";
 
     private static BufferedWriter bufferedWriter;
 
@@ -53,7 +65,7 @@ public class AttributionDataShareHandler implements RequestStreamHandler {
         var parameterStore = AttributionParameterStore.getParameterStore();
         AttributionDataShareHelper helper = helperInit(fileName, fileFullPath, logger);
 
-        int threadCount = 2;
+        int threadCount = 4;
         ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
         CountDownLatch latch = new CountDownLatch(threadCount);
 
@@ -62,6 +74,8 @@ public class AttributionDataShareHandler implements RequestStreamHandler {
 
             executorService.execute(new Utils(fileFullPath, select1, dbConnection, getWriter(fileFullPath), latch, logger));
             executorService.execute(new Utils(fileFullPath, select2, dbConnection, getWriter(fileFullPath), latch, logger));
+            executorService.execute(new Utils(fileFullPath, select3, dbConnection, getWriter(fileFullPath), latch, logger));
+            executorService.execute(new Utils(fileFullPath, select4, dbConnection, getWriter(fileFullPath), latch, logger));
 
             latch.await();
 
@@ -69,6 +83,15 @@ public class AttributionDataShareHandler implements RequestStreamHandler {
 
             logger.log("Total Select TIME ms: ---------- " + (finishSelect - startSelect));
          //   helper.mtpUpload(getAsyncS3Client(ENDPOINT, parameterStore));
+
+
+            //show me the file
+            BufferedReader br = new BufferedReader(new FileReader(fileFullPath));
+            String line;
+            while ((line = br.readLine()) != null) {
+                logger.log(line);
+            }
+
 
         } catch (NullPointerException | SQLException ex) {
             throwAttributionDataShareException(logger, ex);
