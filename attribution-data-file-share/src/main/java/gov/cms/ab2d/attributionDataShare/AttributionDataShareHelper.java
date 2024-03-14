@@ -4,30 +4,43 @@ import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.amazonaws.services.s3.model.AmazonS3Exception;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.model.*;
 
 import java.sql.*;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import static gov.cms.ab2d.attributionDataShare.AttributionDataShareConstants.*;
 
 public class AttributionDataShareHelper {
 
-    static String getFileContent(Connection connection, LambdaLogger logger) {
+    static ArrayList<String> getFileContent(Connection connection, LambdaLogger logger) {
+        var result = new ArrayList<String>();
         var date = new SimpleDateFormat(EFFECTIVE_DATE_PATTERN).format(new Date());
-        var content = new StringBuilder();
         try (var stmt = connection.createStatement()) {
             var rs = getExecuteQuery(stmt);
-            content.append(FIRST_LINE).append(date).append(LINE_SEPARATOR);
-            long records = 0;
+            result.add(FIRST_LINE + date + LINE_SEPARATOR);
+            int records = 0;
+            long totalRecords = 0;
+            String chunkLine = "";
             while (rs.next()) {
-                var line = getResponseLine(rs.getString(1), rs.getTimestamp(2), rs.getBoolean(3));
-                content.append(line).append(LINE_SEPARATOR);
+                var line = getResponseLine(
+                        rs.getString(1), rs.getTimestamp(2), rs.getBoolean(3)) + LINE_SEPARATOR;
+                chunkLine += line;
                 records++;
+                totalRecords++;
+                if (records == 32768) {
+                    result.add(chunkLine);
+                    chunkLine = "";
+                    records = 0;
+                }
             }
-            content.append(LAST_LINE).append(date).append(String.format("%010d", records));
-            return content.toString();
+            result.add(chunkLine);
+            result.add(LAST_LINE + date + String.format("%010d", totalRecords));
+          //  content.append(LAST_LINE).append(date).append(String.format("%010d", totalRecords));
+            return result;
         } catch (SQLException ex) {
             String errorMessage = "An error occurred while exporting data to a file. ";
             logger.log(errorMessage + ex.getMessage());
@@ -63,6 +76,48 @@ public class AttributionDataShareHelper {
             throw new AttributionDataShareException(errorMessage, ex);
         }
     }
+
+    public static void multiPartUploadFileToS3Bucket(ArrayList<String> fileContent, String fileName, S3Client s3Client, LambdaLogger logger) {
+
+        // Initiate the multipart upload.
+        var createMultipartUploadResponse = s3Client.createMultipartUpload(b -> b
+                .bucket(getBucketName())
+                .key(getUploadPath() + fileName));
+        var uploadId = createMultipartUploadResponse.uploadId();
+        // Upload the parts of the file.
+
+        List<CompletedPart> completedParts = new ArrayList<>();
+        for (int partNumber = 1; partNumber < fileContent.size(); partNumber++) {
+
+            UploadPartRequest uploadPartRequest = UploadPartRequest.builder()
+                    .bucket(getBucketName())
+                    .key(getUploadPath() + fileName)
+                    .uploadId(uploadId)
+                    .partNumber(partNumber)
+                    .build();
+
+            UploadPartResponse partResponse = s3Client.uploadPart(
+                    uploadPartRequest,
+                    RequestBody.fromString(fileContent.get(partNumber)));
+
+            CompletedPart part = CompletedPart.builder()
+                    .partNumber(partNumber)
+                    .eTag(partResponse.eTag())
+                    .build();
+            completedParts.add(part);
+        }
+        CompleteMultipartUploadRequest completeMultipartUploadRequest = CompleteMultipartUploadRequest.builder()
+                .bucket(getBucketName())
+                .key(getUploadPath() + fileName)
+                .uploadId(uploadId)
+                .multipartUpload(completedMultipartUpload -> completedMultipartUpload.parts(completedParts))
+                .build();
+
+        // Complete the multipart upload.
+        s3Client.completeMultipartUpload(completeMultipartUploadRequest);
+    }
+
+
 
     public static String getBucketName() {
         return System.getenv(BUCKET_NAME_PROP);

@@ -32,7 +32,7 @@ public class AttributionDataShareHandler implements RequestStreamHandler {
             long start = System.currentTimeMillis();
 
             var content = AttributionDataShareHelper.getFileContent(dbConnection, logger);
-            AttributionDataShareHelper.writeFileToS3Bucket(content, fileName, getS3Client(ENDPOINT, parameterStore), logger);
+            AttributionDataShareHelper.multiPartUploadFileToS3Bucket(content, fileName, getS3Client(ENDPOINT, parameterStore), logger);
 
             long finish = System.currentTimeMillis();
             logger.log("TIME ms: ---------- " + (finish - start));
