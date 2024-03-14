@@ -69,7 +69,7 @@ public class AttributionDataShareHandler implements RequestStreamHandler {
         ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
         CountDownLatch latch = new CountDownLatch(threadCount);
 
-        try (var dbConnection = DriverManager.getConnection(parameterStore.getDbHost(), parameterStore.getDbUser(), parameterStore.getDbPassword())){
+        try (var dbConnection = DriverManager.getConnection(parameterStore.getDbHost(), parameterStore.getDbUser(), parameterStore.getDbPassword())) {
             long startSelect = System.currentTimeMillis();
 
             executorService.execute(new Utils(fileFullPath, select1, dbConnection, getWriter(fileFullPath), latch, logger));
@@ -82,9 +82,10 @@ public class AttributionDataShareHandler implements RequestStreamHandler {
             long finishSelect = System.currentTimeMillis();
 
             logger.log("Total Select TIME ms: ---------- " + (finishSelect - startSelect));
-         //   helper.mtpUpload(getAsyncS3Client(ENDPOINT, parameterStore));
+            //   helper.mtpUpload(getAsyncS3Client(ENDPOINT, parameterStore));
 
 
+            helper.mtpUpload(getAsyncS3Client(ENDPOINT, parameterStore));
             //show me the file
             BufferedReader br = new BufferedReader(new FileReader(fileFullPath));
             String line;
@@ -93,32 +94,25 @@ public class AttributionDataShareHandler implements RequestStreamHandler {
             }
 
 
-        } catch (NullPointerException | SQLException ex) {
+        } catch (NullPointerException | URISyntaxException | SQLException | InterruptedException ex) {
             throwAttributionDataShareException(logger, ex);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
         } finally {
             FileUtil.deleteDirectoryRecursion(Paths.get(fileFullPath));
             logger.log("AttributionDataShare Lambda is completed");
         }
     }
 
-    private static synchronized BufferedWriter getWriter(String fileFullPath)
-    {
-        try{
-            if( bufferedWriter == null )
-            {
-                bufferedWriter =  new BufferedWriter(new FileWriter(fileFullPath, true));
+    private static synchronized BufferedWriter getWriter(String fileFullPath) {
+        try {
+            if (bufferedWriter == null) {
+                bufferedWriter = new BufferedWriter(new FileWriter(fileFullPath, true));
             }
 
             return bufferedWriter;
-        }
-        catch(Exception e)
-        {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
-
 
 
     public S3AsyncClient getAsyncS3Client(String endpoint, AttributionParameterStore parameterStore) throws URISyntaxException {
