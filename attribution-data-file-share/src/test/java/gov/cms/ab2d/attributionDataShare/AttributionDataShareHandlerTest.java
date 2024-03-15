@@ -29,14 +29,14 @@ class AttributionDataShareHandlerTest {
 
     @Test
     void attributionDataShareInvoke() {
-       var  mockParameterStore = mockStatic(AttributionParameterStore.class);
+        var mockParameterStore = mockStatic(AttributionParameterStore.class);
         mockParameterStore
                 .when(AttributionParameterStore::getParameterStore)
                 .thenReturn(parameterStore);
 
         Connection dbConnection = mock(Connection.class);
         mockStatic(DriverManager.class)
-                .when(() ->  DriverManager.getConnection(anyString(), anyString(), anyString())).thenReturn(dbConnection);
+                .when(() -> DriverManager.getConnection(anyString(), anyString(), anyString())).thenReturn(dbConnection);
 
         when(handler.helperInit(anyString(), anyString(), any(LambdaLogger.class))).thenReturn(helper);
         assertDoesNotThrow(() -> handler.handleRequest(null, System.out, new TestContext()));
@@ -51,6 +51,6 @@ class AttributionDataShareHandlerTest {
 
     @Test
     void getS3ClientTest() throws URISyntaxException {
-        assertNotNull(handler.getS3Client(TEST_ENDPOINT, parameterStore));
+        assertNotNull(handler.getAsyncS3Client(TEST_ENDPOINT, parameterStore));
     }
 }

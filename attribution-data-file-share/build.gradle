@@ -13,8 +13,9 @@ repositories {
 dependencies {
     implementation 'com.amazonaws:aws-lambda-java-core:1.2.2'
     implementation 'com.amazonaws:aws-java-sdk-s3:1.12.529'
+    implementation 'software.amazon.awssdk:s3-transfer-manager:2.25.7'
+    implementation 'software.amazon.awssdk.crt:aws-crt:0.29.11'
     implementation 'org.postgresql:postgresql:42.7.2'
-    implementation 'software.amazon.awssdk:s3:2.21.7'
     implementation 'software.amazon.awssdk:ssm:2.25.7'
     implementation 'software.amazon.awssdk:sts:2.25.6'
     implementation project(path: ':lambda-lib')
