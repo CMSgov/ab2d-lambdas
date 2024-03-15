@@ -38,7 +38,7 @@ public class AttributionDataShareHandler implements RequestStreamHandler {
         try (var dbConnection = DriverManager.getConnection(parameterStore.getDbHost(), parameterStore.getDbUser(), parameterStore.getDbPassword())) {
 
             helper.copyDataToFile(dbConnection);
-            helper.mtpUpload(getAsyncS3Client(ENDPOINT, parameterStore));
+            helper.uploadToS3(getAsyncS3Client(ENDPOINT, parameterStore));
 
         } catch (NullPointerException | URISyntaxException | SQLException ex) {
             throwAttributionDataShareException(logger, ex);

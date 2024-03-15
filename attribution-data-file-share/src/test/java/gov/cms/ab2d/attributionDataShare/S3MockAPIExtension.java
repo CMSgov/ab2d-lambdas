@@ -3,7 +3,7 @@ package gov.cms.ab2d.attributionDataShare;
 import io.findify.s3mock.S3Mock;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
-import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.S3AsyncClient;
 import software.amazon.awssdk.services.s3.model.*;
 
 import java.net.URI;
@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.extension.ExtensionContext.Namespace.GLOBAL;
 public class S3MockAPIExtension implements BeforeAllCallback, ExtensionContext.Store.CloseableResource {
 
     private static final S3Mock API = S3Mock.create(8001, "/tmp/s3");
-    public static S3Client S3_CLIENT;
+    public static S3AsyncClient S3_CLIENT;
     private static boolean STARTED = false;
 
     @Override
@@ -25,7 +25,7 @@ public class S3MockAPIExtension implements BeforeAllCallback, ExtensionContext.S
 
             API.start();
 
-            S3_CLIENT = S3Client.builder()
+            S3_CLIENT = S3AsyncClient.crtBuilder()
                     .region(S3_REGION)
                     .endpointOverride(new URI(TEST_ENDPOINT))
                     .build();

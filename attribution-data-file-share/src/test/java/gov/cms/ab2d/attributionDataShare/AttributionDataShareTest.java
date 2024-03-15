@@ -78,7 +78,7 @@ public class AttributionDataShareTest {
     @Test
     void writeFileToFinalDestinationTest() throws IOException {
         createTestFile();
-        helper.writeFileToFinalDestination(S3MockAPIExtension.S3_CLIENT);
+        helper.uploadToS3(S3MockAPIExtension.S3_CLIENT);
         assertTrue(S3MockAPIExtension.isObjectExists(FILE_NAME));
         S3MockAPIExtension.deleteFile(FILE_NAME);
     }
