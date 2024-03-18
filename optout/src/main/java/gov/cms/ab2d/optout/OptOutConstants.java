@@ -19,7 +19,7 @@ public class OptOutConstants {
     public static final String EFFECTIVE_DATE_PATTERN = "yyyyMMdd";
     public static final int EFFECTIVE_DATE_LENGTH = 8;
     public static final String LINE_SEPARATOR = System.getProperty("line.separator");
-    public static final String CONF_FILE_NAME = "P#EFT.ON.AB2D.NGD.CONF.";
+    public static final String CONF_FILE_NAME = "#EFT.ON.AB2D.NGD.CONF.";
     public static final String CONF_FILE_NAME_PATTERN = "'D'yyMMdd.'T'HHmmsss";
     public static final String UPDATE_STATEMENT = "UPDATE public.coverage\n" +
             "SET opt_out_flag = ?, effective_date = current_timestamp\n" +

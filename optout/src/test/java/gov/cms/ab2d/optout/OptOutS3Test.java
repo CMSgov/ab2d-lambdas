@@ -63,6 +63,6 @@ public class OptOutS3Test {
     void getOutFileName() {
         OPT_OUT_S3 = new OptOutS3(S3_CLIENT, TEST_BUCKET_PATH + "/in/" + TEST_FILE_NAME, TEST_BFD_BUCKET_NAME, mock(LambdaLogger.class));
         var outFileName = OPT_OUT_S3.getOutFileName();
-        Assertions.assertTrue(outFileName.startsWith(TEST_BUCKET_PATH + "/out/" + CONF_FILE_NAME));
+        Assertions.assertTrue(outFileName.startsWith(TEST_BUCKET_PATH + "/out/T" + CONF_FILE_NAME));
     }
 }
