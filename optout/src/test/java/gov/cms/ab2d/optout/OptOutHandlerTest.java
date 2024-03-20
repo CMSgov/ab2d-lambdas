@@ -1,6 +1,5 @@
 package gov.cms.ab2d.optout;
 
-import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.amazonaws.services.lambda.runtime.events.SQSEvent;
 import com.amazonaws.services.s3.event.S3EventNotification;
 import gov.cms.ab2d.testutils.AB2DPostgresqlContainer;
@@ -14,14 +13,12 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Collections;
 
 import static gov.cms.ab2d.optout.OptOutConstantsTest.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @Testcontainers
@@ -31,15 +28,15 @@ public class OptOutHandlerTest {
     @Container
     private static final PostgreSQLContainer POSTGRE_SQL_CONTAINER = new AB2DPostgresqlContainer();
     private final static OptOutHandler handler = spy(new OptOutHandler());
-    private final static OptOutProcessor OPT_OUT_PROCESSOR = mock(OptOutProcessor.class);
+ //   private final static OptOutProcessor OPT_OUT_PROCESSOR = mock(OptOutProcessor.class);
     private final static SQSEvent sqsEvent = mock(SQSEvent.class);
     private final static SQSEvent.SQSMessage sqsMessage = mock(SQSEvent.SQSMessage.class);
 
     @BeforeAll
-    static void beforeAll() throws URISyntaxException, IOException {
+    static void beforeAll() throws IOException {
         when(sqsEvent.getRecords()).thenReturn(Collections.singletonList(sqsMessage));
         when(sqsMessage.getBody()).thenReturn(getPayload());
-        when(handler.processorInit(any(LambdaLogger.class))).thenReturn(OPT_OUT_PROCESSOR);
+    //    when(handler.processorInit(any(LambdaLogger.class))).thenReturn(OPT_OUT_PROCESSOR);
     }
 
     @Test

@@ -69,14 +69,15 @@ public class AttributionDataShareHelper {
     }
 
     public String uploadToS3(S3AsyncClient s3AsyncClient) {
-        String currentDate = new SimpleDateFormat(REQ_FILE_NAME_PATTERN).format(new Date());
-        var key = REQ_FILE_NAME + currentDate;
         S3TransferManager transferManager = S3TransferManager.builder()
                 .s3Client(s3AsyncClient)
                 .build();
 
+        var name = getUploadPath() + fileName;
+        var bucketName = getBucketName();
+
         UploadFileRequest uploadFileRequest = UploadFileRequest.builder()
-                .putObjectRequest(b -> b.bucket(getBucketName()).key(getUploadPath() + key))
+                .putObjectRequest(b -> b.bucket(bucketName).key(name))
                 .addTransferListener(LoggingTransferListener.create())
                 .source(Paths.get(fileFullPath))
                 .build();
@@ -84,6 +85,7 @@ public class AttributionDataShareHelper {
         FileUpload fileUpload = transferManager.uploadFile(uploadFileRequest);
 
         CompletedFileUpload uploadResult = fileUpload.completionFuture().join();
+        logger.log("File with name: " + name + " was uploaded to bucket: " + bucketName);
         return uploadResult.response().eTag();
     }
 

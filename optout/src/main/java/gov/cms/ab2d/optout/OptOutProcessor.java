@@ -40,7 +40,8 @@ public class OptOutProcessor {
         var optOutS3 = new OptOutS3(getS3Client(endpoint), fileName, bfdBucket, logger);
 
         processFileFromS3(optOutS3.openFileS3());
-        optOutS3.createResponseOptOutFile(createResponseContent());
+        var name = optOutS3.createResponseOptOutFile(createResponseContent());
+        logger.log("File with name " + name + " was uploaded to bucket: " + bfdBucket);
         if (!isRejected)
             optOutS3.deleteFileFromS3();
     }

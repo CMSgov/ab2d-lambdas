@@ -31,7 +31,8 @@ public class AttributionDataShareHandler implements RequestStreamHandler {
         logger.log("AttributionDataShare Lambda is started");
 
         String currentDate = new SimpleDateFormat(REQ_FILE_NAME_PATTERN).format(new Date());
-        String fileName = REQ_FILE_NAME + currentDate;
+        var prefix = (System.getenv(BUCKET_NAME_PROP).contains("prod")) ? "P" : "T";
+        String fileName = prefix + REQ_FILE_NAME + currentDate;
         String fileFullPath = FILE_PATH + fileName;
         var parameterStore = AttributionParameterStore.getParameterStore();
         AttributionDataShareHelper helper = helperInit(fileName, fileFullPath, logger);

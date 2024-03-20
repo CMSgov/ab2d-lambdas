@@ -92,7 +92,8 @@ public class OptOutS3 {
 
     public String getOutFileName() {
         //bfdeft01/ab2d/in/testing.txt
-        var name = CONF_FILE_NAME
+        var prefix = (bfdBucket.contains("prod")) ? "P" : "T";
+        var name = prefix + CONF_FILE_NAME
                 + new SimpleDateFormat(CONF_FILE_NAME_PATTERN).format(new Date());
 
         String[] path = fileName.split("in");
