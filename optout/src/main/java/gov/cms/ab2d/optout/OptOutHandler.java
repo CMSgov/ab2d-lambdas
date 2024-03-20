@@ -8,8 +8,6 @@ import com.amazonaws.services.s3.event.S3EventNotification;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
-import java.net.URISyntaxException;
-
 import static gov.cms.ab2d.optout.OptOutConstants.ENDPOINT;
 
 public class OptOutHandler implements RequestHandler<SQSEvent, Void> {
@@ -41,7 +39,7 @@ public class OptOutHandler implements RequestHandler<SQSEvent, Void> {
         }
     }
 
-    public OptOutProcessor processorInit(LambdaLogger logger) throws URISyntaxException {
+    public OptOutProcessor processorInit(LambdaLogger logger) {
         return new OptOutProcessor(logger);
     }
 
