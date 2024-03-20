@@ -69,13 +69,11 @@ public class AttributionDataShareHelper {
     }
 
     public String uploadToS3(S3AsyncClient s3AsyncClient) {
-        String currentDate = new SimpleDateFormat(REQ_FILE_NAME_PATTERN).format(new Date());
-        var key = REQ_FILE_NAME + currentDate;
         S3TransferManager transferManager = S3TransferManager.builder()
                 .s3Client(s3AsyncClient)
                 .build();
 
-        var name = getUploadPath() + key;
+        var name = getUploadPath() + fileName;
         var bucketName = getBucketName();
 
         UploadFileRequest uploadFileRequest = UploadFileRequest.builder()
