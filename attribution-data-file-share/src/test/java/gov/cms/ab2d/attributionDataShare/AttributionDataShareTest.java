@@ -23,6 +23,7 @@ import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.Scanner;
 
 import static gov.cms.ab2d.attributionDataShare.AttributionDataShareConstants.*;
 import static gov.cms.ab2d.attributionDataShare.AttributionDataShareHelper.getExecuteQuery;
@@ -64,6 +65,14 @@ public class AttributionDataShareTest {
         assertDoesNotThrow(() -> helper.copyDataToFile(connection));
 
         assertTrue(Files.exists(Paths.get(FILE_FULL_PATH)));
+
+        var scanner = new Scanner(Paths.get(FILE_FULL_PATH), StandardCharsets.UTF_8);
+        var content = scanner.useDelimiter("\\A").next();
+        scanner.close();
+
+        assertTrue(content.contains(AB2D_HEADER_REQ));
+        assertTrue(content.contains(AB2D_TRAILER_REQ));
+
         FileUtil.deleteDirectoryRecursion(Paths.get(FILE_FULL_PATH));
     }
 
