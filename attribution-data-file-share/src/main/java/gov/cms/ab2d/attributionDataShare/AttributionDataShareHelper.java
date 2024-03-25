@@ -36,7 +36,7 @@ public class AttributionDataShareHelper {
 
             var rs = getExecuteQuery(stmt);
 
-            writer.write(FIRST_LINE + date);
+            writer.write(AB2D_HEADER_REQ + date);
             writer.newLine();
             long records = 0;
             while (rs.next()) {
@@ -45,7 +45,7 @@ public class AttributionDataShareHelper {
                 writer.newLine();
                 records++;
             }
-            writer.write(LAST_LINE + date + String.format("%010d", records));
+            writer.write(AB2D_TRAILER_REQ + date + String.format("%010d", records));
 
         } catch (SQLException | IOException ex) {
             String errorMessage = "An error occurred while exporting data to a file. ";

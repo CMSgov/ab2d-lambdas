@@ -10,9 +10,9 @@ public class OptOutConstants {
     public static final String ENDPOINT = "https://s3.amazonaws.com";
     public static final Region S3_REGION = Region.US_EAST_1;
     public static final String HEADER_RESP = "HDR_BENEDATARSP";
-    public static final String TRAILER_RESP = "TLR_BENEDATARSP";
+    public static final String TRAILER_RESP = "TRL_BENEDATARSP";
     public static final String AB2D_HEADER_CONF = "HDR_BENECONFIRM";
-    public static final String AB2D_TRAILER_CONF = "TLR_BENECONFIRM";
+    public static final String AB2D_TRAILER_CONF = "TRL_BENECONFIRM";
     public static final int MBI_INDEX_START = 0;
     public static final int MBI_INDEX_END = 11;
     public static final int OPTOUT_FLAG_INDEX = 11;
