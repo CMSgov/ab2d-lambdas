@@ -65,7 +65,9 @@ public class AttributionDataShareHelper {
             result.append(new SimpleDateFormat(EFFECTIVE_DATE_PATTERN).format(effectiveDate));
             result.append((optOutFlag) ? 'Y' : 'N');
         }
-        return result.toString();
+        // Exactly 20 characters on each line.
+        // If the effective date and flag are null, additional spaces should be added at the end of string.
+        return String.format("%-20s", result);
     }
 
     public String uploadToS3(S3AsyncClient s3AsyncClient) {

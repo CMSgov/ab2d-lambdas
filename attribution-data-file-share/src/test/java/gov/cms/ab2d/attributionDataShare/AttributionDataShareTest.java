@@ -78,9 +78,15 @@ public class AttributionDataShareTest {
 
     @Test
     void getResponseLineTest() {
-        assertEquals(MBI_1, helper.getResponseLine(MBI_1, null, null));
-        assertEquals(MBI_2 + "20240226N", helper.getResponseLine(MBI_2, DATE, false));
-        assertEquals("A          20240226Y", helper.getResponseLine("A", DATE, true));
+        var line1 = helper.getResponseLine(MBI_1, null, null);
+        var line2 = helper.getResponseLine(MBI_2, DATE, false);
+        var line3 = helper.getResponseLine("A", DATE, true);
+        assertEquals(20, line1.length());
+        assertEquals(20, line2.length());
+        assertEquals(20, line3.length());
+        assertEquals(MBI_1 + "         ", line1);
+        assertEquals(MBI_2 + "20240226N", line2);
+        assertEquals("A          20240226Y", line3);
     }
 
 

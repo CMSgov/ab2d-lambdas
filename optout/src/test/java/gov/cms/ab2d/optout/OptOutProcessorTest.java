@@ -49,7 +49,7 @@ public class OptOutProcessorTest {
 
     @BeforeEach
     void beforeEach() throws IOException {
-        S3MockAPIExtension.createFile(Files.readString(Paths.get("src/test/resources/" + TEST_FILE_NAME), StandardCharsets.UTF_8));
+        S3MockAPIExtension.createFile(Files.readString(Paths.get("src/test/resources/" + TEST_FILE_NAME), StandardCharsets.UTF_8), TEST_FILE_NAME);
         parameterStore.when(OptOutParameterStore::getParameterStore).thenReturn(new OptOutParameterStore("", "", "", ""));
         optOutProcessing = spy(new OptOutProcessor(mock(LambdaLogger.class)));
         optOutProcessing.isRejected = false;
@@ -65,6 +65,15 @@ public class OptOutProcessorTest {
         optOutProcessing.isRejected = false;
         optOutProcessing.process(TEST_FILE_NAME, TEST_BFD_BUCKET_NAME, TEST_ENDPOINT);
         assertEquals(7, optOutProcessing.optOutInformationMap.size());
+    }
+
+    @Test
+    void processEmptyFileTest() throws IOException, URISyntaxException {
+        var emptyFileName = "emptyDummy.txt";
+        S3MockAPIExtension.createFile(Files.readString(Paths.get("src/test/resources/" + emptyFileName), StandardCharsets.UTF_8), emptyFileName);
+        optOutProcessing.process(emptyFileName, TEST_BFD_BUCKET_NAME, TEST_ENDPOINT);
+        assertEquals(0, optOutProcessing.optOutInformationMap.size());
+        S3MockAPIExtension.deleteFile(emptyFileName);
     }
 
     @Test
