@@ -50,10 +50,10 @@ public class S3MockAPIExtension implements BeforeAllCallback, ExtensionContext.S
         S3_CLIENT.createBucket(bucketRequest);
     }
 
-    public static void createFile(String content) {
+    public static void createFile(String content, String fileName) {
         var objectRequest = PutObjectRequest.builder()
                 .bucket(TEST_BFD_BUCKET_NAME)
-                .key(TEST_FILE_NAME)
+                .key(fileName)
                 .build();
 
         S3_CLIENT.putObject(objectRequest, RequestBody.fromString(content));
