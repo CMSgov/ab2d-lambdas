@@ -100,6 +100,7 @@ public class OptOutProcessor {
     public void updateOptOut() {
         try (var dbConnection = DriverManager.getConnection(parameterStore.getDbHost(), parameterStore.getDbUser(), parameterStore.getDbPassword())){
             var statement = dbConnection.prepareStatement(UPDATE_STATEMENT);
+            logger.log("----------------- SIZE" + optOutInformationMap.size());
             for (var optOutInformation : optOutInformationMap.entrySet()) {
                 var optOut = optOutInformation.getValue();
                 statement.setBoolean(1, optOut.getOptOutFlag());
@@ -108,6 +109,7 @@ public class OptOutProcessor {
                 statement.addBatch();
              //   prepareInsert(optOutInformation.getValue(), statement);
             }
+            logger.log("----------------- ST " + statement);
             statement.execute();
         } catch (SQLException ex) {
             logger.log("There is an insertion error " + ex.getMessage());
