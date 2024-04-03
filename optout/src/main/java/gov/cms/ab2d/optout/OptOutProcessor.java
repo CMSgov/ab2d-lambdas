@@ -107,11 +107,11 @@ public class OptOutProcessor {
                 statement.setString(2, optOut.getMbi());
                 statement.setString(3, optOut.getMbi());
                 statement.addBatch();
-                logger.log("----------------- ST " + statement);
              //   prepareInsert(optOutInformation.getValue(), statement);
             }
-            logger.log("----------------- ST " + statement.toString());
+            logger.log("----------- Executing batch ");
             statement.executeBatch();
+            logger.log("----------- done batch ");
         } catch (SQLException ex) {
             logger.log("There is an insertion error " + ex.getMessage());
             isRejected = true;
