@@ -8,6 +8,8 @@ import com.amazonaws.services.s3.event.S3EventNotification;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
+import java.sql.Timestamp;
+
 import static gov.cms.ab2d.optout.OptOutConstants.ENDPOINT;
 
 public class OptOutHandler implements RequestHandler<SQSEvent, Void> {
@@ -25,6 +27,7 @@ public class OptOutHandler implements RequestHandler<SQSEvent, Void> {
         var logger = context.getLogger();
         try {
             logger.log("OptOut Lambda started. Processing message from SQS " + msg.getBody());
+            var start = System.nanoTime();
 
             JSONParser parser = new JSONParser();
             JSONObject json = (JSONObject) parser.parse(msg.getBody());
@@ -33,6 +36,8 @@ public class OptOutHandler implements RequestHandler<SQSEvent, Void> {
 
             var optOutProcessing = processorInit(logger);
             optOutProcessing.process(getFileName(notification), getBucketName(notification), ENDPOINT);
+            var stop = System.nanoTime();
+            logger.log("TIME   " + (stop - start));
         } catch (Exception ex) {
             logger.log("An error occurred");
             throw new OptOutException("An error occurred", ex);

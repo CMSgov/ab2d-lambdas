@@ -78,7 +78,9 @@ public class OptOutProcessor {
         String line;
         var lineNumber = 0L;
         try (var dbConnection = DriverManager.getConnection(parameterStore.getDbHost(), parameterStore.getDbUser(), parameterStore.getDbPassword())){
+            logger.log("Connection: " + dbConnection);
             while ((line = reader.readLine()) != null) {
+                logger.log("lineNumber " + lineNumber);
                 if (!line.startsWith(HEADER_RESP) && !line.startsWith(TRAILER_RESP)) {
                     var optOutInformation = createOptOutInformation(line);
                     optOutInformationMap.put(lineNumber, optOutInformation);
@@ -94,6 +96,7 @@ public class OptOutProcessor {
     public OptOutInformation createOptOutInformation(String information) {
         var mbi = information.substring(MBI_INDEX_START, MBI_INDEX_END).trim();
         var optOutFlag = (information.charAt(OPTOUT_FLAG_INDEX) == 'Y');
+        logger.log("OptOutInformation " + optOutFlag);
         return new OptOutInformation(mbi, optOutFlag);
     }
 
@@ -103,6 +106,7 @@ public class OptOutProcessor {
             statement.execute();
         } catch (SQLException ex) {
             logger.log("There is an insertion error on the line " + lineNumber);
+            logger.log(ex.getMessage());
             isRejected = true;
         }
     }
