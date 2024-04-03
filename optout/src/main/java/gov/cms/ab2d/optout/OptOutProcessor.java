@@ -105,7 +105,7 @@ public class OptOutProcessor {
                 var optOut = optOutInformation.getValue();
                 statement.setBoolean(1, optOut.getOptOutFlag());
                 statement.setString(2, optOut.getMbi());
-                statement.setString(3, optOut.getMbi());
+          //      statement.setString(3, optOut.getMbi());
                 statement.addBatch();
              //   prepareInsert(optOutInformation.getValue(), statement);
             }

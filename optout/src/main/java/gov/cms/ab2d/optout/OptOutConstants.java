@@ -23,7 +23,7 @@ public class OptOutConstants {
     public static final String CONF_FILE_NAME_PATTERN = "'D'yyMMdd.'T'HHmmsss";
     public static final String UPDATE_STATEMENT = "UPDATE public.coverage\n" +
             "SET opt_out_flag = ?, effective_date = current_timestamp\n" +
-            "WHERE current_mbi = ? OR historic_mbis iLike CONCAT( '%',?,'%')";
+            "WHERE current_mbi = ?";
 
 
     private OptOutConstants() {
