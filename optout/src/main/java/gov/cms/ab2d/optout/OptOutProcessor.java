@@ -11,7 +11,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -38,8 +37,8 @@ public class OptOutProcessor {
 
     public void process(String fileName, String bfdBucket, String endpoint) throws URISyntaxException {
         var optOutS3 = new OptOutS3(getS3Client(endpoint), fileName, bfdBucket, logger);
-
         processFileFromS3(optOutS3.openFileS3());
+        updateOptOut();
         var name = optOutS3.createResponseOptOutFile(createResponseContent());
         logger.log("File with name " + name + " was uploaded to bucket: " + bfdBucket);
         if (!isRejected)
@@ -77,18 +76,16 @@ public class OptOutProcessor {
     public void processFileFromS3(BufferedReader reader) {
         String line;
         var lineNumber = 0L;
-        try (var dbConnection = DriverManager.getConnection(parameterStore.getDbHost(), parameterStore.getDbUser(), parameterStore.getDbPassword())){
-            logger.log("Connection: " + dbConnection);
+        try {
             while ((line = reader.readLine()) != null) {
-                logger.log("lineNumber " + lineNumber);
+                logger.log("read lineNumber " + lineNumber);
                 if (!line.startsWith(HEADER_RESP) && !line.startsWith(TRAILER_RESP)) {
                     var optOutInformation = createOptOutInformation(line);
                     optOutInformationMap.put(lineNumber, optOutInformation);
-                    updateOptOut(lineNumber, optOutInformation, dbConnection);
                 }
                 lineNumber++;
             }
-        } catch (IOException | SQLException ex) {
+        } catch (IOException ex) {
             logger.log("An error occurred during file processing. " + ex.getMessage());
         }
     }
@@ -100,13 +97,20 @@ public class OptOutProcessor {
         return new OptOutInformation(mbi, optOutFlag);
     }
 
-    public void updateOptOut(long lineNumber, OptOutInformation optOutInformation, Connection dbConnection) {
-        try (var statement = dbConnection.prepareStatement(UPDATE_STATEMENT)) {
-            prepareInsert(optOutInformation, statement);
+    public void updateOptOut() {
+        try (var dbConnection = DriverManager.getConnection(parameterStore.getDbHost(), parameterStore.getDbUser(), parameterStore.getDbPassword())){
+            var statement = dbConnection.prepareStatement(UPDATE_STATEMENT);
+            for (var optOutInformation : optOutInformationMap.entrySet()) {
+                var optOut = optOutInformation.getValue();
+                statement.setBoolean(1, optOut.getOptOutFlag());
+                statement.setString(2, optOut.getMbi());
+                statement.setString(3, optOut.getMbi());
+                statement.addBatch();
+             //   prepareInsert(optOutInformation.getValue(), statement);
+            }
             statement.execute();
         } catch (SQLException ex) {
-            logger.log("There is an insertion error on the line " + lineNumber);
-            logger.log(ex.getMessage());
+            logger.log("There is an insertion error " + ex.getMessage());
             isRejected = true;
         }
     }

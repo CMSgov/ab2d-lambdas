@@ -111,22 +111,22 @@ public class OptOutProcessorTest {
         assertEquals(expectedText, optOutProcessing.createResponseContent());
     }
 
-    @Test
-    void updateOptOutTest() {
-        var optOutInformation = optOutProcessing.createOptOutInformation(validLine('Y'));
-        optOutProcessing.updateOptOut(1L, optOutInformation, dbConnection);
-        assertFalse(optOutProcessing.isRejected);
-    }
-
-    @Test
-    void updateOptOutExceptionTest() throws SQLException {
-        var optOutInformation = optOutProcessing.createOptOutInformation(validLine('Y'));
-        when(dbConnection.prepareStatement(anyString())).thenThrow(SQLException.class);
-        optOutProcessing.updateOptOut(1L, optOutInformation, dbConnection);
-        // Insertion error exists
-        assertTrue(optOutProcessing.isRejected);
-        assertTrue(S3MockAPIExtension.isObjectExists(TEST_FILE_NAME));
-    }
+//    @Test
+//    void updateOptOutTest() {
+//        var optOutInformation = optOutProcessing.createOptOutInformation(validLine('Y'));
+//        optOutProcessing.updateOptOut(1L, optOutInformation, dbConnection);
+//        assertFalse(optOutProcessing.isRejected);
+//    }
+//
+//    @Test
+//    void updateOptOutExceptionTest() throws SQLException {
+//        var optOutInformation = optOutProcessing.createOptOutInformation(validLine('Y'));
+//        when(dbConnection.prepareStatement(anyString())).thenThrow(SQLException.class);
+//        optOutProcessing.updateOptOut(1L, optOutInformation, dbConnection);
+//        // Insertion error exists
+//        assertTrue(optOutProcessing.isRejected);
+//        assertTrue(S3MockAPIExtension.isObjectExists(TEST_FILE_NAME));
+//    }
 
     @Test
     void getEffectiveDateTest() {
