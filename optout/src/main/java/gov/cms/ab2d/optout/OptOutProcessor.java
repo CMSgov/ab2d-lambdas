@@ -12,25 +12,24 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.sql.DriverManager;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.SortedMap;
-import java.util.TreeMap;
+import java.util.List;
 
 import static gov.cms.ab2d.optout.OptOutConstants.*;
 
 public class OptOutProcessor {
     private final LambdaLogger logger;
-    public SortedMap<Long, OptOutInformation> optOutInformationMap;
+    public List<OptOutInformation> optOutInformationList;
     public boolean isRejected;
 
     OptOutParameterStore parameterStore;
 
     public OptOutProcessor(LambdaLogger logger) {
         this.logger = logger;
-        this.optOutInformationMap = new TreeMap<>();
+        this.optOutInformationList = new ArrayList<>();
         isRejected = false;
         parameterStore = OptOutParameterStore.getParameterStore();
     }
@@ -75,15 +74,12 @@ public class OptOutProcessor {
 
     public void processFileFromS3(BufferedReader reader) {
         String line;
-        var lineNumber = 0L;
         try {
             while ((line = reader.readLine()) != null) {
-                logger.log("read lineNumber " + lineNumber);
                 if (!line.startsWith(HEADER_RESP) && !line.startsWith(TRAILER_RESP)) {
                     var optOutInformation = createOptOutInformation(line);
-                    optOutInformationMap.put(lineNumber, optOutInformation);
+                    optOutInformationList.add(optOutInformation);
                 }
-                lineNumber++;
             }
         } catch (IOException ex) {
             logger.log("An error occurred during file processing. " + ex.getMessage());
@@ -93,25 +89,18 @@ public class OptOutProcessor {
     public OptOutInformation createOptOutInformation(String information) {
         var mbi = information.substring(MBI_INDEX_START, MBI_INDEX_END).trim();
         var optOutFlag = (information.charAt(OPTOUT_FLAG_INDEX) == 'Y');
-        logger.log("OptOutInformation " + optOutFlag);
         return new OptOutInformation(mbi, optOutFlag);
     }
 
     public void updateOptOut() {
         try (var dbConnection = DriverManager.getConnection(parameterStore.getDbHost(), parameterStore.getDbUser(), parameterStore.getDbPassword())){
             var statement = dbConnection.prepareStatement(UPDATE_STATEMENT);
-            logger.log("----------------- SIZE" + optOutInformationMap.size());
-            for (var optOutInformation : optOutInformationMap.entrySet()) {
-                var optOut = optOutInformation.getValue();
-                statement.setBoolean(1, optOut.getOptOutFlag());
-                statement.setString(2, optOut.getMbi());
-          //      statement.setString(3, optOut.getMbi());
+            for (var optOutInformation : optOutInformationList) {
+                statement.setBoolean(1, optOutInformation.getOptOutFlag());
+                statement.setString(2, optOutInformation.getMbi());
                 statement.addBatch();
-             //   prepareInsert(optOutInformation.getValue(), statement);
             }
-            logger.log("----------- Executing batch ");
             statement.executeBatch();
-            logger.log("----------- done batch ");
         } catch (SQLException ex) {
             logger.log("There is an insertion error " + ex.getMessage());
             isRejected = true;
@@ -125,16 +114,14 @@ public class OptOutProcessor {
         var recordStatus = getRecordStatus();
         var effectiveDate = getEffectiveDate(date);
 
-        for (var optOutResult : optOutInformationMap.entrySet()) {
-            var info = optOutResult.getValue();
-
-            responseContent.append(info.getMbi())
+        for (var optOutResult : optOutInformationList) {
+            responseContent.append(optOutResult.getMbi())
                     .append(effectiveDate)
-                    .append((info.getOptOutFlag()) ? 'Y' : 'N')
+                    .append((optOutResult.getOptOutFlag()) ? 'Y' : 'N')
                     .append(recordStatus)
                     .append(LINE_SEPARATOR);
         }
-        responseContent.append(AB2D_TRAILER_CONF).append(date).append(String.format("%010d", optOutInformationMap.size()));
+        responseContent.append(AB2D_TRAILER_CONF).append(date).append(String.format("%010d", optOutInformationList.size()));
 
         return responseContent.toString();
     }
@@ -145,13 +132,6 @@ public class OptOutProcessor {
 
     public String getEffectiveDate(String date) {
         return (isRejected) ? " ".repeat(EFFECTIVE_DATE_LENGTH) : date;
-    }
-
-    private static void prepareInsert(OptOutInformation optOut, PreparedStatement statement) throws SQLException {
-        statement.setBoolean(1, optOut.getOptOutFlag());
-        statement.setString(2, optOut.getMbi());
-        statement.setString(3, optOut.getMbi());
-        statement.addBatch();
     }
 
 }

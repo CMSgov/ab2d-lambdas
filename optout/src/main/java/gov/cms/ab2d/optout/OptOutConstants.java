@@ -25,7 +25,6 @@ public class OptOutConstants {
             "SET opt_out_flag = ?, effective_date = current_timestamp\n" +
             "WHERE mbi = ?";
 
-
     private OptOutConstants() {
     }
 }

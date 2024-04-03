@@ -64,7 +64,7 @@ public class OptOutProcessorTest {
     void processTest() throws URISyntaxException {
         optOutProcessing.isRejected = false;
         optOutProcessing.process(TEST_FILE_NAME, TEST_BFD_BUCKET_NAME, TEST_ENDPOINT);
-        assertEquals(7, optOutProcessing.optOutInformationMap.size());
+        assertEquals(7, optOutProcessing.optOutInformationList.size());
     }
 
     @Test
@@ -72,7 +72,7 @@ public class OptOutProcessorTest {
         var emptyFileName = "emptyDummy.txt";
         S3MockAPIExtension.createFile(Files.readString(Paths.get("src/test/resources/" + emptyFileName), StandardCharsets.UTF_8), emptyFileName);
         optOutProcessing.process(emptyFileName, TEST_BFD_BUCKET_NAME, TEST_ENDPOINT);
-        assertEquals(0, optOutProcessing.optOutInformationMap.size());
+        assertEquals(0, optOutProcessing.optOutInformationList.size());
         S3MockAPIExtension.deleteFile(emptyFileName);
     }
 
@@ -92,7 +92,7 @@ public class OptOutProcessorTest {
 
     @Test
     void createAcceptedResponseTest() {
-        optOutProcessing.optOutInformationMap.put(1L, new OptOutInformation(MBI, true));
+        optOutProcessing.optOutInformationList.add(new OptOutInformation(MBI, true));
         var expectedLine = MBI + DATE + "Y" + RecordStatus.ACCEPTED;
         var expectedText = AB2D_HEADER_CONF + DATE + LINE_SEPARATOR
                 + expectedLine + LINE_SEPARATOR
@@ -103,7 +103,7 @@ public class OptOutProcessorTest {
     @Test
     void createRejectedResponseTest() {
         optOutProcessing.isRejected = true;
-        optOutProcessing.optOutInformationMap.put(1L, new OptOutInformation(MBI, false));
+        optOutProcessing.optOutInformationList.add(new OptOutInformation(MBI, false));
         var expectedLine = MBI + "        " + "N" + RecordStatus.REJECTED;
         var expectedText = AB2D_HEADER_CONF + DATE + LINE_SEPARATOR
                 + expectedLine + LINE_SEPARATOR
@@ -111,22 +111,20 @@ public class OptOutProcessorTest {
         assertEquals(expectedText, optOutProcessing.createResponseContent());
     }
 
-//    @Test
-//    void updateOptOutTest() {
-//        var optOutInformation = optOutProcessing.createOptOutInformation(validLine('Y'));
-//        optOutProcessing.updateOptOut(1L, optOutInformation, dbConnection);
-//        assertFalse(optOutProcessing.isRejected);
-//    }
-//
-//    @Test
-//    void updateOptOutExceptionTest() throws SQLException {
-//        var optOutInformation = optOutProcessing.createOptOutInformation(validLine('Y'));
-//        when(dbConnection.prepareStatement(anyString())).thenThrow(SQLException.class);
-//        optOutProcessing.updateOptOut(1L, optOutInformation, dbConnection);
-//        // Insertion error exists
-//        assertTrue(optOutProcessing.isRejected);
-//        assertTrue(S3MockAPIExtension.isObjectExists(TEST_FILE_NAME));
-//    }
+    @Test
+    void updateOptOutTest() {
+        optOutProcessing.updateOptOut();
+        assertFalse(optOutProcessing.isRejected);
+    }
+
+    @Test
+    void updateOptOutExceptionTest() throws SQLException {
+        when(dbConnection.prepareStatement(anyString())).thenThrow(SQLException.class);
+        optOutProcessing.updateOptOut();
+        // Insertion error exists
+        assertTrue(optOutProcessing.isRejected);
+        assertTrue(S3MockAPIExtension.isObjectExists(TEST_FILE_NAME));
+    }
 
     @Test
     void getEffectiveDateTest() {
