@@ -107,6 +107,7 @@ public class OptOutProcessor {
                 statement.setString(2, optOut.getMbi());
                 statement.setString(3, optOut.getMbi());
                 statement.addBatch();
+                logger.log("----------------- ST " + statement);
              //   prepareInsert(optOutInformation.getValue(), statement);
             }
             logger.log("----------------- ST " + statement);
