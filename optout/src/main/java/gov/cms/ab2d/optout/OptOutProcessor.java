@@ -110,8 +110,8 @@ public class OptOutProcessor {
                 logger.log("----------------- ST " + statement);
              //   prepareInsert(optOutInformation.getValue(), statement);
             }
-            logger.log("----------------- ST " + statement);
-            statement.execute();
+            logger.log("----------------- ST " + statement.toString());
+            statement.executeBatch();
         } catch (SQLException ex) {
             logger.log("There is an insertion error " + ex.getMessage());
             isRejected = true;
