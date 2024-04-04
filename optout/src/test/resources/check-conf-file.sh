@@ -26,3 +26,4 @@ EOF
 
 err "Testing confirmation file"
 diff -u "$conf_file" "$expected"
+err "Confirmation file is formatted as expected"
