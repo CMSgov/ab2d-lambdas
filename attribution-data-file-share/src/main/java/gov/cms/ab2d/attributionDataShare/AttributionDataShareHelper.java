@@ -40,7 +40,7 @@ public class AttributionDataShareHelper {
             writer.newLine();
             long records = 0;
             while (rs.next()) {
-                var line = getResponseLine(rs.getString(1), rs.getDate(2), rs.getBoolean(3));
+                var line = getResponseLine(rs.getString("mbi"), rs.getDate("effective_date"), rs.getBoolean("opt_out_flag"));
                 writer.write(line);
                 writer.newLine();
                 records++;
