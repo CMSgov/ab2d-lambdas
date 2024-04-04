@@ -40,7 +40,7 @@ public class AttributionDataShareHelper {
             writer.newLine();
             long records = 0;
             while (rs.next()) {
-                var line = getResponseLine(rs.getString(1), rs.getTimestamp(2), rs.getBoolean(3));
+                var line = getResponseLine(rs.getString(1), rs.getDate(2), rs.getBoolean(3));
                 writer.write(line);
                 writer.newLine();
                 records++;
@@ -54,7 +54,7 @@ public class AttributionDataShareHelper {
         }
     }
 
-    String getResponseLine(String currentMbi, Timestamp effectiveDate, Boolean optOutFlag) {
+    String getResponseLine(String currentMbi, Date effectiveDate, Boolean optOutFlag) {
         var result = new StringBuilder();
         result.append(currentMbi);
         // Adding spaces to the end of a string to achieve the required position index

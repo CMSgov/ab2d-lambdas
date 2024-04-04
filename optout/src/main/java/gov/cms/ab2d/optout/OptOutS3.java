@@ -69,7 +69,6 @@ public class OptOutS3 {
                     .build();
 
             s3Client.putObject(objectRequest, RequestBody.fromString(responseContent));
-            logger.log("Response file done");
             return key;
         } catch (AmazonS3Exception ex) {
             var errorMessage = "Response OptOut file cannot be created. ";
@@ -86,7 +85,6 @@ public class OptOutS3 {
                     .build();
 
             s3Client.deleteObject(request);
-            logger.log("delete file done");
         } catch (SdkClientException ex) {
             logger.log(ex.getMessage());
         }
