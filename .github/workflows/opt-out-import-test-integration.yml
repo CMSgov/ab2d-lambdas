@@ -48,9 +48,11 @@ jobs:
             s3://bfd-test-eft/bfdeft01/ab2d/in/test-${{ github.run_id }}.txt
       - name: Check bucket for response file
         run: |
-          sleep 30
-          aws s3 cp --no-progress s3://bfd-test-eft/bfdeft01/ab2d/out/test-${{ github.run_id }}.txt \
-            test-response.txt
-          cat test-response.txt
+          aws s3 ls s3://bfd-test-eft/bfdeft01/ab2d/out/
+          sleep 20
+          aws s3 ls s3://bfd-test-eft/bfdeft01/ab2d/out/
+          latest=$(aws s3api list-objects-v2 --bucket bfd-test-eft --prefix bfdeft01/ab2d/out/T#EFT.ON.AB2D.NGD.CONF --query 'sort_by(Contents, &LastModified)[-1].Key' --output=text)
+          aws s3 cp --no-progress s3://bfd-test-eft/$latest test-confirmation.txt
+          bash src/test/resources/check-conf-file.sh test-confirmation.txt
 
   # TODO Run another job to check database for update
