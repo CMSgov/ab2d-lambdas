@@ -19,11 +19,8 @@ import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.Scanner;
+import java.util.*;
 
 import static gov.cms.ab2d.attributionDataShare.AttributionDataShareConstants.*;
 import static gov.cms.ab2d.attributionDataShare.AttributionDataShareHelper.getExecuteQuery;
@@ -43,7 +40,7 @@ public class AttributionDataShareTest {
     String FILE_FULL_PATH = FILE_PATH + FILE_NAME;
     String MBI_1 = "DUMMY000001";
     String MBI_2 = "DUMMY000002";
-    Timestamp DATE = Timestamp.valueOf("2024-02-26 00:00:00");
+    Date DATE = new GregorianCalendar(2024, Calendar.FEBRUARY, 26).getTime();
     AttributionDataShareHelper helper;
 
     @BeforeEach
@@ -57,7 +54,7 @@ public class AttributionDataShareTest {
         var stmt = mock(Statement.class);
         var rs = new MockResultSet("");
         rs.addColumn("mbi", Arrays.asList(MBI_1, MBI_2));
-        rs.addColumn("effective_date", Arrays.asList(DATE, null));
+        rs.addColumn("effective_date", Arrays.asList("2024-02-26", null));
         rs.addColumn("opt_out_flag", Arrays.asList(true, null));
         when(connection.createStatement()).thenReturn(stmt);
 
