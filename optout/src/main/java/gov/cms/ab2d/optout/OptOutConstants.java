@@ -22,7 +22,7 @@ public class OptOutConstants {
     public static final String CONF_FILE_NAME = "#EFT.ON.AB2D.NGD.CONF.";
     public static final String CONF_FILE_NAME_PATTERN = "'D'yyMMdd.'T'HHmmsss";
     public static final String UPDATE_STATEMENT = "UPDATE public.current_mbi\n" +
-            "SET opt_out_flag = ?, effective_date = current_timestamp\n" +
+            "SET opt_out_flag = ?, effective_date = DATE(current_timestamp)\n" +
             "WHERE mbi = ?";
 
     private OptOutConstants() {
