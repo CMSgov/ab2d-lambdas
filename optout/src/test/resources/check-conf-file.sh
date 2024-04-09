@@ -4,7 +4,7 @@ set -e
 
 # Echo to stderr
 err() {
-  echo 2>&1 "$@"
+  >&2 echo "$@"
 }
 
 conf_file=$1
@@ -12,9 +12,10 @@ today=$(date +%Y%m%d)
 expected=$(mktemp)
 
 err "Expected file content:"
+err
 
 # Use head from gnu coreutils to remove trailing newline
-head -c-1 <<EOF | tee 2>&1 "$expected"
+head -c-1 <<EOF | >&2 tee "$expected"
 HDR_BENECONFIRM${today}
 1S00E00JG37${today}NAccepted  00
 7SP1D00AA00${today}NAccepted  00
