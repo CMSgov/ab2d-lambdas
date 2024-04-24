@@ -108,9 +108,10 @@ public class OptOutProcessor {
     }
     public String createResponseContent() {
         var date = new SimpleDateFormat(EFFECTIVE_DATE_PATTERN).format(new Date());
-        var responseContent = new StringBuilder();
-        responseContent.append(AB2D_HEADER_CONF).append(date);
-        responseContent.append(LINE_SEPARATOR);
+        var responseContent = new StringBuilder()
+                .append(AB2D_HEADER_CONF)
+                .append(date)
+                .append(LINE_SEPARATOR);
         var recordStatus = getRecordStatus();
         var effectiveDate = getEffectiveDate(date);
 
@@ -121,8 +122,12 @@ public class OptOutProcessor {
                     .append(recordStatus)
                     .append(LINE_SEPARATOR);
         }
-        responseContent.append(AB2D_TRAILER_CONF).append(date).append(String.format("%010d", optOutInformationList.size()));
-
+        var lastLine = new StringBuilder()
+                .append(AB2D_TRAILER_CONF)
+                .append(date)
+                .append(String.format("%010d", optOutInformationList.size()));
+        responseContent.append(lastLine);
+        logger.log("File trailer: " + lastLine);
         return responseContent.toString();
     }
 

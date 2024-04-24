@@ -45,8 +45,9 @@ public class AttributionDataShareHelper {
                 writer.newLine();
                 records++;
             }
-            writer.write(AB2D_TRAILER_REQ + date + String.format("%010d", records));
-
+            String lastLine = AB2D_TRAILER_REQ + date + String.format("%010d", records);
+            writer.write(lastLine);
+            logger.log("File trailer: " + lastLine);
         } catch (SQLException | IOException ex) {
             String errorMessage = "An error occurred while exporting data to a file. ";
             logger.log(errorMessage + ex.getMessage());
