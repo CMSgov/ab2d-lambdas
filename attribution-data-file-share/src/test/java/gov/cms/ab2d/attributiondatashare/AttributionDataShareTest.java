@@ -1,4 +1,4 @@
-package gov.cms.ab2d.attributionDataShare;
+package gov.cms.ab2d.attributiondatashare;
 
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.mockrunner.mock.jdbc.MockResultSet;
@@ -22,16 +22,16 @@ import java.sql.Statement;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import static gov.cms.ab2d.attributionDataShare.AttributionDataShareConstants.*;
-import static gov.cms.ab2d.attributionDataShare.AttributionDataShareHelper.getExecuteQuery;
-import static gov.cms.ab2d.attributionDataShare.S3MockAPIExtension.getBucketName;
-import static gov.cms.ab2d.attributionDataShare.S3MockAPIExtension.getUploadPath;
+import static gov.cms.ab2d.attributiondatashare.AttributionDataShareConstants.*;
+import static gov.cms.ab2d.attributiondatashare.AttributionDataShareHelper.getExecuteQuery;
+import static gov.cms.ab2d.attributiondatashare.S3MockAPIExtension.getBucketName;
+import static gov.cms.ab2d.attributiondatashare.S3MockAPIExtension.getUploadPath;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @Testcontainers
 @ExtendWith({S3MockAPIExtension.class})
-public class AttributionDataShareTest {
+class AttributionDataShareTest {
     @SuppressWarnings({"rawtypes", "unused"})
     @Container
     private static final PostgreSQLContainer POSTGRE_SQL_CONTAINER = new AB2DPostgresqlContainer();

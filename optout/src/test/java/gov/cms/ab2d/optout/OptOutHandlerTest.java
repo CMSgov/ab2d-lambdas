@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
 @Testcontainers
-public class OptOutHandlerTest {
+class OptOutHandlerTest {
 
     @SuppressWarnings({"rawtypes", "unused"})
     @Container

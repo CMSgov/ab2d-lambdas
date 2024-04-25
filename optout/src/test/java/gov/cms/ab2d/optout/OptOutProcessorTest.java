@@ -27,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith({S3MockAPIExtension.class})
-public class OptOutProcessorTest {
+class OptOutProcessorTest {
     private static final Connection dbConnection = mock(Connection.class);
     private static final MockedStatic<OptOutParameterStore> parameterStore = mockStatic(OptOutParameterStore.class);
     private static final String DATE = new SimpleDateFormat(EFFECTIVE_DATE_PATTERN).format(new Date());

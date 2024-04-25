@@ -1,4 +1,4 @@
-package gov.cms.ab2d.attributionDataShare;
+package gov.cms.ab2d.attributiondatashare;
 
 import software.amazon.awssdk.regions.Region;
 

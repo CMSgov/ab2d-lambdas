@@ -43,11 +43,11 @@ public class OptOutHandler implements RequestHandler<SQSEvent, Void> {
         return new OptOutProcessor(logger);
     }
 
-    public String getBucketName(S3EventNotification.S3EventNotificationRecord record) {
-        return record.getS3().getBucket().getName();
+    public String getBucketName(S3EventNotification.S3EventNotificationRecord notificationRecord) {
+        return notificationRecord.getS3().getBucket().getName();
     }
 
-    public String getFileName(S3EventNotification.S3EventNotificationRecord record) {
-        return record.getS3().getObject().getUrlDecodedKey();
+    public String getFileName(S3EventNotification.S3EventNotificationRecord notificationRecord) {
+        return notificationRecord.getS3().getObject().getUrlDecodedKey();
     }
 }

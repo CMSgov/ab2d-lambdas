@@ -49,7 +49,7 @@ test {
 
 sonarqube {
     properties {
-        property 'sonar.coverage.exclusions', "**/OptOutParameterStore.java"
+        property 'sonar.coverage.exclusions', "**/OptOutParameterStore.java, **/OptOutConstants.java"
     }
 }
 

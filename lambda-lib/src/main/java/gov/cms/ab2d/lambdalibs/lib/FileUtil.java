@@ -7,6 +7,8 @@ import java.nio.file.LinkOption;
 import java.nio.file.Path;
 
 public class FileUtil {
+
+    private FileUtil() {}
     public static void deleteDirectoryRecursion(Path path) throws IOException {
         if (Files.isDirectory(path, LinkOption.NOFOLLOW_LINKS)) {
             try (DirectoryStream<Path> entries = Files.newDirectoryStream(path)) {
