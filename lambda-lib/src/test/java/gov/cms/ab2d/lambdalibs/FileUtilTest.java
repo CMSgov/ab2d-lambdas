@@ -11,7 +11,7 @@ import java.nio.file.Paths;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
-class FileUtilTest {
+public class FileUtilTest {
     final Path FILE_PATH = Paths.get("/tmp/opt/");
     final String FILE_NAME = "testFile.txt";
 
