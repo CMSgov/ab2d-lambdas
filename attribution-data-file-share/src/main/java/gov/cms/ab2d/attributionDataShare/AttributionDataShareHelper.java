@@ -40,13 +40,14 @@ public class AttributionDataShareHelper {
             writer.newLine();
             long records = 0;
             while (rs.next()) {
-                var line = getResponseLine(rs.getString(1), rs.getTimestamp(2), rs.getBoolean(3));
+                var line = getResponseLine(rs.getString("mbi"), rs.getDate("effective_date"), rs.getBoolean("opt_out_flag"));
                 writer.write(line);
                 writer.newLine();
                 records++;
             }
-            writer.write(AB2D_TRAILER_REQ + date + String.format("%010d", records));
-
+            String lastLine = AB2D_TRAILER_REQ + date + String.format("%010d", records);
+            writer.write(lastLine);
+            logger.log("File trailer: " + lastLine);
         } catch (SQLException | IOException ex) {
             String errorMessage = "An error occurred while exporting data to a file. ";
             logger.log(errorMessage + ex.getMessage());
@@ -54,7 +55,7 @@ public class AttributionDataShareHelper {
         }
     }
 
-    String getResponseLine(String currentMbi, Timestamp effectiveDate, Boolean optOutFlag) {
+    String getResponseLine(String currentMbi, Date effectiveDate, Boolean optOutFlag) {
         var result = new StringBuilder();
         result.append(currentMbi);
         // Adding spaces to the end of a string to achieve the required position index
