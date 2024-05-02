@@ -1,4 +1,4 @@
-package gov.cms.ab2d.attributionDataShare;
+package gov.cms.ab2d.attributiondatashare;
 
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import software.amazon.awssdk.services.s3.S3AsyncClient;
@@ -16,7 +16,7 @@ import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import static gov.cms.ab2d.attributionDataShare.AttributionDataShareConstants.*;
+import static gov.cms.ab2d.attributiondatashare.AttributionDataShareConstants.*;
 
 public class AttributionDataShareHelper {
     LambdaLogger logger;

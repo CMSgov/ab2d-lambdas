@@ -1,4 +1,4 @@
-package gov.cms.ab2d.attributionDataShare;
+package gov.cms.ab2d.attributiondatashare;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
@@ -12,14 +12,13 @@ import software.amazon.awssdk.services.sts.model.AssumeRoleRequest;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.URISyntaxException;
 import java.nio.file.Paths;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import static gov.cms.ab2d.attributionDataShare.AttributionDataShareConstants.*;
+import static gov.cms.ab2d.attributiondatashare.AttributionDataShareConstants.*;
 
 public class AttributionDataShareHandler implements RequestStreamHandler {
 
@@ -41,7 +40,7 @@ public class AttributionDataShareHandler implements RequestStreamHandler {
             helper.copyDataToFile(dbConnection);
             helper.uploadToS3(getAsyncS3Client(ENDPOINT, parameterStore));
 
-        } catch (NullPointerException | URISyntaxException | SQLException ex) {
+        } catch (NullPointerException | SQLException ex) {
             throwAttributionDataShareException(logger, ex);
         } finally {
             FileUtil.deleteDirectoryRecursion(Paths.get(fileFullPath));
@@ -49,7 +48,7 @@ public class AttributionDataShareHandler implements RequestStreamHandler {
         }
     }
 
-    public S3AsyncClient getAsyncS3Client(String endpoint, AttributionParameterStore parameterStore) throws URISyntaxException {
+    public S3AsyncClient getAsyncS3Client(String endpoint, AttributionParameterStore parameterStore) {
         var client = S3AsyncClient.crtCreate();
 
         if (endpoint.equals(ENDPOINT)) {

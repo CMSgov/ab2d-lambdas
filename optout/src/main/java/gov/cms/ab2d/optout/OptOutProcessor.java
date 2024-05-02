@@ -93,8 +93,8 @@ public class OptOutProcessor {
     }
 
     public void updateOptOut() {
-        try (var dbConnection = DriverManager.getConnection(parameterStore.getDbHost(), parameterStore.getDbUser(), parameterStore.getDbPassword())){
-            var statement = dbConnection.prepareStatement(UPDATE_STATEMENT);
+        try (var dbConnection = DriverManager.getConnection(parameterStore.getDbHost(), parameterStore.getDbUser(), parameterStore.getDbPassword());
+             var statement = dbConnection.prepareStatement(UPDATE_STATEMENT)) {
             for (var optOutInformation : optOutInformationList) {
                 statement.setBoolean(1, optOutInformation.getOptOutFlag());
                 statement.setString(2, optOutInformation.getMbi());
@@ -106,6 +106,7 @@ public class OptOutProcessor {
             isRejected = true;
         }
     }
+
     public String createResponseContent() {
         var date = new SimpleDateFormat(EFFECTIVE_DATE_PATTERN).format(new Date());
         var responseContent = new StringBuilder()

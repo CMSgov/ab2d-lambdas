@@ -1,9 +1,9 @@
-package gov.cms.ab2d.attributionDataShare;
+package gov.cms.ab2d.attributiondatashare;
 
 import software.amazon.awssdk.services.ssm.SsmClient;
 import software.amazon.awssdk.services.ssm.model.GetParameterRequest;
 
-import static gov.cms.ab2d.attributionDataShare.AttributionDataShareConstants.*;
+import static gov.cms.ab2d.attributiondatashare.AttributionDataShareConstants.*;
 
 public class AttributionParameterStore {
 

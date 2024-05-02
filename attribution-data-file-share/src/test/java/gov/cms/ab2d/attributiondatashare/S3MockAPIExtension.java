@@ -1,4 +1,4 @@
-package gov.cms.ab2d.attributionDataShare;
+package gov.cms.ab2d.attributiondatashare;
 
 import io.findify.s3mock.S3Mock;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
@@ -8,7 +8,7 @@ import software.amazon.awssdk.services.s3.model.*;
 
 import java.net.URI;
 
-import static gov.cms.ab2d.attributionDataShare.AttributionDataShareConstants.*;
+import static gov.cms.ab2d.attributiondatashare.AttributionDataShareConstants.*;
 import static org.junit.jupiter.api.extension.ExtensionContext.Namespace.GLOBAL;
 
 public class S3MockAPIExtension implements BeforeAllCallback, ExtensionContext.Store.CloseableResource {

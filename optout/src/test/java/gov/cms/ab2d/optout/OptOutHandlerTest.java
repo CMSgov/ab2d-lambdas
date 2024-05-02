@@ -1,5 +1,7 @@
 package gov.cms.ab2d.optout;
 
+import com.amazonaws.services.lambda.runtime.Context;
+import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.amazonaws.services.lambda.runtime.events.SQSEvent;
 import com.amazonaws.services.s3.event.S3EventNotification;
 import gov.cms.ab2d.testutils.AB2DPostgresqlContainer;
@@ -18,17 +20,17 @@ import java.nio.file.Paths;
 import java.util.Collections;
 
 import static gov.cms.ab2d.optout.OptOutConstantsTest.*;
+import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
 @Testcontainers
-public class OptOutHandlerTest {
+class OptOutHandlerTest {
 
     @SuppressWarnings({"rawtypes", "unused"})
     @Container
     private static final PostgreSQLContainer POSTGRE_SQL_CONTAINER = new AB2DPostgresqlContainer();
     private final static OptOutHandler handler = spy(new OptOutHandler());
- //   private final static OptOutProcessor OPT_OUT_PROCESSOR = mock(OptOutProcessor.class);
     private final static SQSEvent sqsEvent = mock(SQSEvent.class);
     private final static SQSEvent.SQSMessage sqsMessage = mock(SQSEvent.SQSMessage.class);
 
@@ -36,7 +38,6 @@ public class OptOutHandlerTest {
     static void beforeAll() throws IOException {
         when(sqsEvent.getRecords()).thenReturn(Collections.singletonList(sqsMessage));
         when(sqsMessage.getBody()).thenReturn(getPayload());
-    //    when(handler.processorInit(any(LambdaLogger.class))).thenReturn(OPT_OUT_PROCESSOR);
     }
 
     @Test
@@ -51,20 +52,15 @@ public class OptOutHandlerTest {
         assertEquals(TEST_BFD_BUCKET_NAME, handler.getBucketName(notification));
     }
 
-//    @Test
-//    void optOutHandlerInvoke() {
-//        Context context = mock(Context.class);
-//        LambdaLogger logger = mock(LambdaLogger.class);
-//        when(context.getLogger()).thenReturn(logger);
-//
-//        assertDoesNotThrow(() -> handler.handleRequest(sqsEvent, context));
-//    }
+    @Test
+    void optOutHandlerInvoke() {
+        Context context = mock(Context.class);
+        LambdaLogger logger = mock(LambdaLogger.class);
+        when(context.getLogger()).thenReturn(logger);
 
-//    @Test
-//    void optOutHandlerException() throws URISyntaxException {
-//        doThrow(new OptOutException("errorMessage", new AmazonS3Exception("errorMessage"))).when(OPT_OUT_PROCESSOR).process();
-//        assertThrows(OptOutException.class, OPT_OUT_PROCESSOR.process(anyString(), anyString(), anyString()));
-//    }
+        assertThrows(OptOutException.class, () ->  handler.handleRequest(sqsEvent, context));
+    }
+
 
     static private String getPayload() throws IOException {
         return Files.readString(Paths.get("src/test/resources/sqsEvent.json"));

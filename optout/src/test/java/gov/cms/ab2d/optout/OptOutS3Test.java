@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
 @ExtendWith({S3MockAPIExtension.class})
-public class OptOutS3Test {
+class OptOutS3Test {
 
     private static OptOutS3 OPT_OUT_S3;
 

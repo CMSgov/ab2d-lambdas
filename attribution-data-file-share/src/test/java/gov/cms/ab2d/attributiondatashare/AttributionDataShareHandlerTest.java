@@ -1,4 +1,4 @@
-package gov.cms.ab2d.attributionDataShare;
+package gov.cms.ab2d.attributiondatashare;
 
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import gov.cms.ab2d.testutils.AB2DPostgresqlContainer;
@@ -8,11 +8,10 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import java.net.URISyntaxException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 
-import static gov.cms.ab2d.attributionDataShare.AttributionDataShareConstants.TEST_ENDPOINT;
+import static gov.cms.ab2d.attributiondatashare.AttributionDataShareConstants.TEST_ENDPOINT;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -50,7 +49,7 @@ class AttributionDataShareHandlerTest {
     }
 
     @Test
-    void getS3ClientTest() throws URISyntaxException {
+    void getS3ClientTest() {
         assertNotNull(handler.getAsyncS3Client(TEST_ENDPOINT, parameterStore));
     }
 }
