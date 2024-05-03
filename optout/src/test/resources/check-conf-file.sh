@@ -21,7 +21,7 @@ HDR_BENECONFIRM${today}
 7SP1D00AA00${today}NAccepted  00
 2SY1D00AA00${today}YAccepted  00
 7SF9C00AA00${today}NAccepted  00
-6SF9C00AA00${today}NAccepted  00
+7SF6F00AA00${today}NAccepted  00
 DUMMY000006${today}YAccepted  00
 DUMMY000007${today}NAccepted  00
 TRL_BENECONFIRM${today}0000000007
