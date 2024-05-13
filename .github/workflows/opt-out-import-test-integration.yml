@@ -50,8 +50,6 @@ jobs:
         run: |
           sleep 20 # Allow for function to run
           aws s3 ls s3://bfd-test-eft/bfdeft01/ab2d/out/
-          latest=$(aws s3api list-objects-v2 --bucket bfd-test-eft --prefix bfdeft01/ab2d/out/T#EFT.ON.AB2D.NGD.CONF --query 'sort_by(Contents, &LastModified)[-1].Key' --output=text)
-          aws s3 cp --no-progress s3://bfd-test-eft/$latest test-confirmation.txt
-          bash src/test/resources/check-conf-file.sh test-confirmation.txt
+          bash src/test/resources/check-latest-out.sh
 
   # TODO Run another job to check database for update
