@@ -154,6 +154,9 @@ public class OptOutProcessor {
                     numberOfNOptOuts++;
                 }
             }
+            //delete
+            logger.log("Total = " + total);
+            logger.log("numberOfYOptOuts = " + numberOfYOptOuts);
             return new CountResults(total, numberOfYOptOuts, numberOfNOptOuts);
         } catch (SQLException e) {
            logger.log("???");
