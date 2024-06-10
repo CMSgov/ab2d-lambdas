@@ -140,6 +140,8 @@ public class OptOutProcessor {
              var statement = dbConnection.createStatement();
              ResultSet rs = statement.executeQuery(COUNT_STATEMENT)
         ) {
+            logger.log("statement " + statement);
+            logger.log("RS " + rs);
             while (rs.next()) {
                 logger.log("Inside RS");
                 logger.log("rs.getInt(0) " + rs.getInt("total"));
@@ -161,7 +163,7 @@ public class OptOutProcessor {
             logger.log("numberOfYOptOuts = " + numberOfYOptOuts);
             return new CountResults(totalFromDb, numberOfYOptOuts, numberOfNOptOuts);
         } catch (SQLException e) {
-           logger.log("???");
+           logger.log("---------!" + e.getMessage());
         }
         return null;
     }
