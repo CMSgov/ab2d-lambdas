@@ -154,7 +154,6 @@ public class OptOutProcessor {
                     numberOptedOut++;
                 }
             }
-            //delete
             return new OptOutResults(totalFromDb, numberOptedIn, numberOptedOut);
         } catch (SQLException ex) {
            logger.log("There is an error " + ex.getMessage());
