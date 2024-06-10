@@ -31,10 +31,10 @@ public class OptOutHandler implements RequestHandler<SQSEvent, Void> {
             var notification = S3EventNotification.parseJson(s3EventMessage.toString()).getRecords().get(0);
 
             var optOutProcessing = processorInit(logger);
-            var countRes = optOutProcessing.process(getFileName(notification), getBucketName(notification), ENDPOINT);
-            if (countRes != null) {
-                logger.log("OptOut Lambda completed. Total records processed today=" + countRes.getTotalToday()
-                    + " Total records processed to date=" + countRes.getTotalFromDB());
+            var optOutResults = optOutProcessing.process(getFileName(notification), getBucketName(notification), ENDPOINT);
+            if (optOutResults != null) {
+                logger.log("OptOut Lambda completed. Total records processed today=" + optOutResults.getTotalToday()
+                    + " Total records processed to date=" + optOutResults.getTotalFromDB());
             }
         } catch (Exception ex) {
             logger.log("An error occurred");
