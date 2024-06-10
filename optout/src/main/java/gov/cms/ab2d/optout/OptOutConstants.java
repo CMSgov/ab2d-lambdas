@@ -25,7 +25,7 @@ public class OptOutConstants {
             "SET opt_out_flag = ?, effective_date = current_date\n" +
             "WHERE mbi = ?";
 
-    public static final String COUNT_STATEMENT = "select count(*) from current_mbi where opt_out_flag is not null";
+    public static final String COUNT_STATEMENT = "select count(*) AS total from current_mbi where opt_out_flag is not null";
     private OptOutConstants() {
     }
 }

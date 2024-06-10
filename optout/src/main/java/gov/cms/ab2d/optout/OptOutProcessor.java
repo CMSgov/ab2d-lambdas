@@ -135,13 +135,15 @@ public class OptOutProcessor {
     }
 
     public CountResults getCountsOptOut() {
-        int total = 0;
+        int totalFromDb = 0;
         try (var dbConnection = DriverManager.getConnection(parameterStore.getDbHost(), parameterStore.getDbUser(), parameterStore.getDbPassword());
              var statement = dbConnection.createStatement();
              ResultSet rs = statement.executeQuery(COUNT_STATEMENT)
         ) {
             while (rs.next()) {
-                total = rs.getInt(0);
+                logger.log("Inside RS");
+                logger.log("rs.getInt(0) " + rs.getInt("total"));
+                totalFromDb = rs.getInt("total");
             }
             //rename:
             int numberOfYOptOuts = 0;
@@ -155,9 +157,9 @@ public class OptOutProcessor {
                 }
             }
             //delete
-            logger.log("Total = " + total);
+            logger.log("Total = " + totalFromDb);
             logger.log("numberOfYOptOuts = " + numberOfYOptOuts);
-            return new CountResults(total, numberOfYOptOuts, numberOfNOptOuts);
+            return new CountResults(totalFromDb, numberOfYOptOuts, numberOfNOptOuts);
         } catch (SQLException e) {
            logger.log("???");
         }
