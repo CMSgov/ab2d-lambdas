@@ -129,6 +129,9 @@ public class OptOutProcessor {
                 .append(String.format("%010d", optOutInformationList.size()));
         responseContent.append(lastLine);
         logger.log("File trailer: " + lastLine);
+        
+        // Test
+        logger.log("Today we processed 7 records");
         return responseContent.toString();
     }
 
