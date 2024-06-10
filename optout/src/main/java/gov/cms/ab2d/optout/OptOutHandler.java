@@ -10,14 +10,46 @@ import org.json.simple.parser.JSONParser;
 
 import static gov.cms.ab2d.optout.OptOutConstants.ENDPOINT;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class OptOutHandler implements RequestHandler<SQSEvent, Void> {
+
+    private List<OptOutInformation> requestOptOutInformationList;
 
     @Override
     public Void handleRequest(SQSEvent sqsEvent, Context context) {
+        requestOptOutInformationList = new ArrayList<>();
+
         for (SQSEvent.SQSMessage msg : sqsEvent.getRecords()) {
             processSQSMessage(msg, context);
         }
-        context.getLogger().log("OptOut Lambda completed");
+
+        int totalNumberOfProcessedOptOuts = requestOptOutInformationList.size();
+        int numberOfYOptOuts = 0;
+        int numberOfNOptOuts = 0;
+
+        for (OptOutInformation optOut : requestOptOutInformationList) {
+            if (optOut.getOptOutFlag()) {
+                numberOfYOptOuts++;
+            } else {
+                numberOfNOptOuts++;
+            }
+        }
+
+        // TODO: Get the total number of opt-outs processed to date.
+        // I Added a select statement in constants for that should do that
+        // But need to double check if it is correct, since I think we may use a view
+        // and not the 'real' table for performance reasons.
+        
+        String optOutCompletedMessage = String.format(
+            "OptOut Lambda completed. Processed %d optout information records this run" +
+            " with %d opted out, and %d opted in for data sharing.",
+            totalNumberOfProcessedOptOuts, numberOfYOptOuts, numberOfNOptOuts
+        );
+        context.getLogger().log(optOutCompletedMessage);
+
+        requestOptOutInformationList.clear();
         return null;
     }
 
@@ -33,6 +65,10 @@ public class OptOutHandler implements RequestHandler<SQSEvent, Void> {
 
             var optOutProcessing = processorInit(logger);
             optOutProcessing.process(getFileName(notification), getBucketName(notification), ENDPOINT);
+            
+            // Is there a reason the optOutInformationList is public?
+            // Would it be better to make it private and use a getter of the processor?
+            requestOptOutInformationList.addAll(optOutProcessing.optOutInformationList);
         } catch (Exception ex) {
             logger.log("An error occurred");
             throw new OptOutException("An error occurred", ex);

@@ -24,6 +24,11 @@ public class OptOutConstants {
     public static final String UPDATE_STATEMENT = "UPDATE public.current_mbi\n" +
             "SET opt_out_flag = ?, effective_date = current_date\n" +
             "WHERE mbi = ?";
+    
+    // TODO: Verify that this is correct?
+    // I think we use a view for this table for performance reasons.
+    // If so, this will be different
+    public static final String SELECT_OPT_OUT_FLAG_STATEMENT = "SELECT opt_out_flag FROM public.current_mbi";
 
     private OptOutConstants() {
     }
