@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -34,7 +35,7 @@ public class OptOutProcessor {
         parameterStore = OptOutParameterStore.getParameterStore();
     }
 
-    public void process(String fileName, String bfdBucket, String endpoint) throws URISyntaxException {
+    public CountResults process(String fileName, String bfdBucket, String endpoint) throws URISyntaxException {
         var optOutS3 = new OptOutS3(getS3Client(endpoint), fileName, bfdBucket, logger);
         processFileFromS3(optOutS3.openFileS3());
         updateOptOut();
@@ -42,6 +43,7 @@ public class OptOutProcessor {
         logger.log("File with name " + name + " was uploaded to bucket: " + bfdBucket);
         if (!isRejected)
             optOutS3.deleteFileFromS3();
+        return getCountsOptOut();
     }
 
     public S3Client getS3Client(String endpoint) throws URISyntaxException {
@@ -130,6 +132,33 @@ public class OptOutProcessor {
         responseContent.append(lastLine);
         logger.log("File trailer: " + lastLine);
         return responseContent.toString();
+    }
+
+    public CountResults getCountsOptOut() {
+        int total = 0;
+        try (var dbConnection = DriverManager.getConnection(parameterStore.getDbHost(), parameterStore.getDbUser(), parameterStore.getDbPassword());
+             var statement = dbConnection.createStatement();
+             ResultSet rs = statement.executeQuery(COUNT_STATEMENT)
+        ) {
+            while (rs.next()) {
+                total = rs.getInt(0);
+            }
+            //rename:
+            int numberOfYOptOuts = 0;
+            int numberOfNOptOuts = 0;
+
+            for (OptOutInformation optOut : optOutInformationList) {
+                if (optOut.getOptOutFlag()) {
+                    numberOfYOptOuts++;
+                } else {
+                    numberOfNOptOuts++;
+                }
+            }
+            return new CountResults(total, numberOfYOptOuts, numberOfNOptOuts);
+        } catch (SQLException e) {
+           logger.log("???");
+        }
+        return null;
     }
 
     public String getRecordStatus() {
