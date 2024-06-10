@@ -35,7 +35,7 @@ public class OptOutProcessor {
         parameterStore = OptOutParameterStore.getParameterStore();
     }
 
-    public CountResults process(String fileName, String bfdBucket, String endpoint) throws URISyntaxException {
+    public OptOutResults process(String fileName, String bfdBucket, String endpoint) throws URISyntaxException {
         var optOutS3 = new OptOutS3(getS3Client(endpoint), fileName, bfdBucket, logger);
         processFileFromS3(optOutS3.openFileS3());
         updateOptOut();
@@ -43,7 +43,7 @@ public class OptOutProcessor {
         logger.log("File with name " + name + " was uploaded to bucket: " + bfdBucket);
         if (!isRejected)
             optOutS3.deleteFileFromS3();
-        return getCountsOptOut();
+        return getOptOutResults();
     }
 
     public S3Client getS3Client(String endpoint) throws URISyntaxException {
@@ -134,7 +134,7 @@ public class OptOutProcessor {
         return responseContent.toString();
     }
 
-    public CountResults getCountsOptOut() {
+    public OptOutResults getOptOutResults() {
         int totalFromDb = 0;
         try (var dbConnection = DriverManager.getConnection(parameterStore.getDbHost(), parameterStore.getDbUser(), parameterStore.getDbPassword());
              var statement = dbConnection.createStatement();
@@ -143,19 +143,19 @@ public class OptOutProcessor {
             while (rs.next()) {
                 totalFromDb = rs.getInt("total");
             }
-            //rename:
-            int numberOfYOptOuts = 0;
-            int numberOfNOptOuts = 0;
+
+            int numberOptedIn = 0;
+            int numberOptedOut = 0;
 
             for (OptOutInformation optOut : optOutInformationList) {
                 if (optOut.getOptOutFlag()) {
-                    numberOfYOptOuts++;
+                    numberOptedIn++;
                 } else {
-                    numberOfNOptOuts++;
+                    numberOptedOut++;
                 }
             }
             //delete
-            return new CountResults(totalFromDb, numberOfYOptOuts, numberOfNOptOuts);
+            return new OptOutResults(totalFromDb, numberOptedIn, numberOptedOut);
         } catch (SQLException ex) {
            logger.log("There is an error " + ex.getMessage());
         }
