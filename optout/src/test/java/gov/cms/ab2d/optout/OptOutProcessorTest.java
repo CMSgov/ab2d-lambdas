@@ -155,7 +155,8 @@ class OptOutProcessorTest {
     @Test
     void getOptOutResultsTest() {
         OptOutResults results = optOutProcessing.getOptOutResults();
-        assertEquals(results, null);
+        assertNotNull(results);
+        assertEquals(TEST_TOTAL_RESULT_COUNT, results.getTotalFromDB());;
     }
 
 }
