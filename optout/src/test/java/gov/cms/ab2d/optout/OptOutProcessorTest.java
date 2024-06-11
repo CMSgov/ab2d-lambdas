@@ -17,6 +17,7 @@ import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -28,11 +29,14 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith({S3MockAPIExtension.class})
 class OptOutProcessorTest {
+    private static final ResultSet resultSet = mock(ResultSet.class);
+    private static final PreparedStatement preparedStatement = mock(PreparedStatement.class);
     private static final Connection dbConnection = mock(Connection.class);
     private static final MockedStatic<OptOutParameterStore> parameterStore = mockStatic(OptOutParameterStore.class);
     private static final String DATE = new SimpleDateFormat(EFFECTIVE_DATE_PATTERN).format(new Date());
     private static final String MBI = "DUMMY000001";
     private static final String TRAILER_COUNT = "0000000001";
+    private static final int TEST_TOTAL_RESULT_COUNT = 7;
     private static String validLine(char isOptOut) {
         return MBI + isOptOut;
     }
@@ -44,7 +48,10 @@ class OptOutProcessorTest {
 
         mockStatic(DriverManager.class)
                 .when(() ->  DriverManager.getConnection(anyString(), anyString(), anyString())).thenReturn(dbConnection);
-        when(dbConnection.prepareStatement(anyString())).thenReturn(mock(PreparedStatement.class));
+        when(dbConnection.prepareStatement(anyString())).thenReturn(preparedStatement);
+        when(preparedStatement.executeQuery(anyString())).thenReturn(resultSet);
+        when(resultSet.next()).thenReturn(true).thenReturn(false);
+        when(resultSet.getInt(any())).thenReturn(TEST_TOTAL_RESULT_COUNT);
     }
 
     @BeforeEach
