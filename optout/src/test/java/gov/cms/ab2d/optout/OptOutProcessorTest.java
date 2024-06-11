@@ -156,6 +156,8 @@ class OptOutProcessorTest {
     void getOptOutResultsTest() {
         OptOutResults results = optOutProcessing.getOptOutResults();
         assertNotNull(results);
+        System.out.println("Results = " + results);
+        System.out.println("ResultsFromDB = " + results.getTotalFromDB());
         assertEquals(TEST_TOTAL_RESULT_COUNT, results.getTotalFromDB());;
     }
 
