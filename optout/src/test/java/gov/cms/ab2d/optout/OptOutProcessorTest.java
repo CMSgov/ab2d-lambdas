@@ -63,16 +63,18 @@ class OptOutProcessorTest {
     @Test
     void processTest() throws URISyntaxException {
         optOutProcessing.isRejected = false;
-        optOutProcessing.process(TEST_FILE_NAME, TEST_BFD_BUCKET_NAME, TEST_ENDPOINT);
+        OptOutResults results = optOutProcessing.process(TEST_FILE_NAME, TEST_BFD_BUCKET_NAME, TEST_ENDPOINT);
         assertEquals(7, optOutProcessing.optOutInformationList.size());
+        assertEquals(7, results.getTotalToday());
     }
 
     @Test
     void processEmptyFileTest() throws IOException, URISyntaxException {
         var emptyFileName = "emptyDummy.txt";
         S3MockAPIExtension.createFile(Files.readString(Paths.get("src/test/resources/" + emptyFileName), StandardCharsets.UTF_8), emptyFileName);
-        optOutProcessing.process(emptyFileName, TEST_BFD_BUCKET_NAME, TEST_ENDPOINT);
+        OptOutResults results = optOutProcessing.process(emptyFileName, TEST_BFD_BUCKET_NAME, TEST_ENDPOINT);
         assertEquals(0, optOutProcessing.optOutInformationList.size());
+        assertEquals(0, results.getTotalToday());
         S3MockAPIExtension.deleteFile(emptyFileName);
     }
 
@@ -140,6 +142,12 @@ class OptOutProcessorTest {
         assertEquals(RecordStatus.ACCEPTED.toString(), optOutProcessing.getRecordStatus());
         optOutProcessing.isRejected = true;
         assertEquals(RecordStatus.REJECTED.toString(), optOutProcessing.getRecordStatus());
+    }
+
+    @Test
+    void getOptOutResultsTest() {
+        OptOutResults results = optOutProcessing.getOptOutResults();
+        assertEquals(results, null);
     }
 
 }

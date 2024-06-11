@@ -6,7 +6,7 @@ public class OptOutResults {
     private final int optInToday;
     private final int optOutToday;
 
-    public OptOutResults(int totalFromDB, int optInToday, int optOutToday){
+    public OptOutResults(int totalFromDB, int optInToday, int optOutToday) {
         this.totalFromDB = totalFromDB;
         this.optInToday = optInToday;
         this.optOutToday = optOutToday;
@@ -15,7 +15,7 @@ public class OptOutResults {
     public int getTotalFromDB() {
         return totalFromDB;
     }
-    
+
     public int getOptInToday() {
         return optInToday;
     }
