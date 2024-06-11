@@ -2,18 +2,16 @@ package gov.cms.ab2d.optout;
 
 public class OptOutResults {
 
-    private final int totalFromDB;
     private final int optInToday;
     private final int optOutToday;
+    private final int optInTotal;
+    private final int optOutTotal;
 
-    public OptOutResults(int totalFromDB, int optInToday, int optOutToday) {
-        this.totalFromDB = totalFromDB;
+    public OptOutResults(int optInToday, int optOutToday, int optInTotal, int optOutTotal) {
         this.optInToday = optInToday;
         this.optOutToday = optOutToday;
-    }
-
-    public int getTotalFromDB() {
-        return totalFromDB;
+        this.optInTotal = optInTotal;
+        this.optOutTotal = optOutTotal;
     }
 
     public int getOptInToday() {
@@ -26,6 +24,18 @@ public class OptOutResults {
 
     public int getTotalToday() {
         return optInToday + optOutToday;
+    }
+
+    public int getOptInTotal() {
+        return optInTotal;
+    }
+
+    public int getOptOutTotal() {
+        return optOutTotal;
+    }
+
+    public int getTotalAllTime() {
+        return optInTotal + optOutTotal;
     }
 
 }

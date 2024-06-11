@@ -33,10 +33,13 @@ public class OptOutHandler implements RequestHandler<SQSEvent, Void> {
             var optOutProcessing = processorInit(logger);
             var optOutResults = optOutProcessing.process(getFileName(notification), getBucketName(notification), ENDPOINT);
             if (optOutResults != null) {
-                logger.log("OptOut Lambda completed. Total records processed today=" + optOutResults.getTotalToday()
-                    + " Number of opt in=" + optOutResults.getOptInToday()
-                    + " Number of opt out=" + optOutResults.getOptOutToday()
-                    + " Total records processed to date=" + optOutResults.getTotalFromDB());
+                logger.log("OptOut Lambda completed. Total records processed today is: totaltoday=" + optOutResults.getTotalToday()
+                    + " Number of opt in today is: todayin=" + optOutResults.getOptInToday()
+                    + " Number of opt out today is: todayout=" + optOutResults.getOptOutToday()
+                    + " Total records processed to date is: totaltodate=" + optOutResults.getTotalAllTime()
+                    + " Total number of opt in is: totalin=" + optOutResults.getOptInTotal()
+                    + " Total number of opt out is: totalout=" + optOutResults.getOptOutTotal()
+                );
             }
         } catch (Exception ex) {
             logger.log("An error occurred");

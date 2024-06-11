@@ -135,13 +135,16 @@ public class OptOutProcessor {
     }
 
     public OptOutResults getOptOutResults() {
-        int totalFromDb = 0;
+        int totalOptedIn = 0;
+        int totalOptedOut = 0;
+
         try (var dbConnection = DriverManager.getConnection(parameterStore.getDbHost(), parameterStore.getDbUser(), parameterStore.getDbPassword());
              var statement = dbConnection.createStatement();
              ResultSet rs = statement.executeQuery(COUNT_STATEMENT)
         ) {
             while (rs.next()) {
-                totalFromDb = rs.getInt("total");
+                totalOptedIn = rs.getInt("optin");
+                totalOptedOut = rs.getInt("optout");
             }
 
             int numberOptedIn = 0;
@@ -154,7 +157,7 @@ public class OptOutProcessor {
                     numberOptedOut++;
                 }
             }
-            return new OptOutResults(totalFromDb, numberOptedIn, numberOptedOut);
+            return new OptOutResults(numberOptedIn, numberOptedOut, totalOptedIn, totalOptedOut);
         } catch (SQLException ex) {
            logger.log("There is an error " + ex.getMessage());
         }

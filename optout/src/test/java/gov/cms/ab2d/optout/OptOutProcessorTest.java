@@ -36,7 +36,6 @@ class OptOutProcessorTest {
     private static final String DATE = new SimpleDateFormat(EFFECTIVE_DATE_PATTERN).format(new Date());
     private static final String MBI = "DUMMY000001";
     private static final String TRAILER_COUNT = "0000000001";
-    private static final int TEST_TOTAL_RESULT_COUNT = 7;
     private static String validLine(char isOptOut) {
         return MBI + isOptOut;
     }
@@ -51,8 +50,6 @@ class OptOutProcessorTest {
         when(dbConnection.prepareStatement(anyString())).thenReturn(preparedStatement);
         when(dbConnection.createStatement()).thenReturn(preparedStatement);
         when(preparedStatement.executeQuery(anyString())).thenReturn(resultSet);
-        when(resultSet.next()).thenReturn(true).thenReturn(false);
-        when(resultSet.getInt(any())).thenReturn(TEST_TOTAL_RESULT_COUNT);
     }
 
     @BeforeEach
@@ -73,9 +70,10 @@ class OptOutProcessorTest {
         optOutProcessing.isRejected = false;
         OptOutResults results = optOutProcessing.process(TEST_FILE_NAME, TEST_BFD_BUCKET_NAME, TEST_ENDPOINT);
         assertEquals(7, optOutProcessing.optOutInformationList.size());
-        assertEquals(7, results.getTotalToday());
-        assertEquals(4, results.getOptOutToday());
+        
         assertEquals(3, results.getOptInToday());
+        assertEquals(4, results.getOptOutToday());
+        assertEquals(7, results.getTotalToday());
     }
 
     @Test
@@ -155,12 +153,26 @@ class OptOutProcessorTest {
     }
 
     @Test
-    void getOptOutResultsTest() {
+    void getOptOutResultsTest() throws SQLException {
+        final String OPT_IN_RESULTSET_STRING = "optin";
+        final String OPT_OUT_RESULTSET_STRING = "optout";
+
+        final int OPT_IN_TOTAL = 9;
+        final int OPT_OUT_TOTAL = 7;
+
+        when(resultSet.next()).thenReturn(true).thenReturn(true).thenReturn(false);
+        when(resultSet.getInt(OPT_IN_RESULTSET_STRING)).thenReturn(OPT_IN_TOTAL);
+        when(resultSet.getInt(OPT_OUT_RESULTSET_STRING)).thenReturn(OPT_OUT_TOTAL);
+
+        optOutProcessing.optOutInformationList.add(new OptOutInformation(MBI, true));
+        optOutProcessing.optOutInformationList.add(new OptOutInformation("DUMMY000002", false));
+
         OptOutResults results = optOutProcessing.getOptOutResults();
         assertNotNull(results);
-        System.out.println("Results = " + results);
-        System.out.println("ResultsFromDB = " + results.getTotalFromDB());
-        assertEquals(TEST_TOTAL_RESULT_COUNT, results.getTotalFromDB());;
+        assertEquals(1, results.getOptInToday());
+        assertEquals(1, results.getOptOutToday());
+        assertEquals(OPT_IN_TOTAL, results.getOptInTotal());
+        assertEquals(OPT_OUT_TOTAL, results.getOptOutTotal());
     }
 
 }
