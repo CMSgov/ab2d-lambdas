@@ -154,15 +154,15 @@ class OptOutProcessorTest {
 
     @Test
     void getOptOutResultsTest() throws SQLException {
-        final String OPT_IN_RESULTSET_STRING = "optin";
-        final String OPT_OUT_RESULTSET_STRING = "optout";
+        final String optInResultSetString = "optin";
+        final String optOutResultSetString = "optout";
 
-        final int OPT_IN_TOTAL = 9;
-        final int OPT_OUT_TOTAL = 7;
+        final int optInTotalCount = 9;
+        final int optOutTotalCount = 7;
 
         when(resultSet.next()).thenReturn(true).thenReturn(false);
-        when(resultSet.getInt(OPT_IN_RESULTSET_STRING)).thenReturn(OPT_IN_TOTAL);
-        when(resultSet.getInt(OPT_OUT_RESULTSET_STRING)).thenReturn(OPT_OUT_TOTAL);
+        when(resultSet.getInt(optInResultSetString)).thenReturn(optInTotalCount);
+        when(resultSet.getInt(optOutResultSetString)).thenReturn(optOutTotalCount);
 
         optOutProcessing.optOutInformationList.add(new OptOutInformation(MBI, true));
         optOutProcessing.optOutInformationList.add(new OptOutInformation("DUMMY000002", false));
@@ -171,8 +171,8 @@ class OptOutProcessorTest {
         assertNotNull(results);
         assertEquals(1, results.getOptInToday());
         assertEquals(1, results.getOptOutToday());
-        assertEquals(OPT_IN_TOTAL, results.getOptInTotal());
-        assertEquals(OPT_OUT_TOTAL, results.getOptOutTotal());
+        assertEquals(optInTotalCount, results.getOptInTotal());
+        assertEquals(optOutTotalCount, results.getOptOutTotal());
     }
 
 }
