@@ -74,6 +74,8 @@ class OptOutProcessorTest {
         OptOutResults results = optOutProcessing.process(TEST_FILE_NAME, TEST_BFD_BUCKET_NAME, TEST_ENDPOINT);
         assertEquals(7, optOutProcessing.optOutInformationList.size());
         assertEquals(7, results.getTotalToday());
+        assertEquals(4, results.getOptOutToday());
+        assertEquals(3, results.getOptInToday());
     }
 
     @Test
