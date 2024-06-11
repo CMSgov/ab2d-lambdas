@@ -49,6 +49,7 @@ class OptOutProcessorTest {
         mockStatic(DriverManager.class)
                 .when(() ->  DriverManager.getConnection(anyString(), anyString(), anyString())).thenReturn(dbConnection);
         when(dbConnection.prepareStatement(anyString())).thenReturn(preparedStatement);
+        when(dbConnection.createStatement()).thenReturn(preparedStatement);
         when(preparedStatement.executeQuery(anyString())).thenReturn(resultSet);
         when(resultSet.next()).thenReturn(true).thenReturn(false);
         when(resultSet.getInt(any())).thenReturn(TEST_TOTAL_RESULT_COUNT);
