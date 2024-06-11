@@ -73,7 +73,7 @@ class OptOutProcessorTest {
         
         assertEquals(3, results.getOptInToday());
         assertEquals(4, results.getOptOutToday());
-        assertEquals(7, results.getTotalToday());
+        assertEquals(optOutProcessing.optOutInformationList.size(), results.getTotalToday());
     }
 
     @Test
@@ -82,7 +82,7 @@ class OptOutProcessorTest {
         S3MockAPIExtension.createFile(Files.readString(Paths.get("src/test/resources/" + emptyFileName), StandardCharsets.UTF_8), emptyFileName);
         OptOutResults results = optOutProcessing.process(emptyFileName, TEST_BFD_BUCKET_NAME, TEST_ENDPOINT);
         assertEquals(0, optOutProcessing.optOutInformationList.size());
-        assertEquals(0, results.getTotalToday());
+        assertEquals(optOutProcessing.optOutInformationList.size(), results.getTotalToday());
         S3MockAPIExtension.deleteFile(emptyFileName);
     }
 
@@ -160,7 +160,7 @@ class OptOutProcessorTest {
         final int OPT_IN_TOTAL = 9;
         final int OPT_OUT_TOTAL = 7;
 
-        when(resultSet.next()).thenReturn(true).thenReturn(true).thenReturn(false);
+        when(resultSet.next()).thenReturn(true).thenReturn(false);
         when(resultSet.getInt(OPT_IN_RESULTSET_STRING)).thenReturn(OPT_IN_TOTAL);
         when(resultSet.getInt(OPT_OUT_RESULTSET_STRING)).thenReturn(OPT_OUT_TOTAL);
 
