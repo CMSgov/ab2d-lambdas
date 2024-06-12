@@ -17,6 +17,8 @@ public class OptOutResultsTest {
 
         assertEquals(todayOptIn, optOutResults.getOptInToday());
         assertEquals(todayOptOut, optOutResults.getOptOutToday());
+        assertEquals(totalOptedIn, optOutResults.getOptInTotal());
+        assertEquals(totalOptedOut, optOutResults.getOptOutTotal());
         assertEquals(todayOptIn + todayOptOut, optOutResults.getTotalToday());
         assertEquals(totalOptedIn + totalOptedOut, optOutResults.getTotalAllTime());
     }
