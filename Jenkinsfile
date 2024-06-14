@@ -9,7 +9,7 @@ pipeline {
 
     tools {
         gradle "gradle-7.2"
-        jdk 'openjdk17'
+        jdk 'adoptjdk13'
     }
 
     stages {
