@@ -67,16 +67,28 @@ class OptOutHandlerTest {
     }
 
     @Test
+    void itLogsResults() {
+        LambdaLogger logger = mock(LambdaLogger.class);
+        OptOutResults optOutResults = new OptOutResults(1, 1, 2, 2);
+
+        String loggedMessage = "OptOut Lambda completed. Total records processed today is: totaltoday=" + optOutResults.getTotalToday()
+                + " Number of opt in today is: todayin=" + optOutResults.getOptInToday()
+                + " Number of opt out today is: todayout=" + optOutResults.getOptOutToday()
+                + " Total records processed to date is: totaltodate=" + optOutResults.getTotalAllTime()
+                + " Total number of opt in is: totalin=" + optOutResults.getOptInTotal()
+                + " Total number of opt out is: totalout=" + optOutResults.getOptOutTotal();
+
+        handler.logResults(optOutResults, logger);
+        verify(logger, times(1)).log(loggedMessage);
+    }
+
+    @Test
     void itDoesNotLogWhenResultsAreNull() throws URISyntaxException {
         Context context = mock(Context.class);
         LambdaLogger logger = mock(LambdaLogger.class);
-        OptOutProcessor processor = mock(OptOutProcessor.class);
         
         when(context.getLogger()).thenReturn(logger);
-        when(handler.processorInit(any())).thenReturn(processor);
-        when(processor.process(anyString(), anyString(), anyString())).thenReturn(null);
-
-        handler.handleRequest(sqsEvent, context);
+        handler.logResults(null, logger);
         verify(logger, times(0)).log(anyString());
     }
 
