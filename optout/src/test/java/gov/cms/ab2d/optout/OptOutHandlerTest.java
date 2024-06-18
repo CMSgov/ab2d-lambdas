@@ -15,6 +15,7 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Collections;
@@ -59,6 +60,20 @@ class OptOutHandlerTest {
         when(context.getLogger()).thenReturn(logger);
 
         assertThrows(OptOutException.class, () ->  handler.handleRequest(sqsEvent, context));
+    }
+
+    @Test
+    void itDoesNotLogWhenResultsAreNull() throws URISyntaxException {
+        Context context = mock(Context.class);
+        LambdaLogger logger = mock(LambdaLogger.class);
+        OptOutProcessor processor = mock(OptOutProcessor.class);
+
+        when(context.getLogger()).thenReturn(logger);
+        when(handler.processorInit(any())).thenReturn(processor);
+        when(processor.process(anyString(), anyString(), anyString())).thenReturn(null);
+
+        handler.handleRequest(sqsEvent, context);
+        verify(logger, times(0)).log(anyString());
     }
 
 
