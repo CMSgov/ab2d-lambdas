@@ -151,7 +151,7 @@ public class OptOutProcessor {
             int numberOptedOut = 0;
 
             for (OptOutInformation optOut : optOutInformationList) {
-                if (Boolean.TRUE.equals(optOut.getOptOutFlag())) {
+                if (optOut.getOptOutFlag()) {
                     numberOptedIn++;
                 } else {
                     numberOptedOut++;
