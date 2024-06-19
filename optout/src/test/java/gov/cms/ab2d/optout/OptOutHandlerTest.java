@@ -22,6 +22,7 @@ import java.util.Collections;
 import static gov.cms.ab2d.optout.OptOutConstantsTest.*;
 import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @Testcontainers
@@ -58,9 +59,29 @@ class OptOutHandlerTest {
         LambdaLogger logger = mock(LambdaLogger.class);
         when(context.getLogger()).thenReturn(logger);
 
-        assertThrows(OptOutException.class, () ->  handler.handleRequest(sqsEvent, context));
+        assertThrows(OptOutException.class, () -> handler.handleRequest(sqsEvent, context));
+        verify(handler, times(1)).processSQSMessage(sqsMessage, context);
+        verify(logger, times(2)).log(anyString());
     }
 
+    @Test
+    void itLogsResults() {
+        LambdaLogger logger = mock(LambdaLogger.class);
+        OptOutResults optOutResults = new OptOutResults(1, 1, 2, 2);
+
+        handler.logResults(optOutResults, logger);
+        verify(logger, times(1)).log(anyString());
+    }
+
+    @Test
+    void itDoesNotLogWhenResultsAreNull() {
+        Context context = mock(Context.class);
+        LambdaLogger logger = mock(LambdaLogger.class);
+
+        when(context.getLogger()).thenReturn(logger);
+        handler.logResults(null, logger);
+        verify(logger, times(0)).log(anyString());
+    }
 
     static private String getPayload() throws IOException {
         return Files.readString(Paths.get("src/test/resources/sqsEvent.json"));
