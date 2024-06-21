@@ -15,7 +15,6 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Collections;
@@ -23,6 +22,7 @@ import java.util.Collections;
 import static gov.cms.ab2d.optout.OptOutConstantsTest.*;
 import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @Testcontainers
@@ -59,23 +59,29 @@ class OptOutHandlerTest {
         LambdaLogger logger = mock(LambdaLogger.class);
         when(context.getLogger()).thenReturn(logger);
 
-        assertThrows(OptOutException.class, () ->  handler.handleRequest(sqsEvent, context));
+        assertThrows(OptOutException.class, () -> handler.handleRequest(sqsEvent, context));
+        verify(handler, times(1)).processSQSMessage(sqsMessage, context);
+        verify(logger, times(2)).log(anyString());
     }
 
     @Test
-    void itDoesNotLogWhenResultsAreNull() throws URISyntaxException {
-        Context context = mock(Context.class);
+    void itLogsResults() {
         LambdaLogger logger = mock(LambdaLogger.class);
-        OptOutProcessor processor = mock(OptOutProcessor.class);
+        OptOutResults optOutResults = new OptOutResults(1, 1, 2, 2);
 
-        when(context.getLogger()).thenReturn(logger);
-        when(handler.processorInit(any())).thenReturn(processor);
-        when(processor.process(anyString(), anyString(), anyString())).thenReturn(null);
-
-        handler.handleRequest(sqsEvent, context);
-        verify(logger, times(0)).log(anyString());
+        handler.logResults(optOutResults, logger);
+        verify(logger, times(1)).log(anyString());
     }
 
+    @Test
+    void itDoesNotLogWhenResultsAreNull() {
+        Context context = mock(Context.class);
+        LambdaLogger logger = mock(LambdaLogger.class);
+
+        when(context.getLogger()).thenReturn(logger);
+        handler.logResults(null, logger);
+        verify(logger, times(0)).log(anyString());
+    }
 
     static private String getPayload() throws IOException {
         return Files.readString(Paths.get("src/test/resources/sqsEvent.json"));

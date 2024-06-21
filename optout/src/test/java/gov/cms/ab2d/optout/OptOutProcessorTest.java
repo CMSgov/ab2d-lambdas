@@ -17,6 +17,7 @@ import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -28,6 +29,8 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith({S3MockAPIExtension.class})
 class OptOutProcessorTest {
+    private static final ResultSet resultSet = mock(ResultSet.class);
+    private static final PreparedStatement preparedStatement = mock(PreparedStatement.class);
     private static final Connection dbConnection = mock(Connection.class);
     private static final MockedStatic<OptOutParameterStore> parameterStore = mockStatic(OptOutParameterStore.class);
     private static final String DATE = new SimpleDateFormat(EFFECTIVE_DATE_PATTERN).format(new Date());
@@ -44,7 +47,9 @@ class OptOutProcessorTest {
 
         mockStatic(DriverManager.class)
                 .when(() ->  DriverManager.getConnection(anyString(), anyString(), anyString())).thenReturn(dbConnection);
-        when(dbConnection.prepareStatement(anyString())).thenReturn(mock(PreparedStatement.class));
+        when(dbConnection.prepareStatement(anyString())).thenReturn(preparedStatement);
+        when(dbConnection.createStatement()).thenReturn(preparedStatement);
+        when(preparedStatement.executeQuery(anyString())).thenReturn(resultSet);
     }
 
     @BeforeEach
@@ -63,16 +68,21 @@ class OptOutProcessorTest {
     @Test
     void processTest() throws URISyntaxException {
         optOutProcessing.isRejected = false;
-        optOutProcessing.process(TEST_FILE_NAME, TEST_BFD_BUCKET_NAME, TEST_ENDPOINT);
+        OptOutResults results = optOutProcessing.process(TEST_FILE_NAME, TEST_BFD_BUCKET_NAME, TEST_ENDPOINT);
         assertEquals(7, optOutProcessing.optOutInformationList.size());
+        
+        assertEquals(3, results.getOptInToday());
+        assertEquals(4, results.getOptOutToday());
+        assertEquals(optOutProcessing.optOutInformationList.size(), results.getTotalToday());
     }
 
     @Test
     void processEmptyFileTest() throws IOException, URISyntaxException {
         var emptyFileName = "emptyDummy.txt";
         S3MockAPIExtension.createFile(Files.readString(Paths.get("src/test/resources/" + emptyFileName), StandardCharsets.UTF_8), emptyFileName);
-        optOutProcessing.process(emptyFileName, TEST_BFD_BUCKET_NAME, TEST_ENDPOINT);
+        OptOutResults results = optOutProcessing.process(emptyFileName, TEST_BFD_BUCKET_NAME, TEST_ENDPOINT);
         assertEquals(0, optOutProcessing.optOutInformationList.size());
+        assertEquals(optOutProcessing.optOutInformationList.size(), results.getTotalToday());
         S3MockAPIExtension.deleteFile(emptyFileName);
     }
 
@@ -140,6 +150,29 @@ class OptOutProcessorTest {
         assertEquals(RecordStatus.ACCEPTED.toString(), optOutProcessing.getRecordStatus());
         optOutProcessing.isRejected = true;
         assertEquals(RecordStatus.REJECTED.toString(), optOutProcessing.getRecordStatus());
+    }
+
+    @Test
+    void getOptOutResultsTest() throws SQLException {
+        final String optInResultSetString = "optin";
+        final String optOutResultSetString = "optout";
+
+        final int optInTotalCount = 9;
+        final int optOutTotalCount = 7;
+
+        when(resultSet.next()).thenReturn(true).thenReturn(false);
+        when(resultSet.getInt(optInResultSetString)).thenReturn(optInTotalCount);
+        when(resultSet.getInt(optOutResultSetString)).thenReturn(optOutTotalCount);
+
+        optOutProcessing.optOutInformationList.add(new OptOutInformation(MBI, true));
+        optOutProcessing.optOutInformationList.add(new OptOutInformation("DUMMY000002", false));
+
+        OptOutResults results = optOutProcessing.getOptOutResults();
+        assertNotNull(results);
+        assertEquals(1, results.getOptInToday());
+        assertEquals(1, results.getOptOutToday());
+        assertEquals(optInTotalCount, results.getOptInTotal());
+        assertEquals(optOutTotalCount, results.getOptOutTotal());
     }
 
 }

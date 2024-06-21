@@ -17,7 +17,6 @@ public class OptOutHandler implements RequestHandler<SQSEvent, Void> {
         for (SQSEvent.SQSMessage msg : sqsEvent.getRecords()) {
             processSQSMessage(msg, context);
         }
-        context.getLogger().log("OptOut Lambda completed");
         return null;
     }
 
@@ -32,10 +31,23 @@ public class OptOutHandler implements RequestHandler<SQSEvent, Void> {
             var notification = S3EventNotification.parseJson(s3EventMessage.toString()).getRecords().get(0);
 
             var optOutProcessing = processorInit(logger);
-            optOutProcessing.process(getFileName(notification), getBucketName(notification), ENDPOINT);
+            var optOutResults = optOutProcessing.process(getFileName(notification), getBucketName(notification), ENDPOINT);
+            logResults(optOutResults, logger);
         } catch (Exception ex) {
             logger.log("An error occurred");
             throw new OptOutException("An error occurred", ex);
+        }
+    }
+
+    public void logResults(OptOutResults optOutResults, LambdaLogger logger) {
+        if (optOutResults != null) {
+            logger.log("OptOut Lambda completed. Total records processed today is: totaltoday=" + optOutResults.getTotalToday()
+                + " Number of opt in today is: todayin=" + optOutResults.getOptInToday()
+                + " Number of opt out today is: todayout=" + optOutResults.getOptOutToday()
+                + " Total records processed to date is: totaltodate=" + optOutResults.getTotalAllTime()
+                + " Total number of opt in is: totalin=" + optOutResults.getOptInTotal()
+                + " Total number of opt out is: totalout=" + optOutResults.getOptOutTotal()
+            );
         }
     }
 
