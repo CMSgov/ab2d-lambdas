@@ -55,7 +55,7 @@ class AttributionDataShareTest {
         var rs = new MockResultSet("");
         rs.addColumn("mbi", Arrays.asList(MBI_1, MBI_2));
         rs.addColumn("effective_date", Arrays.asList("2024-02-26", null));
-        rs.addColumn("opt_out_flag", Arrays.asList(true, null));
+        rs.addColumn("share_data", Arrays.asList(true, null));
         when(connection.createStatement()).thenReturn(stmt);
 
         when(getExecuteQuery(stmt)).thenReturn(rs);
