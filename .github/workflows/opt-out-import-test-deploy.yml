@@ -6,6 +6,8 @@ on:
 
 jobs:
   deploy:
+    env:
+      ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
     runs-on: self-hosted
     environment: test
     defaults:
