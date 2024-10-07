@@ -9,6 +9,8 @@ jobs:
       contents: read
       id-token: write
     runs-on: ubuntu-latest
+    env:
+      ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
     environment: prod
     steps:
       - uses: aws-actions/configure-aws-credentials@v3
