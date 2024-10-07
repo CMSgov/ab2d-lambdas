@@ -37,7 +37,7 @@ dependencies {
     implementation project(':lambda-lib')
     implementation('gov.cms.ab2d:ab2d-contracts-client:1.1')
     implementation 'org.slf4j:slf4j-api:2.0.5'
-    implementation 'com.amazonaws:aws-java-sdk-sns:1.12.405'
+    implementation 'com.amazonaws:aws-java-sdk-sns:1.12.769'
 
     implementation('gov.cms.ab2d:ab2d-sns-client:0.0.1') {
         // Gradle is including these transient dependencies in the zip making it huge

@@ -13,8 +13,8 @@ repositories {
 dependencies {
     implementation 'com.amazonaws:aws-lambda-java-core:1.2.2'
     implementation 'com.amazonaws:aws-lambda-java-events:2.2.2'
-    implementation 'com.amazonaws:aws-java-sdk-s3:1.12.529'
-    implementation 'org.postgresql:postgresql:42.7.2'
+    implementation 'com.amazonaws:aws-java-sdk-s3:1.12.769'
+    implementation 'org.postgresql:postgresql:42.7.3'
     implementation 'software.amazon.awssdk:s3:2.25.6'
     implementation 'software.amazon.awssdk:ssm:2.25.7'
     implementation 'software.amazon.awssdk:sts:2.25.6'
