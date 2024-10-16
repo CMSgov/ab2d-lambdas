@@ -10,6 +10,8 @@ jobs:
     defaults:
       run:
         working-directory: ./attribution-data-file-share
+    env:
+      ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true 
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-java@v3
