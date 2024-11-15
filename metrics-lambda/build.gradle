@@ -44,7 +44,7 @@ dependencies {
     }
     implementation 'com.amazonaws:aws-lambda-java-core:1.2.2'
     implementation 'com.amazonaws:aws-lambda-java-events:3.11.0'
-    implementation 'com.amazonaws:aws-java-sdk-sqs:1.12.342'
+    implementation 'com.amazonaws:aws-java-sdk-sqs:1.12.769'
     implementation 'com.fasterxml.jackson.datatype:jackson-datatype-joda:2.14.0'
     implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.14.0'
     annotationProcessor 'org.projectlombok:lombok:1.18.24'
