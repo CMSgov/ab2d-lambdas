@@ -4,6 +4,7 @@ import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
 import gov.cms.ab2d.lambdalibs.lib.FileUtil;
+import gov.cms.ab2d.lambdalibs.lib.ParameterStoreUtil;
 import software.amazon.awssdk.services.s3.S3AsyncClient;
 import software.amazon.awssdk.services.sts.StsClient;
 import software.amazon.awssdk.services.sts.auth.StsAssumeRoleCredentialsProvider;
@@ -33,7 +34,7 @@ public class AttributionDataShareHandler implements RequestStreamHandler {
         var prefix = (System.getenv(BUCKET_NAME_PROP).contains("prod")) ? "P" : "T";
         String fileName = prefix + REQ_FILE_NAME + currentDate;
         String fileFullPath = FILE_PATH + fileName;
-        var parameterStore = AttributionParameterStore.getParameterStore();
+        var parameterStore = ParameterStoreUtil.getParameterStore(ROLE_PARAM, DB_HOST_PARAM, DB_USER_PARAM, DB_PASS_PARAM);
         AttributionDataShareHelper helper = helperInit(fileName, fileFullPath, logger);
         try (var dbConnection = DriverManager.getConnection(parameterStore.getDbHost(), parameterStore.getDbUser(), parameterStore.getDbPassword())) {
 
@@ -48,7 +49,7 @@ public class AttributionDataShareHandler implements RequestStreamHandler {
         }
     }
 
-    public S3AsyncClient getAsyncS3Client(String endpoint, AttributionParameterStore parameterStore) {
+    public S3AsyncClient getAsyncS3Client(String endpoint, ParameterStoreUtil parameterStore) {
         var client = S3AsyncClient.crtCreate();
 
         if (endpoint.equals(ENDPOINT)) {

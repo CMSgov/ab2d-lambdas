@@ -2,6 +2,7 @@ package gov.cms.ab2d.optout;
 
 
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
+import gov.cms.ab2d.lambdalibs.lib.ParameterStoreUtil;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.sts.StsClient;
 import software.amazon.awssdk.services.sts.auth.StsAssumeRoleCredentialsProvider;
@@ -26,13 +27,13 @@ public class OptOutProcessor {
     public List<OptOutInformation> optOutInformationList;
     public boolean isRejected;
 
-    OptOutParameterStore parameterStore;
+    ParameterStoreUtil parameterStore;
 
     public OptOutProcessor(LambdaLogger logger) {
         this.logger = logger;
         this.optOutInformationList = new ArrayList<>();
         isRejected = false;
-        parameterStore = OptOutParameterStore.getParameterStore();
+        parameterStore = ParameterStoreUtil.getParameterStore(ROLE_PARAM, DB_HOST_PARAM, DB_USER_PARAM, DB_PASS_PARAM);
     }
 
     public OptOutResults process(String fileName, String bfdBucket, String endpoint) throws URISyntaxException {
