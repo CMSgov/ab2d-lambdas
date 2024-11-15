@@ -48,7 +48,7 @@ test {
 
 sonarqube {
     properties {
-        property 'sonar.coverage.exclusions', "**/OptOutParameterStore.java, **/OptOutConstants.java"
+        property 'sonar.coverage.exclusions', "**/OptOutConstants.java"
     }
 }
 

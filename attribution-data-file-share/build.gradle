@@ -44,11 +44,6 @@ test {
     environment "S3_UPLOAD_PATH", "bfdeft01/test/out"
 }
 
-sonarqube {
-    properties {
-        property 'sonar.coverage.exclusions', "**/AttributionParameterStore.java"
-    }
-}
 
 task wrapper(type: Wrapper) {
     gradleVersion = '7.5'
