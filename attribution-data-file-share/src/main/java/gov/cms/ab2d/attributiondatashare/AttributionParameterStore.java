@@ -1,5 +1,6 @@
 package gov.cms.ab2d.attributiondatashare;
 
+import gov.cms.ab2d.lambdalibs.lib.SsmClientUtil;
 import software.amazon.awssdk.services.ssm.SsmClient;
 import software.amazon.awssdk.services.ssm.model.GetParameterRequest;
 
@@ -20,9 +21,7 @@ public class AttributionParameterStore {
     }
 
     public static AttributionParameterStore getParameterStore() {
-        var ssmClient = SsmClient.builder()
-                .region(S3_REGION)
-                .build();
+        var ssmClient = SsmClientUtil.getClient();
 
         var role = getValueFromParameterStore(ROLE_PARAM, ssmClient);
         var dbHost = getValueFromParameterStore(DB_HOST_PARAM, ssmClient);

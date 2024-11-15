@@ -1,5 +1,6 @@
 package gov.cms.ab2d.optout;
 
+import gov.cms.ab2d.lambdalibs.lib.SsmClientUtil;
 import software.amazon.awssdk.services.ssm.SsmClient;
 import software.amazon.awssdk.services.ssm.model.GetParameterRequest;
 
@@ -19,9 +20,7 @@ public class OptOutParameterStore {
     }
 
     public static OptOutParameterStore getParameterStore() {
-        var ssmClient = SsmClient.builder()
-                .region(S3_REGION)
-                .build();
+        var ssmClient = SsmClientUtil.getClient();
 
         var role = getValueFromParameterStore(ROLE_PARAM, ssmClient);
         var dbHost = getValueFromParameterStore(DB_HOST_PARAM, ssmClient);
