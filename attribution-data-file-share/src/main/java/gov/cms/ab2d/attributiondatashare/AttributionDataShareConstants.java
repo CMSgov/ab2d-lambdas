@@ -2,7 +2,7 @@ package gov.cms.ab2d.attributiondatashare;
 
 import software.amazon.awssdk.regions.Region;
 
-public class AttributionDataShareConstants {
+public final class AttributionDataShareConstants {
 
     public static final String ROLE_PARAM = "/ab2d/opt-out/bfd-bucket-role-arn";
     public static final String DB_HOST_PARAM = "/ab2d/opt-out/db-host";

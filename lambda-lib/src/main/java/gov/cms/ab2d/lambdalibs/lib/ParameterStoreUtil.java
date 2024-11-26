@@ -1,36 +1,39 @@
-package gov.cms.ab2d.attributiondatashare;
+package gov.cms.ab2d.lambdalibs.lib;
 
+import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.ssm.SsmClient;
 import software.amazon.awssdk.services.ssm.model.GetParameterRequest;
 
-import static gov.cms.ab2d.attributiondatashare.AttributionDataShareConstants.*;
-
-public class AttributionParameterStore {
+public class ParameterStoreUtil {
 
     private final String role;
     private final String dbHost;
     private final String dbUser;
     private final String dbPassword;
 
-    public AttributionParameterStore(String role, String dbHost, String dbUser, String dbPassword) {
+    public ParameterStoreUtil(String role, String dbHost, String dbUser, String dbPassword) {
         this.role = role;
         this.dbHost = dbHost;
         this.dbUser = dbUser;
         this.dbPassword = dbPassword;
     }
 
-    public static AttributionParameterStore getParameterStore() {
-        var ssmClient = SsmClient.builder()
-                .region(S3_REGION)
+    public static SsmClient getClient(){
+        return  SsmClient.builder()
+                .region(Region.US_EAST_1)
                 .build();
+    }
 
-        var role = getValueFromParameterStore(ROLE_PARAM, ssmClient);
-        var dbHost = getValueFromParameterStore(DB_HOST_PARAM, ssmClient);
-        var dbUser = getValueFromParameterStore(DB_USER_PARAM, ssmClient);
-        var dbPassword = getValueFromParameterStore(DB_PASS_PARAM, ssmClient);
+    public static ParameterStoreUtil getParameterStore(String roleParam, String dbHostParam, String dbUserParam, String dbPasswordParam) {
+        var ssmClient = ParameterStoreUtil.getClient();
+
+        var role = getValueFromParameterStore(roleParam, ssmClient);
+        var dbHost = getValueFromParameterStore(dbHostParam, ssmClient);
+        var dbUser = getValueFromParameterStore(dbUserParam, ssmClient);
+        var dbPassword = getValueFromParameterStore(dbPasswordParam, ssmClient);
 
         ssmClient.close();
-        return new AttributionParameterStore(role, dbHost, dbUser, dbPassword);
+        return new ParameterStoreUtil(role, dbHost, dbUser, dbPassword);
     }
 
     private static String getValueFromParameterStore(String key, SsmClient ssmClient) {
@@ -59,6 +62,3 @@ public class AttributionParameterStore {
         return role;
     }
 }
-
-
-

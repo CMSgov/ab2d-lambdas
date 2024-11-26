@@ -1,6 +1,7 @@
 package gov.cms.ab2d.attributiondatashare;
 
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
+import gov.cms.ab2d.lambdalibs.lib.ParameterStoreUtil;
 import gov.cms.ab2d.testutils.AB2DPostgresqlContainer;
 import gov.cms.ab2d.testutils.TestContext;
 import org.junit.jupiter.api.Test;
@@ -22,15 +23,15 @@ class AttributionDataShareHandlerTest {
     @Container
     private static final PostgreSQLContainer POSTGRE_SQL_CONTAINER = new AB2DPostgresqlContainer();
     LambdaLogger LOGGER = mock(LambdaLogger.class);
-    AttributionParameterStore parameterStore = new AttributionParameterStore("", "", "", "");
+    ParameterStoreUtil parameterStore = new ParameterStoreUtil("", "", "", "");
     AttributionDataShareHelper helper = mock(AttributionDataShareHelper.class);
     AttributionDataShareHandler handler = spy(new AttributionDataShareHandler());
 
     @Test
     void attributionDataShareInvoke() {
-        var mockParameterStore = mockStatic(AttributionParameterStore.class);
+        var mockParameterStore = mockStatic(ParameterStoreUtil.class);
         mockParameterStore
-                .when(AttributionParameterStore::getParameterStore)
+                .when(() -> ParameterStoreUtil.getParameterStore(anyString(), anyString(), anyString(), anyString()))
                 .thenReturn(parameterStore);
 
         Connection dbConnection = mock(Connection.class);

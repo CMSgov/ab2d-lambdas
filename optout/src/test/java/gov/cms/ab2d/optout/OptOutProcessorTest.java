@@ -2,6 +2,7 @@ package gov.cms.ab2d.optout;
 
 
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
+import gov.cms.ab2d.lambdalibs.lib.ParameterStoreUtil;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,7 +33,7 @@ class OptOutProcessorTest {
     private static final ResultSet resultSet = mock(ResultSet.class);
     private static final PreparedStatement preparedStatement = mock(PreparedStatement.class);
     private static final Connection dbConnection = mock(Connection.class);
-    private static final MockedStatic<OptOutParameterStore> parameterStore = mockStatic(OptOutParameterStore.class);
+    private static final MockedStatic<ParameterStoreUtil> parameterStore = mockStatic(ParameterStoreUtil.class);
     private static final String DATE = new SimpleDateFormat(EFFECTIVE_DATE_PATTERN).format(new Date());
     private static final String MBI = "DUMMY000001";
     private static final String TRAILER_COUNT = "0000000001";
@@ -43,8 +44,6 @@ class OptOutProcessorTest {
 
     @BeforeAll
     static void beforeAll() throws SQLException {
-        parameterStore.when(OptOutParameterStore::getParameterStore).thenReturn(new OptOutParameterStore("", "", "", ""));
-
         mockStatic(DriverManager.class)
                 .when(() ->  DriverManager.getConnection(anyString(), anyString(), anyString())).thenReturn(dbConnection);
         when(dbConnection.prepareStatement(anyString())).thenReturn(preparedStatement);
@@ -55,7 +54,9 @@ class OptOutProcessorTest {
     @BeforeEach
     void beforeEach() throws IOException {
         S3MockAPIExtension.createFile(Files.readString(Paths.get("src/test/resources/" + TEST_FILE_NAME), StandardCharsets.UTF_8), TEST_FILE_NAME);
-        parameterStore.when(OptOutParameterStore::getParameterStore).thenReturn(new OptOutParameterStore("", "", "", ""));
+        parameterStore.
+                when(() -> ParameterStoreUtil.getParameterStore(anyString(), anyString(), anyString(), anyString()))
+                .thenReturn(new ParameterStoreUtil("", "", "", ""));
         optOutProcessing = spy(new OptOutProcessor(mock(LambdaLogger.class)));
         optOutProcessing.isRejected = false;
     }
