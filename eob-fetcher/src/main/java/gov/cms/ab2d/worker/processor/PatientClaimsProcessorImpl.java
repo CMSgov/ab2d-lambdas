@@ -153,7 +153,7 @@ public class PatientClaimsProcessorImpl {
 
             // Make first request and begin looping over remaining pages
             eobBundle = bfdClient.requestEOBFromServer(payload.getVersion(),
-                    patientCoverage.getBeneId(), payload.getSince(), payload.getContract());
+                    patientCoverage.getBeneId(), payload.getSince(), payload.getUntil(),  payload.getContract());
             List<IBaseResource> eobs = new ArrayList<>(PatientClaimsFilter.filterEntries(eobBundle, patientCoverage, payload.getAttestationDate(),
                     payload.isSkipBillablePeriodCheck(), payload.getSince(), payload.getVersion()));
 
