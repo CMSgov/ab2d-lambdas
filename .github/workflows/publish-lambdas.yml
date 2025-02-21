@@ -50,6 +50,13 @@ jobs:
             SONAR_HOST_URL=/sonarqube/url
             SONAR_TOKEN=/sonarqube/token
 
+      - name: Verify Required Libraries
+        run: |
+          echo "Checking for required system libraries..."
+          ldd --version || echo "ldd (glibc) is not installed!"
+          ldconfig -p | grep "libstdc++" || echo "libstdc++ is missing!"
+          ldconfig -p | grep "zlib" || echo "zlib is missing!"
+
       - name: Build Lambdas
         run: |
           ./gradlew -b build.gradle
