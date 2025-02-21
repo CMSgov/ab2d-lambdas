@@ -22,45 +22,42 @@ jobs:
     runs-on: self-hosted
 
     env:
-      ARTIFACTORY_URL: ${{ secrets.ARTIFACTORY_URL }}
       ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
       AWS_REGION: ${{ vars.AWS_REGION }}
-      DEPLOYMENT_ENV: ${{ vars[format('{0}_DEPLOYMENT_ENV', inputs.environment)] }}
+      DEPLOYMENT_ENV: ${{ vars[format('{0}_DEPLOYMENT_ENV', github.event.inputs.environment || inputs.environment)] }}
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Set up Gradle
-        uses: gradle/gradle-build-action@v3
+      - uses: gradle/actions/setup-gradle@0bdd871935719febd78681f197cd39af5b6e16a6 # v4.2.2
         with:
-          gradle-version: '7.2'
+          gradle-version: 7.5
+
+      - uses: cmsgov/ab2d-bcda-dpc-platform/actions/aws-params-env-action@main
+        env:
+          AWS_REGION: ${{ vars.AWS_REGION }}
+        with:
+          params: |
+            ARTIFACTORY_URL=/artifactory/url
+            ARTIFACTORY_USER=/artifactory/user
+            ARTIFACTORY_PASSWORD=/artifactory/password
+            SONAR_HOST_URL=/sonarqube/url
+            SONAR_TOKEN=/sonarqube/token
 
       - name: Build Lambdas
-        env:
-          ARTIFACTORY_USER: ${{ secrets.ARTIFACTORY_USER }}
-          ARTIFACTORY_PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}
         run: |
           ./gradlew -b build.gradle
 
       - name: Test Lambdas
-        env:
-          ARTIFACTORY_USER: ${{ secrets.ARTIFACTORY_USER }}
-          ARTIFACTORY_PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}
         run: |
           ./gradlew clean test --info -b build.gradle
 
       - name: Build Jars
-        env:
-          ARTIFACTORY_USER: ${{ secrets.ARTIFACTORY_USER }}
-          ARTIFACTORY_PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}
         run: |
           ./gradlew buildZip --info -b build.gradle
 
       - name: SonarQube Analysis
-        env:
-          ARTIFACTORY_USER: ${{ secrets.ARTIFACTORY_USER }}
-          ARTIFACTORY_PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}
         run: |
           ./gradlew sonarqube -Dsonar.projectKey=ab2d-lambdas -Dsonar.host.url=https://sonarqube.cloud.cms.gov
 
@@ -70,16 +67,10 @@ jobs:
           sleep 600  # Simulate a 10-minute wait (adjust based on actual implementation)
 
       - name: SBOM
-        env:
-          ARTIFACTORY_USER: ${{ secrets.ARTIFACTORY_USER }}
-          ARTIFACTORY_PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}
         run: |
           ./gradlew cyclonedxBom --info -b build.gradle
 
       - name: Publish Lambdas
-        env:
-          ARTIFACTORY_USER: ${{ secrets.ARTIFACTORY_USER }}
-          ARTIFACTORY_PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}
         run: |
           echo "Checking for unpublished artifacts..."
           DEPLOY_SCRIPT=""
