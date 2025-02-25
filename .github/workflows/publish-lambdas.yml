@@ -29,6 +29,17 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+        
+      - name: Remount /tmp with exec permissions
+        run: |
+          echo "Remounting /tmp with exec permissions..."
+          sudo mount /tmp -o remount,exec
+
+      - name: Verify /tmp Permissions
+        run: |
+          echo "Checking /tmp permissions..."
+          mount | grep /tmp
+          ls -ld /tmp
 
       - uses: actions/setup-java@8df1039502a15bceb9433410b1a100fbe190c53b # v4.5.0
         with:
