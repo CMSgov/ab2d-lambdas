@@ -60,7 +60,11 @@ dependencies {
 
 test {
     useJUnitPlatform()
+    jvmArgs = [
+            '--add-opens=java.base/java.util=ALL-UNNAMED'
+    ]
 }
+
 task buildZip(type: Zip) {
 
     from compileJava
