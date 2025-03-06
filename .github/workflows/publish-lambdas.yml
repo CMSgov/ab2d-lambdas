@@ -7,6 +7,10 @@ on:
       environment:
         required: true
         type: string
+    outputs:
+      build_version:
+        description: "The lambdas build version"
+        value: ${{ jobs.publish.outputs.build_version }}
   workflow_dispatch:
     inputs:
       environment:
