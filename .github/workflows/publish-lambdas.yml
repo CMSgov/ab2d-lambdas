@@ -20,7 +20,8 @@ on:
 jobs:
   publish:
     runs-on: self-hosted
-
+    outputs:
+      output_1: ${{ steps.publish_lambdas.build_version }}
     env:
       ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
       AWS_REGION: ${{ vars.AWS_REGION }}
@@ -94,6 +95,7 @@ jobs:
           ./gradlew cyclonedxBom --info -b build.gradle
 
       - name: Publish Lambdas
+        id: publish_lambdas
         run: |
           echo "Checking for unpublished artifacts..."
           DEPLOY_SCRIPT=""
@@ -119,3 +121,4 @@ jobs:
 
           BUILD_VERSION=$(./gradlew properties -q | grep "version:" | awk '{print $2}')
           echo "Build version: $BUILD_VERSION"
+          echo "build_version=$BUILD_VERSION" >> "$GITHUB_OUTPUT"
