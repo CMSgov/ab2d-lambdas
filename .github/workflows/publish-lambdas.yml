@@ -34,7 +34,9 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
-        
+        with:
+          repository: 'cmsgov/ab2d-lambdas'
+
       - name: Remount /tmp with exec permissions
         run: |
           echo "Remounting /tmp with exec permissions..."
