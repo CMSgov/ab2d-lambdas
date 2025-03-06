@@ -21,7 +21,7 @@ jobs:
   publish:
     runs-on: self-hosted
     outputs:
-      output_1: ${{ steps.publish_lambdas.build_version }}
+      build_version: ${{ steps.publish_lambdas.build_version }}
     env:
       ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
       AWS_REGION: ${{ vars.AWS_REGION }}
