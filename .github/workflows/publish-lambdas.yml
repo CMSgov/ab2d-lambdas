@@ -38,6 +38,7 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
         with:
+          # specify repo and ref (branch) to allow this workflow to be called from cmsgov/ab2d/deploy-lambda.yml
           repository: 'cmsgov/ab2d-lambdas'
           ref: ${{ inputs.ref || github.ref }}
 
