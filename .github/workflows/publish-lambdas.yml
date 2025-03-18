@@ -1,35 +1,35 @@
 name: publish-lambdas
 
 on:
-  pull_request:
   workflow_call:
     inputs:
-      environment:
-        required: true
+      ref:
+        required: false
         type: string
+        description: 'Branch name - used when called by cmsgov/ab2d/deploy-lambda.yml'
+    outputs:
+      build_version:
+        description: "The lambdas build version"
+        value: ${{ jobs.publish.outputs.build_version }}
   workflow_dispatch:
-    inputs:
-      environment:
-        required: true
-        type: choice
-        options:
-          - dev
-          - test
-          - prod
 
 jobs:
   publish:
     runs-on: self-hosted
-
+    outputs:
+      build_version: ${{ steps.publish_lambdas.outputs.build_version }}
     env:
       ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
       AWS_REGION: ${{ vars.AWS_REGION }}
-      DEPLOYMENT_ENV: ${{ vars[format('{0}_DEPLOYMENT_ENV', github.event.inputs.environment || inputs.environment)] }}
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
-        
+        with:
+          # specify repo and ref (branch) to allow this workflow to be called from cmsgov/ab2d/deploy-lambda.yml
+          repository: 'cmsgov/ab2d-lambdas'
+          ref: ${{ inputs.ref || github.ref }}
+
       - name: Remount /tmp with exec permissions
         run: |
           echo "Remounting /tmp with exec permissions..."
@@ -94,6 +94,7 @@ jobs:
           ./gradlew cyclonedxBom --info -b build.gradle
 
       - name: Publish Lambdas
+        id: publish_lambdas
         run: |
           echo "Checking for unpublished artifacts..."
           DEPLOY_SCRIPT=""
@@ -119,3 +120,4 @@ jobs:
 
           BUILD_VERSION=$(./gradlew properties -q | grep "version:" | awk '{print $2}')
           echo "Build version: $BUILD_VERSION"
+          echo "build_version=$BUILD_VERSION" >> "$GITHUB_OUTPUT"
