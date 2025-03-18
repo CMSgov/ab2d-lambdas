@@ -19,6 +19,8 @@ public class JobFetchPayload {
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSz")
     private OffsetDateTime since;
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSz")
+    private OffsetDateTime until;
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSz")
     private Date attestationDate;
     private PatientCoverage[] beneficiaries;
 }
