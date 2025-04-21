@@ -36,10 +36,15 @@ ext {
     optoutVersion = project.version
     attributionDataShareVersion = project.version
 
-
     sourcesRepo = 'ab2d-maven-repo'
     deployerRepo = 'ab2d-main'
     resolverRepo = 'ab2d-main'
+
+    // https://www.cve.org/CVERecord?id=CVE-2024-1597
+    postgresVersion = '42.7.5' // currently 42.7.2
+    ab2dSnsClientVersion = '1.1.1' // currently at 0.0.1
+    ab2dEventClientVersion = '3.3.5' // currently at 1.11.2
+
 }
 
 configurations {
@@ -87,8 +92,8 @@ subprojects {
         }
     }
 
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
 
     group 'gov.cms.ab2d'
 
@@ -199,8 +204,8 @@ tasks.register('buildZip', Zip) {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
 }
 
 build.dependsOn buildZip

@@ -26,7 +26,7 @@ repositories {
 
 dependencies {
 
-    implementation('gov.cms.ab2d:ab2d-events-client:1.11.2') {
+    implementation("gov.cms.ab2d:ab2d-events-client:${ab2dEventClientVersion}") {
         // Gradle is including these transient dependencies in the zip making it huge
         exclude group: 'org.springframework'
         exclude group: 'org.springframework.boot'
@@ -76,8 +76,8 @@ task wrapper(type: Wrapper) {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
 }
 
 build.dependsOn buildZip
