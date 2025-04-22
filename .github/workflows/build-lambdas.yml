@@ -1,0 +1,77 @@
+name: publish-lambdas
+
+on:
+  workflow_call:
+    inputs:
+      ref:
+        required: false
+        type: string
+        description: 'Branch name - used when called by cmsgov/ab2d/deploy-lambda.yml'
+    outputs:
+      build_version:
+        description: "The lambdas build version"
+        value: ${{ jobs.publish.outputs.build_version }}
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: self-hosted
+    outputs:
+      build_version: ${{ steps.publish_lambdas.outputs.build_version }}
+    env:
+      ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
+      AWS_REGION: ${{ vars.AWS_REGION }}
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          # specify repo and ref (branch) to allow this workflow to be called from cmsgov/ab2d/deploy-lambda.yml
+          repository: 'cmsgov/ab2d-lambdas'
+          ref: ${{ inputs.ref || github.ref }}
+
+      - name: Remount /tmp with exec permissions
+        run: |
+          echo "Remounting /tmp with exec permissions..."
+          sudo mount /tmp -o remount,exec
+
+      - name: Verify /tmp Permissions
+        run: |
+          echo "Checking /tmp permissions..."
+          mount | grep /tmp
+          ls -ld /tmp
+
+      - uses: actions/setup-java@8df1039502a15bceb9433410b1a100fbe190c53b # v4.5.0
+        with:
+          distribution: 'adopt'
+          java-version: '15'
+
+      - uses: gradle/actions/setup-gradle@0bdd871935719febd78681f197cd39af5b6e16a6 # v4.2.2
+        with:
+          gradle-version: 7.2
+
+      - uses: cmsgov/ab2d-bcda-dpc-platform/actions/aws-params-env-action@main
+        env:
+          AWS_REGION: ${{ vars.AWS_REGION }}
+        with:
+          params: |
+            ARTIFACTORY_URL=/artifactory/url
+            ARTIFACTORY_USER=/artifactory/user
+            ARTIFACTORY_PASSWORD=/artifactory/password
+            SONAR_HOST_URL=/sonarqube/url
+            SONAR_TOKEN=/sonarqube/token
+
+      - name: Verify Required Libraries
+        run: |
+          echo "Checking for required system libraries..."
+          ldd --version || echo "ldd (glibc) is not installed!"
+          ldconfig -p | grep "libstdc++" || echo "libstdc++ is missing!"
+          ldconfig -p | grep "zlib" || echo "zlib is missing!"
+
+      - name: Build Lambdas
+        run: |
+          ./gradlew -b build.gradle
+
+      - name: Test Lambdas
+        run: |
+          ./gradlew clean test --info -b build.gradle
