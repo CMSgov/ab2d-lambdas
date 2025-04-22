@@ -44,7 +44,6 @@ ext.set("zipName", 'optout')
 
 test {
     useJUnitPlatform()
-    jvmArgs = "--add-opens=java.base/java.util=ALL-UNNAMED"
 }
 
 sonarqube {

@@ -33,7 +33,6 @@ ext.set("zipName", 'audit')
 
 test {
     useJUnitPlatform()
-    jvmArgs = "--add-opens=java.base/java.util=ALL-UNNAMED"
 }
 
 task wrapper(type: Wrapper) {
