@@ -74,7 +74,7 @@ dependencies {
     testImplementation 'org.mockito:mockito-core:4.11.0'
     testImplementation project(':lambda-lib')
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.2'
-    testImplementation 'org.junit.platform:junit-platform-commons:1.9.2'
+    testImplementation 'org.junit.platform:junit-platform-commons:1.12.2'
     testImplementation 'org.testcontainers:junit-jupiter:1.17.6'
     testImplementation project(':lambda-test-utils')
     testImplementation 'com.fasterxml.jackson.datatype:jackson-datatype-joda:2.14.0'
