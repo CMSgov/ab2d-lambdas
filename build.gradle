@@ -39,7 +39,7 @@ ext {
     postgresVersion = '42.7.5' // currently 42.7.2
     ab2dSnsClientVersion = '1.1.1' // currently at 0.0.1
     ab2dEventClientVersion = '3.3.5' // currently at 1.11.2
-    junitJupiterVersion = '5.9.2'
+    junitJupiterVersion = '5.12.2'
 
 }
 
