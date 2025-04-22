@@ -45,3 +45,19 @@ java {
     sourceCompatibility = JavaVersion.VERSION_17
     targetCompatibility = JavaVersion.VERSION_17
 }
+
+tasks.withType(JavaCompile) {
+    options.compilerArgs += [
+            '--add-opens', 'java.base/java.lang=ALL-UNNAMED',
+            '--add-opens', 'java.base/java.util=ALL-UNNAMED'
+            // Add more --add-opens options as needed
+    ]
+}
+
+tasks.withType(Test) {
+    jvmArgs += [
+            '--add-opens', 'java.base/java.lang=ALL-UNNAMED',
+            '--add-opens', 'java.base/java.util=ALL-UNNAMED'
+            // Add more --add-opens options as needed
+    ]
+}
