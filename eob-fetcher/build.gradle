@@ -23,6 +23,7 @@ dependencies {
 
 test {
     useJUnitPlatform()
+    jvmArgs = listOf("--add-opens=java.base/java.util=ALL-UNNAMED")
 }
 
 task buildZip(type: Zip) {

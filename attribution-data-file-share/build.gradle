@@ -40,6 +40,7 @@ ext.set("zipName", 'attributionDataShare')
 
 test {
     useJUnitPlatform()
+    jvmArgs = listOf("--add-opens=java.base/java.util=ALL-UNNAMED")
     environment "S3_UPLOAD_BUCKET", "bfd-test-eft"
     environment "S3_UPLOAD_PATH", "bfdeft01/test/out"
 }
