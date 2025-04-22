@@ -20,8 +20,8 @@ dependencies {
     implementation 'com.googlecode.json-simple:json-simple:1.1.1'
     implementation(project(":lambda-lib"))
     testImplementation 'com.amazonaws:aws-java-sdk-sqs:1.11.792'
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.12.2'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.12.2'
+    testImplementation "org.junit.jupiter:junit-jupiter-api:${junitJupiterApiVersion}"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${junitJupiterEngineVersion}"
     testImplementation 'org.mockito:mockito-core:4.8.0'
     testImplementation 'org.testcontainers:junit-jupiter:1.19.7'
     testImplementation 'org.testcontainers:postgresql:1.19.1'

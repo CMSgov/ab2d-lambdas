@@ -15,9 +15,9 @@ dependencies {
     //test
     testImplementation 'org.slf4j:slf4j-api:2.0.6'
     testImplementation 'org.slf4j:slf4j-reload4j:2.0.6'
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.12.2'
-    testImplementation 'org.junit.platform:junit-platform-commons:1.12.2'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.12.2'
+    testImplementation "org.junit.jupiter:junit-jupiter-api:${junitJupiterApiVersion}"
+    testImplementation "org.junit.platform:junit-platform-commons:${junitPlatformCommonsVersion}"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${junitJupiterEngineVersion}"
     implementation 'software.amazon.awssdk:ssm:2.25.7'
 
 }
