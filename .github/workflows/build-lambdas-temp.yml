@@ -60,4 +60,4 @@ jobs:
 
       - name: Test Lambdas
         run: |
-          ./gradlew clean test --info -b build.gradle --stacktrace
+          ./gradlew clean test --info -b build.gradle --stacktrace --debug
