@@ -12,7 +12,6 @@ jobs:
     env:
       ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
       AWS_REGION: ${{ vars.AWS_REGION }}
-
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
