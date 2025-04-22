@@ -66,7 +66,7 @@ repositories {
 
 test {
     useJUnitPlatform()
-    jvmArgs = listOf("--add-opens=java.base/java.util=ALL-UNNAMED")
+    jvmArgs = "--add-opens=java.base/java.util=ALL-UNNAMED"
 }
 
 subprojects {
@@ -133,7 +133,7 @@ subprojects {
 
     test {
         useJUnitPlatform()
-        jvmArgs = listOf("--add-opens=java.base/java.util=ALL-UNNAMED")
+        jvmArgs = "--add-opens=java.base/java.util=ALL-UNNAMED"
         finalizedBy jacocoTestReport // report is always generated after tests run
     }
 
