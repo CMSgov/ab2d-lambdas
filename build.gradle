@@ -66,6 +66,10 @@ repositories {
 
 test {
     useJUnitPlatform()
+    testLogging {
+        events "failed"
+        exceptionFormat "full"
+    }
 }
 
 subprojects {
@@ -132,6 +136,10 @@ subprojects {
 
     test {
         useJUnitPlatform()
+        testLogging {
+            events "failed"
+            exceptionFormat "full"
+        }
         finalizedBy jacocoTestReport // report is always generated after tests run
     }
 

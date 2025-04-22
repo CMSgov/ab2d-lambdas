@@ -40,6 +40,10 @@ ext.set("zipName", 'attributionDataShare')
 
 test {
     useJUnitPlatform()
+    testLogging {
+        events "failed"
+        exceptionFormat "full"
+    }
     environment "S3_UPLOAD_BUCKET", "bfd-test-eft"
     environment "S3_UPLOAD_PATH", "bfdeft01/test/out"
 }

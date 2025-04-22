@@ -78,6 +78,10 @@ dependencies {
 
 test {
     useJUnitPlatform()
+    testLogging {
+        events "failed"
+        exceptionFormat "full"
+    }
 }
 task buildZip(type: Zip) {
 

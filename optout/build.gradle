@@ -44,6 +44,10 @@ ext.set("zipName", 'optout')
 
 test {
     useJUnitPlatform()
+    testLogging {
+        events "failed"
+        exceptionFormat "full"
+    }
 }
 
 sonarqube {

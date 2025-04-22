@@ -33,6 +33,10 @@ ext.set("zipName", 'audit')
 
 test {
     useJUnitPlatform()
+    testLogging {
+        events "failed"
+        exceptionFormat "full"
+    }
 }
 
 task wrapper(type: Wrapper) {
