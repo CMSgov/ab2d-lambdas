@@ -22,9 +22,7 @@ dependencies {
     testImplementation 'org.liquibase:liquibase-core:4.18.0'
     testImplementation "org.postgresql:postgresql:${postgresVersion}"
     testImplementation project(':lambda-test-utils')
-    testImplementation "org.junit.jupiter:junit-jupiter-api:${junitJupiterApiVersion}"
-    testImplementation "org.junit.platform:junit-platform-commons:${junitPlatformCommonsVersion}"
-    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${junitJupiterEngineVersion}"
+    testImplementation "org.junit.jupiter:junit-jupiter:${junitJupiterVersion}"
     testImplementation 'org.testcontainers:junit-jupiter:1.17.6'
     testImplementation "org.testcontainers:postgresql:1.17.6"
 

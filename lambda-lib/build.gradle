@@ -15,9 +15,7 @@ dependencies {
     //test
     testImplementation 'org.slf4j:slf4j-api:2.0.6'
     testImplementation 'org.slf4j:slf4j-reload4j:2.0.6'
-    testImplementation "org.junit.jupiter:junit-jupiter-api:${junitJupiterApiVersion}"
-    testImplementation "org.junit.platform:junit-platform-commons:${junitPlatformCommonsVersion}"
-    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${junitJupiterEngineVersion}"
+    testImplementation "org.junit.jupiter:junit-jupiter:${junitJupiterVersion}"
     implementation 'software.amazon.awssdk:ssm:2.25.7'
 
 }

@@ -20,8 +20,7 @@ dependencies {
     implementation 'com.googlecode.json-simple:json-simple:1.1.1'
     implementation(project(":lambda-lib"))
     testImplementation 'com.amazonaws:aws-java-sdk-sqs:1.11.792'
-    testImplementation "org.junit.jupiter:junit-jupiter-api:${junitJupiterApiVersion}"
-    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${junitJupiterEngineVersion}"
+    testImplementation "org.junit.jupiter:junit-jupiter:${junitJupiterVersion}"
     testImplementation 'org.mockito:mockito-core:4.8.0'
     testImplementation 'org.testcontainers:junit-jupiter:1.19.7'
     testImplementation 'org.testcontainers:postgresql:1.19.1'
@@ -71,7 +70,6 @@ tasks.withType(JavaCompile) {
     options.compilerArgs += [
             '--add-opens', 'java.base/java.lang=ALL-UNNAMED',
             '--add-opens', 'java.base/java.util=ALL-UNNAMED'
-            // Add more --add-opens options as needed
     ]
 }
 
@@ -79,6 +77,5 @@ tasks.withType(Test) {
     jvmArgs += [
             '--add-opens', 'java.base/java.lang=ALL-UNNAMED',
             '--add-opens', 'java.base/java.util=ALL-UNNAMED'
-            // Add more --add-opens options as needed
     ]
 }

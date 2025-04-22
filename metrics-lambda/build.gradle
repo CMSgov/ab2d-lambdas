@@ -50,10 +50,7 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok:1.18.24'
     compileOnly 'org.projectlombok:lombok:1.18.24'
     implementation 'org.slf4j:slf4j-api:2.0.4'
-
-    testImplementation "org.junit.jupiter:junit-jupiter-api:${junitJupiterApiVersion}"
-    testImplementation "org.junit.platform:junit-platform-commons:${junitPlatformCommonsVersion}"
-    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${junitJupiterEngineVersion}"
+    testImplementation "org.junit.jupiter:junit-jupiter:${junitJupiterVersion}"
     testImplementation 'org.mockito:mockito-core:4.8.0'
     testImplementation project(':lambda-test-utils')
 }
