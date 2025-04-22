@@ -7,11 +7,6 @@ plugins {
 version = "1.1.0"
 group = "gov.cms.ab2d"
 
-dependencies {
-    testImplementation "org.junit.jupiter:junit-jupiter-api:${junitJupiterApiVersion}"
-    testImplementation "org.junit.platform:junit-platform-commons:${junitPlatformCommonsVersion}"
-    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${junitJupiterEngineVersion}"
-}
 
 ext {
     sourcesRepo = 'ab2d-main'
@@ -49,6 +44,13 @@ ext {
     junitPlatformCommonsVersion = '1.9.2'
 
 
+}
+
+
+dependencies {
+    testImplementation "org.junit.jupiter:junit-jupiter-api:${junitJupiterApiVersion}"
+    testImplementation "org.junit.platform:junit-platform-commons:${junitPlatformCommonsVersion}"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${junitJupiterEngineVersion}"
 }
 
 configurations {
