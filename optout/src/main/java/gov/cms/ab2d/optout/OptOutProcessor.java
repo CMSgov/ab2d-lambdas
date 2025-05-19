@@ -123,8 +123,8 @@ public class OptOutProcessor {
         try (var dbConnection = DriverManager.getConnection(parameterStore.getDbHost(), parameterStore.getDbUser(), parameterStore.getDbPassword());
              var statement = dbConnection.prepareStatement(UPSERT_STATEMENT)) {
             for (var optOutInformation : optOutInformationList) {
-                statement.setBoolean(1, optOutInformation.getOptOutFlag());
-                statement.setString(2, optOutInformation.getMbi());
+                statement.setString(1, optOutInformation.getMbi());
+                statement.setBoolean(2, optOutInformation.getOptOutFlag());
                 statement.addBatch();
             }
             statement.executeBatch();
