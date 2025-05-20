@@ -80,8 +80,7 @@ public class OptOutProcessor {
         try {
             while ((line = reader.readLine()) != null) {
                 if (!line.startsWith(HEADER_RESP) && !line.startsWith(TRAILER_RESP)) {
-                    var optOutInformation = createOptOutInformation(line);
-                    optOutInformationList.add(optOutInformation);
+                    createOptOutInformation(line);
                 }
             }
         } catch (IOException ex) {
@@ -89,18 +88,43 @@ public class OptOutProcessor {
         }
     }
 
-    public OptOutInformation createOptOutInformation(String information) {
-        var mbi = information.substring(MBI_INDEX_START, MBI_INDEX_END).trim();
-        var optOutFlag = (information.charAt(OPTOUT_FLAG_INDEX) == 'Y');
-        return new OptOutInformation(mbi, optOutFlag);
+    public void createOptOutInformation(String information) {
+        List<String> mbis = parseMbis(information);
+        boolean optOutFlag = extractOptOutFlag(information, mbis.size() > 1);
+
+        mbis.forEach(mbi ->
+                optOutInformationList.add(new OptOutInformation(mbi.trim(), optOutFlag))
+        );
     }
+
+    private List<String> parseMbis(String information) {
+        if (information.contains(",")) {
+            String mbi1 = information.substring(MBI_INDEX_START, MBI_INDEX_LENGTH);
+            int secondStart = MBI_INDEX_LENGTH + 1;
+            String mbi2 = information.substring(secondStart, secondStart + MBI_INDEX_LENGTH);
+            return List.of(mbi1, mbi2);
+        } else {
+            String mbi = information.substring(MBI_INDEX_START, MBI_INDEX_LENGTH);
+            return List.of(mbi);
+        }
+    }
+
+    private boolean extractOptOutFlag(String information, boolean hasTwoMbis) {
+        int flagPosition = hasTwoMbis
+                // for two MBIs, flag is just after the second MBI
+                ? MBI_INDEX_LENGTH + 1 + MBI_INDEX_LENGTH
+                // for one MBI, flag is at the standard offset
+                : OPTOUT_FLAG_INDEX;
+        return information.charAt(flagPosition) == 'Y';
+    }
+
 
     public void updateOptOut() {
         try (var dbConnection = DriverManager.getConnection(parameterStore.getDbHost(), parameterStore.getDbUser(), parameterStore.getDbPassword());
-             var statement = dbConnection.prepareStatement(UPDATE_STATEMENT)) {
+             var statement = dbConnection.prepareStatement(UPSERT_STATEMENT)) {
             for (var optOutInformation : optOutInformationList) {
-                statement.setBoolean(1, optOutInformation.getOptOutFlag());
-                statement.setString(2, optOutInformation.getMbi());
+                statement.setString(1, optOutInformation.getMbi());
+                statement.setBoolean(2, optOutInformation.getOptOutFlag());
                 statement.addBatch();
             }
             statement.executeBatch();

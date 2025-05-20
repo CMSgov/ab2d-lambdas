@@ -15,11 +15,7 @@ import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -35,17 +31,20 @@ class OptOutProcessorTest {
     private static final Connection dbConnection = mock(Connection.class);
     private static final MockedStatic<ParameterStoreUtil> parameterStore = mockStatic(ParameterStoreUtil.class);
     private static final String DATE = new SimpleDateFormat(EFFECTIVE_DATE_PATTERN).format(new Date());
-    private static final String MBI = "DUMMY000001";
+    private static final String MBI1 = "DUMMY000001";
+    private static final String MBI2 = "DUMMY000002";
     private static final String TRAILER_COUNT = "0000000001";
+
     private static String validLine(char isOptOut) {
-        return MBI + isOptOut;
+        return MBI1 + isOptOut;
     }
+
     static OptOutProcessor optOutProcessing;
 
     @BeforeAll
     static void beforeAll() throws SQLException {
         mockStatic(DriverManager.class)
-                .when(() ->  DriverManager.getConnection(anyString(), anyString(), anyString())).thenReturn(dbConnection);
+                .when(() -> DriverManager.getConnection(anyString(), anyString(), anyString())).thenReturn(dbConnection);
         when(dbConnection.prepareStatement(anyString())).thenReturn(preparedStatement);
         when(dbConnection.createStatement()).thenReturn(preparedStatement);
         when(preparedStatement.executeQuery(anyString())).thenReturn(resultSet);
@@ -71,9 +70,21 @@ class OptOutProcessorTest {
         optOutProcessing.isRejected = false;
         OptOutResults results = optOutProcessing.process(TEST_FILE_NAME, TEST_BFD_BUCKET_NAME, TEST_ENDPOINT);
         assertEquals(7, optOutProcessing.optOutInformationList.size());
-        
+
         assertEquals(3, results.getOptInToday());
         assertEquals(4, results.getOptOutToday());
+        assertEquals(optOutProcessing.optOutInformationList.size(), results.getTotalToday());
+    }
+
+    @Test
+    void multipleMBIsProcessTest() throws URISyntaxException, IOException {
+        S3MockAPIExtension.createFile(Files.readString(Paths.get("src/test/resources/" + MULTIPLE_MBIS_TEST_FILE_NAME), StandardCharsets.UTF_8), MULTIPLE_MBIS_TEST_FILE_NAME);
+        optOutProcessing.isRejected = false;
+        OptOutResults results = optOutProcessing.process(MULTIPLE_MBIS_TEST_FILE_NAME, TEST_BFD_BUCKET_NAME, TEST_ENDPOINT);
+        assertEquals(9, optOutProcessing.optOutInformationList.size());
+
+        assertEquals(4, results.getOptInToday());
+        assertEquals(5, results.getOptOutToday());
         assertEquals(optOutProcessing.optOutInformationList.size(), results.getTotalToday());
     }
 
@@ -89,22 +100,37 @@ class OptOutProcessorTest {
 
     @Test
     void createTrueOptOutInformationTest() {
-        var optOutInformation = optOutProcessing.createOptOutInformation(validLine('Y'));
-        assertEquals(MBI, optOutInformation.getMbi());
-        assertTrue(optOutInformation.getOptOutFlag());
+        optOutProcessing.createOptOutInformation(validLine('Y'));
+        var list = optOutProcessing.optOutInformationList;
+        assertEquals(1, list.size());
+        assertEquals(MBI1, list.get(0).getMbi());
+        assertTrue(list.get(0).getOptOutFlag());
     }
 
     @Test
     void createFalseOptOutInformationTest() {
-        var optOutInformation = optOutProcessing.createOptOutInformation(validLine('N'));
-        assertEquals(MBI, optOutInformation.getMbi());
-        assertFalse(optOutInformation.getOptOutFlag());
+        optOutProcessing.createOptOutInformation(validLine('N'));
+        var list = optOutProcessing.optOutInformationList;
+        assertEquals(1, list.size());
+        assertEquals(MBI1, list.get(0).getMbi());
+        assertFalse(list.get(0).getOptOutFlag());
+    }
+
+    @Test
+    void createMultipleOptOutInformationTest() {
+        optOutProcessing.createOptOutInformation(MBI1 + "," + MBI2 + "Y");
+        var list = optOutProcessing.optOutInformationList;
+        assertEquals(2, list.size());
+        assertEquals(MBI1, list.get(0).getMbi());  // MBI1
+        assertTrue(list.get(0).getOptOutFlag());   // Y
+        assertEquals(MBI2, list.get(1).getMbi());  // MBI2
+        assertTrue(list.get(1).getOptOutFlag());   // Y
     }
 
     @Test
     void createAcceptedResponseTest() {
-        optOutProcessing.optOutInformationList.add(new OptOutInformation(MBI, true));
-        var expectedLine = MBI + DATE + "Y" + RecordStatus.ACCEPTED;
+        optOutProcessing.optOutInformationList.add(new OptOutInformation(MBI1, true));
+        var expectedLine = MBI1 + DATE + "Y" + RecordStatus.ACCEPTED;
         var expectedText = AB2D_HEADER_CONF + DATE + LINE_SEPARATOR
                 + expectedLine + LINE_SEPARATOR
                 + AB2D_TRAILER_CONF + DATE + TRAILER_COUNT;
@@ -114,8 +140,8 @@ class OptOutProcessorTest {
     @Test
     void createRejectedResponseTest() {
         optOutProcessing.isRejected = true;
-        optOutProcessing.optOutInformationList.add(new OptOutInformation(MBI, false));
-        var expectedLine = MBI + "        " + "N" + RecordStatus.REJECTED;
+        optOutProcessing.optOutInformationList.add(new OptOutInformation(MBI1, false));
+        var expectedLine = MBI1 + "        " + "N" + RecordStatus.REJECTED;
         var expectedText = AB2D_HEADER_CONF + DATE + LINE_SEPARATOR
                 + expectedLine + LINE_SEPARATOR
                 + AB2D_TRAILER_CONF + DATE + TRAILER_COUNT;
@@ -165,7 +191,7 @@ class OptOutProcessorTest {
         when(resultSet.getInt(optInResultSetString)).thenReturn(optInTotalCount);
         when(resultSet.getInt(optOutResultSetString)).thenReturn(optOutTotalCount);
 
-        optOutProcessing.optOutInformationList.add(new OptOutInformation(MBI, true));
+        optOutProcessing.optOutInformationList.add(new OptOutInformation(MBI1, true));
         optOutProcessing.optOutInformationList.add(new OptOutInformation("DUMMY000002", false));
 
         OptOutResults results = optOutProcessing.getOptOutResults();
