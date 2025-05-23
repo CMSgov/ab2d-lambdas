@@ -1,0 +1,10 @@
+name: Hello World
+on:
+  push:
+  workflow_dispatch:
+jobs:
+  Hello-World-Job:
+    runs-on:
+      - codebuild-ab2d-lambdas-${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - run: echo "Hello Brian!"
