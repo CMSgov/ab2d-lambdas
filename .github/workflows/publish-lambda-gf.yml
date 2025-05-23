@@ -16,6 +16,9 @@ on:
 
 jobs:
   publish:
+    permissions:
+      contents: read
+      id-token: write
     runs-on:
       - codebuild-ab2d-lambdas-${{ github.run_id }}-${{ github.run_attempt }}
     outputs:
