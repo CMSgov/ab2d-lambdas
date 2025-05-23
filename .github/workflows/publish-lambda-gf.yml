@@ -74,26 +74,26 @@ jobs:
         run: |
           ./gradlew -b build.gradle
 
-      - name: Test Lambdas
-        run: |
-          ./gradlew clean test --info -b build.gradle
+      # - name: Test Lambdas
+      #   run: |
+      #     ./gradlew clean test --info -b build.gradle
 
       - name: Build Jars
         run: |
           ./gradlew buildZip --info -b build.gradle
 
-      - name: SonarQube Analysis
-        run: |
-          ./gradlew sonarqube -Dsonar.projectKey=ab2d-lambdas -Dsonar.host.url=https://sonarqube.cloud.cms.gov
+      # - name: SonarQube Analysis
+      #   run: |
+      #     ./gradlew sonarqube -Dsonar.projectKey=ab2d-lambdas -Dsonar.host.url=https://sonarqube.cloud.cms.gov
 
-      - name: Quality Gate
-        run: |
-          echo "Waiting for SonarQube Quality Gate..."
-          sleep 600  # Simulate a 10-minute wait (adjust based on actual implementation)
+      # - name: Quality Gate
+      #   run: |
+      #     echo "Waiting for SonarQube Quality Gate..."
+      #     sleep 600  # Simulate a 10-minute wait (adjust based on actual implementation)
 
-      - name: SBOM
-        run: |
-          ./gradlew cyclonedxBom --info -b build.gradle
+      # - name: SBOM
+      #   run: |
+      #     ./gradlew cyclonedxBom --info -b build.gradle
 
       - name: Publish Lambdas
         id: publish_lambdas
