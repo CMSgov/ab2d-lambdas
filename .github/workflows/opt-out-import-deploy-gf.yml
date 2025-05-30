@@ -1,4 +1,4 @@
-name: opt-out-import deploy (Greenfield)
+name: opt-out-import deploy-gf
 
 on:
   push:
@@ -65,8 +65,8 @@ jobs:
         run: ../gradlew buildZip
 
       - name: Upload and reload
-        env: ${{ inputs.environment || 'dev' }}
-        LABEL: ${AB2D}-opt-out-import
+        env:
+          LABEL: ${AB2D}-opt-out-import
         run: |
           aws s3 cp --no-progress function.zip \
           "s3://${LAMBDA_BUCKET_NAME}/function.zip"
