@@ -65,7 +65,7 @@ jobs:
         run: ../gradlew buildZip
 
       - name: Upload and reload
-        env: ${AB2D} || 'dev'
+        env: ${{ inputs.environment || 'dev' }}
         LABEL: ${AB2D}-opt-out-import
         run: |
           aws s3 cp --no-progress function.zip \
