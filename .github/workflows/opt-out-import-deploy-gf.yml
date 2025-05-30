@@ -1,0 +1,72 @@
+name: opt-out-import deploy (Greenfield)
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        description: AWS environment to deploy to
+        required: true
+        type: string
+        default: "dev"
+
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: AWS environment to deploy to
+        required: true
+        type: string
+        default: "dev"
+
+jobs:
+  deploy:
+    permissions:
+      contents: read
+      id-token: write
+    runs-on: codebuild-ab2d-${{github.run_id}}-${{github.run_attempt}}
+    env:
+      ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
+     # AB2D_ENV: ${{ inputs.environment }}
+      AB2D_ENV: dev
+    environment: ${AB2D_ENV}
+    defaults:
+      run:
+        working-directory: ./optout
+
+    steps:
+      - name: Assume AWS role
+        uses: aws-actions/configure-aws-credentials@ececac1a45f3b08a01d2dd070d28d111c5fe6722 # v4.1.0
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{ env.AWS_ACCOUNT }}:role/delegatedadmin/developer/ab2d-${{ env.AB2D_ENV }}-github-actions
+
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Set env vars from AWS params in BCDA management account
+        uses: cmsgov/ab2d-bcda-dpc-platform/actions/aws-params-env-action@main
+        env:
+          AWS_REGION: ${{ vars.AWS_REGION }}
+        with:
+          params: |
+            ARTIFACTORY_URL=/artifactory/url
+            ARTIFACTORY_USER=/artifactory/user
+            ARTIFACTORY_PASSWORD=/artifactory/password
+            LAMBDA_BUCKET_NAME=/ab2d/${AB2D_ENV}/ab2d-${AB2D_ENV}-opt-out-import-bucket
+
+      - name: Build opt-out-import zip file
+        run: ../gradlew buildZip
+
+      - name: Upload and reload
+        env:
+        LABEL: ${AB2D}-opt-out-import
+        run: |
+          aws s3 cp --no-progress function.zip \
+          "s3://${LAMBDA_BUCKET_NAME}/function.zip"
+          aws lambda update-function-code --function-name "ab2d-${LABEL}" \
+          --s3-bucket "$LAMBDA_BUCKET_NAME" --s3-key function.zip
