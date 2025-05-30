@@ -1,6 +1,8 @@
 name: opt-out-export deploy (Greenfield)
 
 on:
+  push:
+    branches: [ AB2D-6685/optout-lambdas-gf ]
   workflow_call:
     inputs:
       environment:
