@@ -6,7 +6,7 @@ on:
   workflow_call:
     inputs:
       environment:
-        description: AWS environment to deploy to
+        description: AWS environment to deploy
         required: true
         type: string
         default: "dev"
@@ -14,7 +14,7 @@ on:
   workflow_dispatch:
     inputs:
       environment:
-        description: AWS environment to deploy to
+        description: AWS environment to deploy
         required: true
         type: string
         default: "dev"
