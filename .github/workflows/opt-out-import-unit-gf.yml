@@ -1,8 +1,6 @@
 name: opt-out-import-gf unit tests
 
 on:
-  push:
-    branches: [ AB2D-6685/optout-lambdas-gf ]
   pull_request:
     paths:
       - .github/workflows/opt-out-import-unit.yml
