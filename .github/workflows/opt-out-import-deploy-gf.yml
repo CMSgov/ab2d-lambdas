@@ -1,6 +1,8 @@
-name: opt-out-export deploy-gf
+name: opt-out-import deploy-gf
 
 on:
+  push:
+    branches: [ AB2D-6685/optout-lambdas-gf ]
   workflow_call:
     inputs:
       environment:
@@ -25,12 +27,14 @@ jobs:
       id-token: write
     runs-on: codebuild-ab2d-lambdas-${{github.run_id}}-${{github.run_attempt}}
     env:
-      AWS_ACCOUNT: ${{ inputs.environment == 'sandbox' && secrets.PROD_ACCOUNT || secrets.NON_PROD_ACCOUNT }}
+    #  AWS_ACCOUNT: ${{ inputs.environment == 'sandbox' && secrets.PROD_ACCOUNT || secrets.NON_PROD_ACCOUNT }}
       ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
-      AB2D_ENV: ${{ inputs.environment }}
+    #  AB2D_ENV: ${{ inputs.environment }}
+      AWS_ACCOUNT: ${{ secrets.NON_PROD_ACCOUNT }}
+      AB2D_ENV: 'dev'
     defaults:
       run:
-        working-directory: ./attribution-data-file-share
+        working-directory: ./optout
     steps:
       - name: Assume AWS role
         uses: aws-actions/configure-aws-credentials@ececac1a45f3b08a01d2dd070d28d111c5fe6722 # v4.1.0
@@ -57,13 +61,13 @@ jobs:
             ARTIFACTORY_USER=/artifactory/user
             ARTIFACTORY_PASSWORD=/artifactory/password
 
-      - name: Build opt-out-export zip file
+      - name: Build opt-out-import zip file
         run: ../gradlew buildZip
 
       - name: Upload and reload
         env:
-          BUCKET: ${{ inputs.environment == 'dev' && 'ab2d-dev-opt-out-export-function-20250528140638171100000001' || inputs.environment == 'test' && 'ab2d-test-opt-out-export-function-20250529140617557400000001' }}
+          BUCKET: 'ab2d-dev-opt-out-import-function-20250528140631782700000001'
         run: |
-          aws s3 cp --no-progress build/distributions/attributionDataShare.zip s3://${{ env.BUCKET }}/function.zip
-          aws lambda update-function-code --function-name ab2d-${{ env.AB2D_ENV }}-opt-out-export \
+          aws s3 cp --no-progress build/distributions/optout.zip s3://${{ env.BUCKET }}/function.zip
+          aws lambda update-function-code --function-name ab2d-${{ env.AB2D_ENV }}-opt-out-import \
             --s3-bucket ${{ env.BUCKET }} --s3-key function.zip
