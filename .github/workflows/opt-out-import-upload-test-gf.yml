@@ -4,10 +4,22 @@ run-name: opt-out-import test-gf ${{ inputs.environment }}
 on:
   push:
     branches: [ AB2D-6716/upload_ps_values ]
-    paths:
-      - .github/workflows/opt-out-import-test-integration.yml
-      - optout/**
+  workflow_call:
+    inputs:
+      environment:
+        required: true
+        type: string
   workflow_dispatch:
+    inputs:
+      environment:
+        description: AB2D environment
+        required: true
+        type: choice
+        options:
+          - dev
+          - test
+          - sandbox
+        default: test
 
 # Ensure we have only one integration test running at a time
 concurrency:
