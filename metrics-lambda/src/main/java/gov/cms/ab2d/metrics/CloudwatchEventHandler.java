@@ -38,6 +38,8 @@ public class CloudwatchEventHandler implements RequestHandler<SNSEvent, String> 
     private final String environment = Optional.ofNullable(System.getenv("environment"))
             .orElse("local") + "-";
 
+    private final String queueName = getQueueName(environment);
+
     // AWS sends an object that's not wrapped with type info. The event service expects the wrapper.
     // Since there's not an easy way to enable/disable type wrapper just have 2 mappers.
     private final ObjectMapper inputMapper = new ObjectMapper()
@@ -52,6 +54,23 @@ public class CloudwatchEventHandler implements RequestHandler<SNSEvent, String> 
 
     static {
         amazonSQS = setup();
+    }
+
+    // determine SQS queue name -- needed for greenfield deployments
+    static String getQueueName(String environment) {
+        final String env;
+        if (environment.contains("dev")) {
+            env="dev";
+        } else if (environment.contains("impl")) {
+            env="test";
+        } else if (environment.contains("sandbox")) {
+            env="sandbox";
+        } else if (environment.contains("prod")) {
+            env="prod";
+        } else {
+            env=environment;
+        }
+        return String.format("ab2d-%s-events-sqs", env);
     }
 
     private static AmazonSQS setup() {
@@ -78,7 +97,7 @@ public class CloudwatchEventHandler implements RequestHandler<SNSEvent, String> 
 
     private void sendMetric(SNSEvent.SNSRecord snsRecord, LambdaLogger log) {
         final SendMessageRequest request = new SendMessageRequest();
-        final String queue = environment + "events-sqs";
+        final String queue = this.queueName;
         final String service;
         try {
             final MetricAlarm alarm = inputMapper.readValue(Optional.ofNullable(snsRecord.getSNS())
