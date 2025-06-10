@@ -33,7 +33,7 @@ public class OptOutProcessor {
     public OptOutProcessor(LambdaLogger logger) {
         this.logger = logger;
         this.optOutInformationList = new ArrayList<>();
-        this.dbHost = "jdbc:" + System.getenv("DB_HOST");
+        this.dbHost = System.getenv("DB_HOST");
         var environment = System.getenv("ENV");
         var bfdRole = "/opt-out-import/ab2d/" + environment + "/bfd-bucket-role-arn";
         var dbUser = "/ab2d/" + environment + "/core/sensitive/database_user";

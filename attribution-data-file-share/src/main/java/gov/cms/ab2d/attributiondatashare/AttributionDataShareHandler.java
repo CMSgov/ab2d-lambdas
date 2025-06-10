@@ -39,7 +39,7 @@ public class AttributionDataShareHandler implements RequestStreamHandler {
         var bfdRole = "/opt-out-import/ab2d/" + environment + "/bfd-bucket-role-arn";
         var dbUser = "/ab2d/" + environment + "/core/sensitive/database_user";
         var dbPassword = "/ab2d/" + environment + "/core/sensitive/database_password";
-        var dbHost = "jdbc:" + System.getenv("DB_HOST");
+        var dbHost = System.getenv("DB_HOST");
 
         var parameterStore = ParameterStoreUtil.getParameterStore(bfdRole, dbUser, dbPassword);
 
