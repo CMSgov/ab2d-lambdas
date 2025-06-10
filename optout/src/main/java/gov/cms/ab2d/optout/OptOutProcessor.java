@@ -26,14 +26,20 @@ public class OptOutProcessor {
     private final LambdaLogger logger;
     public List<OptOutInformation> optOutInformationList;
     public boolean isRejected;
+    private final String dbHost;
 
     ParameterStoreUtil parameterStore;
 
     public OptOutProcessor(LambdaLogger logger) {
         this.logger = logger;
         this.optOutInformationList = new ArrayList<>();
+        this.dbHost = "jdbc:" + System.getenv("DB_HOST");
+        var environment = System.getenv("ENV");
+        var bfdRole = "/opt-out-import/ab2d/" + environment + "/bfd-bucket-role-arn";
+        var dbUser = "/ab2d/" + environment + "/core/sensitive/database_user";
+        var dbPassword = "/ab2d/" + environment + "/core/sensitive/database_password";
+        parameterStore = ParameterStoreUtil.getParameterStore(bfdRole, dbUser, dbPassword);
         isRejected = false;
-        parameterStore = ParameterStoreUtil.getParameterStore(ROLE_PARAM, DB_HOST_PARAM, DB_USER_PARAM, DB_PASS_PARAM);
     }
 
     public OptOutResults process(String fileName, String bfdBucket, String endpoint) throws URISyntaxException {
@@ -120,7 +126,7 @@ public class OptOutProcessor {
 
 
     public void updateOptOut() {
-        try (var dbConnection = DriverManager.getConnection(parameterStore.getDbHost(), parameterStore.getDbUser(), parameterStore.getDbPassword());
+        try (var dbConnection = DriverManager.getConnection(dbHost, parameterStore.getDbUser(), parameterStore.getDbPassword());
              var statement = dbConnection.prepareStatement(UPSERT_STATEMENT)) {
             for (var optOutInformation : optOutInformationList) {
                 statement.setString(1, optOutInformation.getMbi());
@@ -163,7 +169,7 @@ public class OptOutProcessor {
         int totalOptedIn = 0;
         int totalOptedOut = 0;
 
-        try (var dbConnection = DriverManager.getConnection(parameterStore.getDbHost(), parameterStore.getDbUser(), parameterStore.getDbPassword());
+        try (var dbConnection = DriverManager.getConnection(dbHost, parameterStore.getDbUser(), parameterStore.getDbPassword());
              var statement = dbConnection.createStatement();
              ResultSet rs = statement.executeQuery(COUNT_STATEMENT)
         ) {

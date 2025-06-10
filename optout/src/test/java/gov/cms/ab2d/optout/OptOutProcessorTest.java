@@ -54,8 +54,8 @@ class OptOutProcessorTest {
     void beforeEach() throws IOException {
         S3MockAPIExtension.createFile(Files.readString(Paths.get("src/test/resources/" + TEST_FILE_NAME), StandardCharsets.UTF_8), TEST_FILE_NAME);
         parameterStore.
-                when(() -> ParameterStoreUtil.getParameterStore(anyString(), anyString(), anyString(), anyString()))
-                .thenReturn(new ParameterStoreUtil("", "", "", ""));
+                when(() -> ParameterStoreUtil.getParameterStore(anyString(), anyString(), anyString()))
+                .thenReturn(new ParameterStoreUtil("", "", ""));
         optOutProcessing = spy(new OptOutProcessor(mock(LambdaLogger.class)));
         optOutProcessing.isRejected = false;
     }

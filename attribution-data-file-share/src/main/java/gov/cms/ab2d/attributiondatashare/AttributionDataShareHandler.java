@@ -30,13 +30,22 @@ public class AttributionDataShareHandler implements RequestStreamHandler {
         LambdaLogger logger = context.getLogger();
         logger.log("AttributionDataShare Lambda is started");
 
+        var environment = System.getenv("ENV");
         String currentDate = new SimpleDateFormat(REQ_FILE_NAME_PATTERN).format(new Date());
         var prefix = (System.getenv(BUCKET_NAME_PROP).contains("prod")) ? "P" : "T";
         String fileName = prefix + REQ_FILE_NAME + currentDate;
         String fileFullPath = FILE_PATH + fileName;
-        var parameterStore = ParameterStoreUtil.getParameterStore(ROLE_PARAM, DB_HOST_PARAM, DB_USER_PARAM, DB_PASS_PARAM);
+
+        var bfdRole = "/opt-out-import/ab2d/" + environment + "/bfd-bucket-role-arn";
+        var dbUser = "/ab2d/" + environment + "/core/sensitive/database_user";
+        var dbPassword = "/ab2d/" + environment + "/core/sensitive/database_password";
+        var dbHost = "jdbc:" + System.getenv("DB_HOST");
+
+        var parameterStore = ParameterStoreUtil.getParameterStore(bfdRole, dbUser, dbPassword);
+
         AttributionDataShareHelper helper = helperInit(fileName, fileFullPath, logger);
-        try (var dbConnection = DriverManager.getConnection(parameterStore.getDbHost(), parameterStore.getDbUser(), parameterStore.getDbPassword())) {
+
+        try (var dbConnection = DriverManager.getConnection(dbHost, parameterStore.getDbUser(), parameterStore.getDbPassword())) {
 
             helper.copyDataToFile(dbConnection);
             helper.uploadToS3(getAsyncS3Client(ENDPOINT, parameterStore));
