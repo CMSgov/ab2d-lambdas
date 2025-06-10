@@ -61,17 +61,13 @@ public class CloudwatchEventHandler implements RequestHandler<SNSEvent, String> 
         final String env;
         if (environment.contains("dev")) {
             env="dev";
-        }
-        else if (environment.contains("impl")) {
+        } else if (environment.contains("impl")) {
             env="test";
-        }
-        else if (environment.contains("sandbox")) {
+        } else if (environment.contains("sandbox")) {
             env="sandbox";
-        }
-        else if (environment.contains("prod")) {
+        } else if (environment.contains("prod")) {
             env="prod";
-        }
-        else {
+        } else {
             env=environment;
         }
         return String.format("ab2d-%s-events-sqs", env);
