@@ -1,4 +1,5 @@
 name: opt-out-import deploy-gf
+run-name: opt-out-import deploy-gf ${{ inputs.environment }}
 
 on:
   workflow_call:
