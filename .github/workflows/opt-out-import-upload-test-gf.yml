@@ -3,7 +3,7 @@ run-name: opt-out-import test-gf ${{ inputs.environment }}
 
 on:
   push:
-    branches: [ AB2D-6716/upload_ps_values ]
+    branches: [ AB2D-6716/update_ps_values ]
   workflow_call:
     inputs:
       environment:
