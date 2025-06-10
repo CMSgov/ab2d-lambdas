@@ -2,8 +2,6 @@ name: opt-out-import test-gf
 run-name: opt-out-import test-gf ${{ inputs.environment }}
 
 on:
-  push:
-    branches: [ AB2D-6716/update_ps_values ]
   workflow_call:
     inputs:
       environment:
@@ -32,11 +30,9 @@ jobs:
       id-token: write
     runs-on: codebuild-ab2d-lambdas-${{github.run_id}}-${{github.run_attempt}}
     env:
-    #  AWS_ACCOUNT: ${{ inputs.environment == 'sandbox' && secrets.PROD_ACCOUNT || secrets.NON_PROD_ACCOUNT }}
+      AWS_ACCOUNT: ${{ inputs.environment == 'sandbox' && secrets.PROD_ACCOUNT || secrets.NON_PROD_ACCOUNT }}
       ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
-      #AB2D_ENV: ${{ inputs.environment }}
-      AB2D_ENV: 'dev'
-      AWS_ACCOUNT: ${{ secrets.NON_PROD_ACCOUNT }}
+      AB2D_ENV: ${{ inputs.environment }}
     defaults:
       run:
         working-directory: ./optout
