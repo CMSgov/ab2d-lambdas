@@ -138,8 +138,10 @@ public class HPMSCountsHandler implements RequestStreamHandler {
             AmazonSNSClient client = this.amazonSNSClient;
             // Greenfield SNS topics are different from legacy and must be overridden here
             String topicPrefix = getTopicPrefix(ab2dEnvironment);
-            request.setTopicArn(client.createTopic(topicPrefix + "-" + topicName).getTopicArn());
+            String topic = topicPrefix + "-" + topicName;
+            request.setTopicArn(client.createTopic(topic).getTopicArn());
             request.setMessage(this.mapper.writeValueAsString(message));
+            log.info("Sending message to {}", topic);
             this.amazonSNSClient.publish(request);
         }
 
