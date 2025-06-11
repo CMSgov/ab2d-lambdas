@@ -77,6 +77,7 @@ jobs:
       - name: Build Jars
         run: |
           ./gradlew buildZip --info -b build.gradle
+
       - name: SonarQube Analysis
         run: |
          ./gradlew sonarqube -Dsonar.projectKey=ab2d-lambdas -Dsonar.host.url=https://sonarqube.cloud.cms.gov
