@@ -9,8 +9,11 @@ import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
 import com.amazonaws.services.sns.AmazonSNSClient;
 import com.amazonaws.services.sns.AmazonSNSClientBuilder;
+import com.amazonaws.services.sns.model.PublishRequest;
 import com.amazonaws.util.StringUtils;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.joda.JodaModule;
@@ -20,6 +23,7 @@ import gov.cms.ab2d.contracts.model.ContractDTO;
 import gov.cms.ab2d.eventclient.config.Ab2dEnvironment;
 import gov.cms.ab2d.lambdalibs.lib.PropertiesUtil;
 import gov.cms.ab2d.snsclient.clients.SNSClient;
+import gov.cms.ab2d.snsclient.clients.SNSClientImpl;
 import gov.cms.ab2d.snsclient.clients.SNSConfig;
 import gov.cms.ab2d.snsclient.messages.CoverageCountDTO;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
@@ -28,6 +32,8 @@ import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.core5.http.io.HttpClientResponseHandler;
 import org.joda.time.DateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -94,8 +100,9 @@ public class HPMSCountsHandler implements RequestStreamHandler {
         HttpGet request = new HttpGet(url + "/contracts");
         HttpClientResponseHandler<String> handler = new BasicHttpClientResponseHandler();
         String response = httpClient.execute(request, handler);
-        SNSConfig snsConfig = new SNSConfig();
-        SNSClient client = snsConfig.snsClient(snsClient, Ab2dEnvironment.fromName(envi));
+        //SNSConfig snsConfig = new SNSConfig();
+        //SNSClient client = snsConfig.snsClient(snsClient, Ab2dEnvironment.fromName(envi));
+        SNSClient client = new AB2DSNSClientOverride(snsClient, Ab2dEnvironment.fromName(envi));
         DateTime dateTime = DateTime.now();
         Timestamp version = Timestamp.from(Instant.now());
         int year = dateTime.getYear();
@@ -108,6 +115,50 @@ public class HPMSCountsHandler implements RequestStreamHandler {
                         .collect(Collectors.toList());
         client.sendMessage(COVERAGE_COUNTS.getValue(), coverage);
         outputStream.write(("{\"status\": \"ok\"}").getBytes(StandardCharsets.UTF_8));
+    }
+
+    // Provide a custom implementation of `SNSClient` for greenfield deployments - It is not possible to
+    // upgrade this lambda (Java 11) to a recent version of `ab2d-sns-client` (Java 17) due to incompatibility
+    public static class AB2DSNSClientOverride implements SNSClient {
+
+        private static final Logger log = LoggerFactory.getLogger(AB2DSNSClientOverride.class);
+        private final AmazonSNSClient amazonSNSClient;
+        private final ObjectMapper mapper;
+        private final Ab2dEnvironment ab2dEnvironment;
+
+        public AB2DSNSClientOverride(AmazonSNSClient amazonSNSClient, Ab2dEnvironment ab2dEnvironment) {
+            this.mapper = ((JsonMapper.Builder)JsonMapper.builder().configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true)).build();
+            this.amazonSNSClient = amazonSNSClient;
+            this.ab2dEnvironment = ab2dEnvironment;
+        }
+
+        @Override
+        public void sendMessage(String topicName, Object message) throws JsonProcessingException {
+            PublishRequest request = new PublishRequest();
+            AmazonSNSClient client = this.amazonSNSClient;
+            // Greenfield SNS topics are different from legacy and must be overridden here
+            String topicPrefix = getTopicPrefix(ab2dEnvironment);
+            request.setTopicArn(client.createTopic(topicPrefix + "-" + topicName).getTopicArn());
+            request.setMessage(this.mapper.writeValueAsString(message));
+            this.amazonSNSClient.publish(request);
+        }
+
+        String getTopicPrefix(Ab2dEnvironment environment) {
+            final String env;
+            if (environment.getName().contains("dev")) {
+                env="dev";
+            } else if (environment.getName().contains("impl")) {
+                env="test";
+            } else if (environment.getName().contains("sandbox")) {
+                env="sandbox";
+            } else if (environment.getName().contains("prod")) {
+                env="prod";
+            } else {
+                env=environment.getName();
+            }
+            return "ab2d-" + env;
+        }
+
     }
 
 }
