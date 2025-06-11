@@ -80,12 +80,13 @@ jobs:
         run: |
           ./gradlew buildZip --info -b build.gradle
 
+
 # SKIP SonarQube + quality gate because it fails due to:
-#    Multiple CI environments are detected: [AwsCodeBuild, Github Actions]. Please check environment variables or set property sonar.ci.autoconfig.disabled to true.
+#   Multiple CI environments are detected: [AwsCodeBuild, Github Actions]. Please check environment variables or set property sonar.ci.autoconfig.disabled to true.
 #
 #      - name: SonarQube Analysis
 #        run: |
-#          ./gradlew sonarqube -Dsonar.projectKey=ab2d-lambdas -Dsonar.host.url=https://sonarqube.cloud.cms.gov -Dsonar.ci.autoconfig.disabled=true
+#          ./gradlew sonarqube -Dsonar.projectKey=ab2d-lambdas -Dsonar.host.url=https://sonarqube.cloud.cms.gov
 #
 #      - name: Quality Gate
 #        run: |
@@ -101,7 +102,7 @@ jobs:
         run: |
           echo "Checking for unpublished artifacts..."
           DEPLOY_SCRIPT=""
-          VERSION_PUBLISHED_LIST=$(./gradlew -q lookForArtifacts | tr "'''" "\n")
+          VERSION_PUBLISHED_LIST=$(./gradlew -q lookForArtifacts | tr -d '\r')
 
           while IFS= read -r line; do
             ARTIFACTORY_INFO=($(echo $line | tr ":" "\n"))
