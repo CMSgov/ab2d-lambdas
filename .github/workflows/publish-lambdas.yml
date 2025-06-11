@@ -72,9 +72,9 @@ jobs:
         run: |
           ./gradlew -b build.gradle
 
-#      - name: Test Lambdas
-#        run: |
-#          ./gradlew clean test --info -b build.gradle
+      - name: Test Lambdas
+        run: |
+          ./gradlew clean test --info -b build.gradle
 
       - name: Build Jars
         run: |
@@ -82,7 +82,7 @@ jobs:
 
 #      - name: SonarQube Analysis
 #        run: |
-#          ./gradlew sonarqube -Dsonar.projectKey=ab2d-lambdas -Dsonar.host.url=https://sonarqube.cloud.cms.gov
+#          ./gradlew sonarqube -Dsonar.projectKey=ab2d-lambdas -Dsonar.host.url=https://sonarqube.cloud.cms.gov -Dsonar.ci.autoconfig.disabled=true
 #
 #      - name: Quality Gate
 #        run: |
@@ -98,7 +98,7 @@ jobs:
         run: |
           echo "Checking for unpublished artifacts..."
           DEPLOY_SCRIPT=""
-          VERSION_PUBLISHED_LIST=$(./gradlew -q lookForArtifacts | tr -d '\r')
+          VERSION_PUBLISHED_LIST=$(./gradlew -q lookForArtifacts | tr "'''" "\n")
 
           while IFS= read -r line; do
             ARTIFACTORY_INFO=($(echo $line | tr ":" "\n"))
