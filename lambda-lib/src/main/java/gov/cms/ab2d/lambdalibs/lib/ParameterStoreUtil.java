@@ -7,33 +7,30 @@ import software.amazon.awssdk.services.ssm.model.GetParameterRequest;
 public class ParameterStoreUtil {
 
     private final String role;
-    private final String dbHost;
     private final String dbUser;
     private final String dbPassword;
 
-    public ParameterStoreUtil(String role, String dbHost, String dbUser, String dbPassword) {
+    public ParameterStoreUtil(String role, String dbUser, String dbPassword) {
         this.role = role;
-        this.dbHost = dbHost;
         this.dbUser = dbUser;
         this.dbPassword = dbPassword;
     }
 
-    public static SsmClient getClient(){
+    public static SsmClient getClient() {
         return  SsmClient.builder()
                 .region(Region.US_EAST_1)
                 .build();
     }
 
-    public static ParameterStoreUtil getParameterStore(String roleParam, String dbHostParam, String dbUserParam, String dbPasswordParam) {
+    public static ParameterStoreUtil getParameterStore(String roleParam, String dbUserParam, String dbPasswordParam) {
         var ssmClient = ParameterStoreUtil.getClient();
 
         var role = getValueFromParameterStore(roleParam, ssmClient);
-        var dbHost = getValueFromParameterStore(dbHostParam, ssmClient);
         var dbUser = getValueFromParameterStore(dbUserParam, ssmClient);
         var dbPassword = getValueFromParameterStore(dbPasswordParam, ssmClient);
 
         ssmClient.close();
-        return new ParameterStoreUtil(role, dbHost, dbUser, dbPassword);
+        return new ParameterStoreUtil(role, dbUser, dbPassword);
     }
 
     private static String getValueFromParameterStore(String key, SsmClient ssmClient) {
@@ -44,10 +41,6 @@ public class ParameterStoreUtil {
 
         var parameterResponse = ssmClient.getParameter(parameterRequest);
         return parameterResponse.parameter().value();
-    }
-
-    public String getDbHost() {
-        return dbHost;
     }
 
     public String getDbUser() {

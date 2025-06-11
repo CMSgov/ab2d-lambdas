@@ -22,16 +22,16 @@ class AttributionDataShareHandlerTest {
     @SuppressWarnings({"rawtypes", "unused"})
     @Container
     private static final PostgreSQLContainer POSTGRE_SQL_CONTAINER = new AB2DPostgresqlContainer();
-    LambdaLogger LOGGER = mock(LambdaLogger.class);
-    ParameterStoreUtil parameterStore = new ParameterStoreUtil("", "", "", "");
-    AttributionDataShareHelper helper = mock(AttributionDataShareHelper.class);
-    AttributionDataShareHandler handler = spy(new AttributionDataShareHandler());
+    private final LambdaLogger logger = mock(LambdaLogger.class);
+    private final ParameterStoreUtil parameterStore = new ParameterStoreUtil("", "", "");
+    private final AttributionDataShareHelper helper = mock(AttributionDataShareHelper.class);
+    private final AttributionDataShareHandler handler = spy(new AttributionDataShareHandler());
 
     @Test
     void attributionDataShareInvoke() {
         var mockParameterStore = mockStatic(ParameterStoreUtil.class);
         mockParameterStore
-                .when(() -> ParameterStoreUtil.getParameterStore(anyString(), anyString(), anyString(), anyString()))
+                .when(() -> ParameterStoreUtil.getParameterStore(anyString(), anyString(), anyString()))
                 .thenReturn(parameterStore);
 
         Connection dbConnection = mock(Connection.class);
@@ -46,7 +46,7 @@ class AttributionDataShareHandlerTest {
     void attributionDataShareExceptionTest() {
         Exception ex = mock(Exception.class);
         when(ex.getMessage()).thenReturn("Exception");
-        assertThrows(AttributionDataShareException.class, () -> handler.throwAttributionDataShareException(LOGGER, ex));
+        assertThrows(AttributionDataShareException.class, () -> handler.throwAttributionDataShareException(logger, ex));
     }
 
     @Test

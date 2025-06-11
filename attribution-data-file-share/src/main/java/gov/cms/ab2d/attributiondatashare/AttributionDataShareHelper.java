@@ -19,9 +19,9 @@ import java.util.Date;
 import static gov.cms.ab2d.attributiondatashare.AttributionDataShareConstants.*;
 
 public class AttributionDataShareHelper {
-    LambdaLogger logger;
-    String fileName;
-    String fileFullPath;
+    private final LambdaLogger logger;
+    private final String fileName;
+    private final String fileFullPath;
 
     public AttributionDataShareHelper(String fileName, String fileFullPath, LambdaLogger logger) {
         this.fileName = fileName;

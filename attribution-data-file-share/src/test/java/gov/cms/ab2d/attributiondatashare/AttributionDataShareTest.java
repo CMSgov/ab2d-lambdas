@@ -35,13 +35,13 @@ class AttributionDataShareTest {
     @SuppressWarnings({"rawtypes", "unused"})
     @Container
     private static final PostgreSQLContainer POSTGRE_SQL_CONTAINER = new AB2DPostgresqlContainer();
-    LambdaLogger LOGGER = mock(LambdaLogger.class);
-    String FILE_NAME = REQ_FILE_NAME + new SimpleDateFormat(REQ_FILE_NAME_PATTERN).format(new Date());
-    String FILE_FULL_PATH = FILE_PATH + FILE_NAME;
-    String MBI_1 = "DUMMY000001";
-    String MBI_2 = "DUMMY000002";
-    Date DATE = new GregorianCalendar(2024, Calendar.FEBRUARY, 26).getTime();
-    AttributionDataShareHelper helper;
+    private static final LambdaLogger LOGGER = mock(LambdaLogger.class);
+    private static final String FILE_NAME = REQ_FILE_NAME + new SimpleDateFormat(REQ_FILE_NAME_PATTERN).format(new Date());
+    private static final String FILE_FULL_PATH = FILE_PATH + FILE_NAME;
+    private static final String MBI1 = "DUMMY000001";
+    private static final String MBI2 = "DUMMY000002";
+    private static final Date DATE = new GregorianCalendar(2024, Calendar.FEBRUARY, 26).getTime();
+    private AttributionDataShareHelper helper;
 
     @BeforeEach
     public void beforeEach() {
@@ -53,7 +53,7 @@ class AttributionDataShareTest {
         var connection = mock(Connection.class);
         var stmt = mock(Statement.class);
         var rs = new MockResultSet("");
-        rs.addColumn("mbi", Arrays.asList(MBI_1, MBI_2));
+        rs.addColumn("mbi", Arrays.asList(MBI1, MBI2));
         rs.addColumn("effective_date", Arrays.asList("2024-02-26", null));
         rs.addColumn("share_data", Arrays.asList(true, null));
         when(connection.createStatement()).thenReturn(stmt);
@@ -75,14 +75,14 @@ class AttributionDataShareTest {
 
     @Test
     void getResponseLineTest() {
-        var line1 = helper.getResponseLine(MBI_1, null, null);
-        var line2 = helper.getResponseLine(MBI_2, DATE, false);
+        var line1 = helper.getResponseLine(MBI1, null, null);
+        var line2 = helper.getResponseLine(MBI2, DATE, false);
         var line3 = helper.getResponseLine("A", DATE, true);
         assertEquals(20, line1.length());
         assertEquals(20, line2.length());
         assertEquals(20, line3.length());
-        assertEquals(MBI_1 + "         ", line1);
-        assertEquals(MBI_2 + "20240226N", line2);
+        assertEquals(MBI1 + "         ", line1);
+        assertEquals(MBI2 + "20240226N", line2);
         assertEquals("A          20240226Y", line3);
     }
 
@@ -107,7 +107,7 @@ class AttributionDataShareTest {
 
     private void createTestFile() throws IOException {
         PrintWriter writer = new PrintWriter(FILE_FULL_PATH, StandardCharsets.UTF_8);
-        writer.println(MBI_1);
+        writer.println(MBI1);
         writer.close();
     }
 }
