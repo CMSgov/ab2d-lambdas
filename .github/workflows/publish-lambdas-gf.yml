@@ -28,7 +28,6 @@ jobs:
       AWS_ACCOUNT: ${{ secrets.NON_PROD_ACCOUNT }}
 
     steps:
-      - run: echo "Hello Brian!"
       - name: Checkout Code
         uses: actions/checkout@v4
         with:
