@@ -16,7 +16,6 @@ on:
 jobs:
   publish:
     runs-on: self-hosted
-    environment: dev
     outputs:
       build_version: ${{ steps.publish_lambdas.outputs.build_version }}
     env:
@@ -55,7 +54,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@ececac1a45f3b08a01d2dd070d28d111c5fe6722 # v4.1.0
         with:
           aws-region: ${{ vars.AWS_REGION }}
-          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/ab2d-dev-github-actions
+          role-to-assume: arn:aws:iam::${{ secrets.TEST_ACCOUNT_ID }}:role/delegatedadmin/developer/ab2d-test-github-actions
 
       - name: Set env vars from AWS params
         uses: cmsgov/ab2d-bcda-dpc-platform/actions/aws-params-env-action@main
