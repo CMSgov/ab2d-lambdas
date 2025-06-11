@@ -1,9 +1,6 @@
 name: publish-lambdas-gf
 
 on:
-  push:
-    branches:
-      - more-workflows-gf
   workflow_call:
     inputs:
       ref:
