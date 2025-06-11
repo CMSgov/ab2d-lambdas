@@ -70,7 +70,7 @@ public class CloudwatchEventHandler implements RequestHandler<SNSEvent, String> 
         } else {
             env=environment;
         }
-        return String.format("ab2d-%s-events-sqs", env);
+        return String.format("ab2d-%s-events", env);
     }
 
     private static AmazonSQS setup() {
