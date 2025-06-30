@@ -12,7 +12,7 @@ public final class AttributionDataShareConstants {
     public static final String REQ_FILE_NAME_PATTERN = "'D'yyMMdd.'T'HHmmsss";
     public static final String AB2D_HEADER_REQ = "HDR_BENEDATAREQ";
     public static final String AB2D_TRAILER_REQ = "TRL_BENEDATAREQ";
-    public static final String SELECT_STATEMENT = "SELECT * FROM public.current_mbi";
+    public static final String SELECT_STATEMENT = "SELECT * FROM current_mbi";
     public static final int CURRENT_MBI_LENGTH = 11;
     public static final String EFFECTIVE_DATE_PATTERN = "yyyyMMdd";
     public static final String BUCKET_NAME_PROP = "S3_UPLOAD_BUCKET";
