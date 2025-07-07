@@ -1,12 +1,12 @@
 {
-  "Type" : "Notification",
-  "MessageId" : "5da6e965-ca05-5123-8347-b72ad7893428",
-  "TopicArn" : "arn:aws:sns:test",
-  "Subject" : "Amazon S3 Notification",
-  "Message" : "{\"Records\":[{\"eventVersion\":\"2.1\",\"eventSource\":\"aws:s3\",\"awsRegion\":\"us-east-1\",\"eventTime\":\"2024-02-20T21:36:11.419Z\",\"eventName\":\"ObjectCreated:Put\",\"s3\":{\"s3SchemaVersion\":\"1.0\",\"configurationId\":\"bfd-test-eft-inbound-received-s3-dpc\",\"bucket\":{\"name\":\"bfd-test-eft\",\"arn\":\"arn:aws:s3:::bfd-test-eft\"},\"object\":{\"key\":\"bfdeft01/ab2d/in/optOutDummy.txt\",\"size\":12}}}]}",
-  "Timestamp" : "2024-02-20T21:36:12.405Z",
-  "SignatureVersion" : "1",
-  "Signature" : "TestSignature",
-  "SigningCertURL" : "TestSigningCertURL",
-  "UnsubscribeURL" : "TestUnsubscribeURL"
+  "Type": "Notification",
+  "MessageId": "586e4b42-9aac-5f77-97e5-2ba4b467de18",
+  "TopicArn": "arn:aws:sns:us-east-1:577373831711:bfd-test-eft-inbound-received-s3-ab2d",
+  "Subject": "Amazon S3 Notification",
+  "Message": "{\"Records\":[{\"eventVersion\":\"2.1\",\"eventSource\":\"aws:s3\",\"awsRegion\":\"us-east-1\",\"eventTime\":\"2025-07-07T20:22:34.366Z\",\"eventName\":\"ObjectCreated:Put\",\"userIdentity\":{\"principalId\":\"AWS:AROAYM3RJQIP4ROVVVKZI:GitHubActions\"},\"requestParameters\":{\"sourceIPAddress\":\"10.128.179.32\"},\"responseElements\":{\"x-amz-request-id\":\"SCQRNDT414GTJ0P1\",\"x-amz-id-2\":\"GKgV2es0IXtsGg1B4+L7vZvEXxogQm6rWnQGlBmZThvHNfro38Eh2n79BmzRQu40WQfmemlWrgyd7c0HfBzQSdFDPaGijJwi\"},\"s3\":{\"s3SchemaVersion\":\"1.0\",\"configurationId\":\"bfd-test-eft-inbound-received-s3-ab2d\",\"bucket\":{\"name\":\"bfd-test-eft\",\"ownerIdentity\":{\"principalId\":\"A5VBSMJFI0FCE\"},\"arn\":\"arn:aws:s3:::bfd-test-eft\"},\"object\":{\"key\":\"bfdeft01/ab2d/in/optOutDummy.txt\",\"size\":148,\"eTag\":\"03a6af4c78a116d1d2ef505228cbea5b\",\"sequencer\":\"00686C2C8A3FE4EF94\"}}}]}",
+  "Timestamp": "2025-07-07T20:22:35.325Z",
+  "SignatureVersion": "1",
+  "Signature": "EC6Y0+dx8mWzOWr9WQo4tQRsSY61d3+TnFwmF7FPmOGIB7VBzX094jFNfaGp0WO0N+RMZSCTwjKX31mVexDCchw+Kk57YgJL1F3FfcBLOrih9kvSofTDBei3hKsg8g041nxmv+YWK5TB2zDNfxZcHk01OXChXXkTqiW6hKRWWNkUCmoNyxiF4Cv5Y4k+q97kNensTSE/mK+qEq4lrm8fY+Loe9QYD0wyFSjdMgmKQobIVNXfby9qxC2hJgS1SzhLYnOpBRhOUdoKyId4zJLFIq4d+xlC5yQbjoDOixJfcrvuXe4792ts39B0ivw/19MJGv5dijfTXc4QjXX/l/mJRg==",
+  "SigningCertURL": "https://sns.us-east-1.amazonaws.com/SimpleNotificationService-9c6465fa7f48f5cacd23014631ec1136.pem",
+  "UnsubscribeURL": "https://sns.us-east-1.amazonaws.com/?Action=Unsubscribe&SubscriptionArn=arn:aws:sns:us-east-1:577373831711:bfd-test-eft-inbound-received-s3-ab2d:7f171afd-f1de-4875-9129-cf9f57140612"
 }
