@@ -19,6 +19,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import static gov.cms.ab2d.optout.OptOutConstants.*;
 
@@ -135,7 +136,18 @@ public class OptOutProcessor {
             }
             statement.executeBatch();
         } catch (SQLException ex) {
-            logger.log("There is an insertion error " + ex.getMessage());
+            Pattern cleanup = Pattern.compile(
+                    "INSERT INTO[\\s\\S]*?ERROR",
+                    Pattern.DOTALL
+            );
+            String raw = ex.getMessage();
+            String sanitized = raw;
+            if (raw.contains("INSERT INTO")) {
+                sanitized = cleanup.matcher(raw)
+                        .replaceAll("INSERT INTO. ERROR");
+            }
+
+            logger.log("There is an insertion error " + sanitized);
             isRejected = true;
         }
     }
