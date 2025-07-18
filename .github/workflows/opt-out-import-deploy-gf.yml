@@ -69,7 +69,7 @@ jobs:
         env:
           #ToDo: add buckets for sbx and prod
 #          BUCKET: ${{ inputs.environment == 'dev' && 'ab2d-dev-opt-out-import-function-20250528140631782700000001' || inputs.environment == 'test' && 'ab2d-test-opt-out-import-function-20250529140353146500000001' }}
-          BUCKET: 'ab2d-prod-opt-out-import-function-20250616155408985300000001 '
+          BUCKET: 'ab2d-prod-opt-out-import-function-20250616155408985300000001'
         run: |
           aws s3 cp --no-progress build/distributions/optout.zip s3://${{ env.BUCKET }}/function.zip
           aws lambda update-function-code --function-name ab2d-${{ env.AB2D_ENV }}-opt-out-import \
