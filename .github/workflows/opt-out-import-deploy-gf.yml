@@ -67,7 +67,6 @@ jobs:
 
       - name: Upload and reload
         env:
-          #ToDo: add buckets for sbx and prod
 #          BUCKET: ${{ inputs.environment == 'dev' && 'ab2d-dev-opt-out-import-function-20250528140631782700000001' || inputs.environment == 'test' && 'ab2d-test-opt-out-import-function-20250529140353146500000001' }}
           BUCKET: 'ab2d-prod-opt-out-import-function-20250616155408985300000001'
         run: |
