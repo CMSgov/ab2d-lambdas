@@ -142,7 +142,7 @@ public class OptOutProcessor {
             );
             String raw = ex.getMessage();
             String sanitized = raw;
-            if (raw.contains("INSERT INTO")) {
+            if (raw != null && raw.contains("INSERT INTO")) {
                 sanitized = cleanup.matcher(raw)
                         .replaceAll("INSERT INTO. ERROR");
             }
