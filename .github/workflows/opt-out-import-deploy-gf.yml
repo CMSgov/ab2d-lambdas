@@ -28,7 +28,6 @@ jobs:
       id-token: write
     runs-on: codebuild-ab2d-lambdas-${{github.run_id}}-${{github.run_attempt}}
     env:
-
 #      AWS_ACCOUNT: ${{ inputs.environment == 'sandbox' && secrets.PROD_ACCOUNT || secrets.NON_PROD_ACCOUNT }}
       AWS_ACCOUNT: ${{ secrets.PROD_ACCOUNT }}
       ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
