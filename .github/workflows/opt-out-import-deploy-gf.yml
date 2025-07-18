@@ -2,6 +2,8 @@ name: opt-out-import deploy-gf
 run-name: opt-out-import deploy-gf ${{ inputs.environment }}
 
 on:
+  push:
+    branches: [ "deploy_prod_gf" ]
   workflow_call:
     inputs:
       environment:
@@ -26,9 +28,11 @@ jobs:
       id-token: write
     runs-on: codebuild-ab2d-lambdas-${{github.run_id}}-${{github.run_attempt}}
     env:
-      AWS_ACCOUNT: ${{ inputs.environment == 'sandbox' && secrets.PROD_ACCOUNT || secrets.NON_PROD_ACCOUNT }}
+#      AWS_ACCOUNT: ${{ inputs.environment == 'sandbox' && secrets.PROD_ACCOUNT || secrets.NON_PROD_ACCOUNT }}
+      AWS_ACCOUNT: ${{ secrets.PROD_ACCOUNT }}
       ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
-      AB2D_ENV: ${{ inputs.environment }}
+      AB2D_ENV: 'prod'
+#      AB2D_ENV: ${{ inputs.environment }}
     defaults:
       run:
         working-directory: ./optout
@@ -64,7 +68,8 @@ jobs:
       - name: Upload and reload
         env:
           #ToDo: add buckets for sbx and prod
-          BUCKET: ${{ inputs.environment == 'dev' && 'ab2d-dev-opt-out-import-function-20250528140631782700000001' || inputs.environment == 'test' && 'ab2d-test-opt-out-import-function-20250529140353146500000001' }}
+#          BUCKET: ${{ inputs.environment == 'dev' && 'ab2d-dev-opt-out-import-function-20250528140631782700000001' || inputs.environment == 'test' && 'ab2d-test-opt-out-import-function-20250529140353146500000001' }}
+          BUCKET: 'ab2d-prod-opt-out-import-function-20250616155408985300000001 '
         run: |
           aws s3 cp --no-progress build/distributions/optout.zip s3://${{ env.BUCKET }}/function.zip
           aws lambda update-function-code --function-name ab2d-${{ env.AB2D_ENV }}-opt-out-import \
