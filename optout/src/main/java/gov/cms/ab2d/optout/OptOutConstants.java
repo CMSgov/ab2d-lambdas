@@ -18,7 +18,7 @@ public class OptOutConstants {
     public static final String LINE_SEPARATOR = System.lineSeparator();
     public static final String CONF_FILE_NAME = "#EFT.ON.AB2D.NGD.CONF.";
     public static final String CONF_FILE_NAME_PATTERN = "'D'yyMMdd.'T'HHmmsss";
-    public static final String UPSERT_STATEMENT = "INSERT INTO current_mbi (mbi, share_data, effective_date) \n" +
+    public static final String UPSERT_STATEMENT = "INSERT INTO public.current_mbi (mbi, share_data, effective_date) \n" +
                     "VALUES (?, ?, current_date) \n" +
                     "ON CONFLICT (mbi) DO UPDATE \n" +
                     "SET share_data = EXCLUDED.share_data, \n" +
