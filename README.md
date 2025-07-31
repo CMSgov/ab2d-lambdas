@@ -1,3 +1,7 @@
+# THIS PROJECT HAS BEEN ARCHIVED
+As part of AB2D's _2025 Greenfield Migration_, this repository was targeted for migration/consolidation into the primary AB2D repository.
+Please find the source code that supports AB2D's lambdas in their new home under https://github.com/CMSgov/ab2d/tree/main/lambdas.
+
 This project encapsulates all AB2D lambdas managed by the dev team. AB2D ops manages some lambdas.
 The goals of this project are: 
 - Streamline creating, testing, and deploying lambdas to aws
